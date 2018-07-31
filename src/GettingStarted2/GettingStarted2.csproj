@@ -1,0 +1,56 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+   
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Asset Include="$(SamplesAssetsDir)\Earth.png" />
+  </ItemGroup>
+
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BruTile.Desktop" Version="2.0.1" />
+    <PackageReference Include="ImGui.NET" Version="0.4.7" />
+    <PackageReference Include="Veldrid.ImageSharp" Version="4.4.0-beta3-gf6196c3020" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)Shaders\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>Shaders\%(RecursiveDir)\%(FileName)%(Extension)</Link>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="imgui\**" />
+    <EmbeddedResource Remove="imgui\**" />
+    <None Remove="imgui\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="TextureEarth - 复制 - 复制.cs" />
+  </ItemGroup>
+
+
+
+
+  <ItemGroup>
+    <EmbeddedResource Include="Shaders/GlobeFS.spv" LogicalName="GlobeFS.spv" />
+    <EmbeddedResource Include="Shaders/GlobeVS.spv" LogicalName="GlobeVS.spv" />
+    
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\AssetPrimitives\AssetPrimitives.csproj" />
+    <ProjectReference Include="..\SampleBase\SampleBase.csproj" />
+  </ItemGroup>
+
+</Project>
