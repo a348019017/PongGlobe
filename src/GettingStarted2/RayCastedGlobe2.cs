@@ -55,7 +55,7 @@ namespace GettingStarted2
 
         public TexturedEarth(ApplicationWindow window) : base(window)
         {
-
+            
 
             //_stoneTexData = LoadEmbeddedAsset<ProcessedTexture>("Earth.binary");
             //_stoneTexData.MipLevels = 1;
@@ -113,17 +113,8 @@ namespace GettingStarted2
 
         protected unsafe override void CreateResources(ResourceFactory factory)
         {
-
-            _camera.Position = new Vector3(4f, 0f, 0f);           
-            _camera.NearDistance = 0.1f;
-            _camera.FarDistance = 100f;
-            _camera.Pitch = 0f;
-            _camera.Yaw = (float)Math.PI / 2;
-            //_camera.
-            //_camera.
-
-           
-
+            _camera.Heading = MathF.PI / 2;
+            _camera.Tilt = MathF.PI/8;
             _projectionBuffer = factory.CreateBuffer(new BufferDescription(144, BufferUsage.UniformBuffer| BufferUsage.Dynamic));
            // _viewBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
             //_worldBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));

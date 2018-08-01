@@ -194,12 +194,7 @@ namespace PongGlobe.Scene
             //创建一个命令队列
             _cl = factory.CreateCommandList();
 
-            //设置相机参数
-            _camera.Position = new Vector3(5f, 0f, 0f);
-            _camera.NearDistance = 0.001f;
-            _camera.FarDistance = 100f;
-            _camera.Pitch = 0f;
-            _camera.Yaw = (float)Math.PI / 2;
+           
 
         }
 

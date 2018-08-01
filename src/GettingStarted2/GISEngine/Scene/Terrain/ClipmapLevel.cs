@@ -4,6 +4,7 @@ using System.Text;
 using PongGlobe.Core;
 using Veldrid;
 using Veldrid.ImageSharp;
+using System.Drawing;
 namespace PongGlobe.Scene.Terrain
 {
     /// <summary>
@@ -26,13 +27,16 @@ namespace PongGlobe.Scene.Terrain
         private TextureView __normalTextureView;
         private TextureView _imageryTextureView;
 
-        //此ClipMapLevel的二维范围
-        private object Extent { get; set; }
+        //此ClipMapLevel的二维范围,对应于地理坐标
+        public RectangleF  Extent { get; set; }
 
         /// <summary>
         /// 滞后计算其AABB包围盒,用于视椎体裁切等操作
         /// </summary>
         private object AABB { get; set; }
+
+        
+
 
         public void Draw()
         {
@@ -62,6 +66,8 @@ namespace PongGlobe.Scene.Terrain
                 _imageryTexture = ImageryTexture.CreateDeviceTexture(gd, factory);
                 _imageryTextureView = factory.CreateTextureView(_imageryTexture);
             }
+            //创建一个渲染管道
+
 
                 
 
@@ -76,6 +82,12 @@ namespace PongGlobe.Scene.Terrain
             _heightTexture = null;
             _heightTextureView.Dispose();
             _heightTextureView = null;
+            _normalTexture.Dispose();
+            _normalTexture = null;
+            __normalTextureView.Dispose();
+            __normalTextureView = null;
+            _imageryTexture.Dispose();
+            _imageryTextureView = null;
         }
     }
 
@@ -85,13 +97,32 @@ namespace PongGlobe.Scene.Terrain
     /// </summary>
     public class TerrainLayer : IRender
     {
+        private List<ClipMapLevel> _clipLevels = new List<ClipMapLevel>();
+
+        TerrainLayer()
+        {
+
+            //创建10个ClimpLevel由于测试，范围从[-180,-90,0,90开始]
+            var MaxExtent = new RectangleF(-180, -90, 180, 180);
+            for (int i = 0; i < 10; i++)
+            {
+                var level = new ClipMapLevel();
+                var width = 180 / (2 ^ i);
+                level.Extent = new RectangleF(-90f-width/2,0-width/2,width,width);
+            }
+        }
+
         private CommandList _cmd = null;
         public void CreateDeviceResources(GraphicsDevice gd, ResourceFactory factory)
         {
+            //对于512的瓦片来说，分解成为12个block的ring,分别绘制每个Block
+            var blockM = RectangleTessellator.Compute(new RectangleF(0, 0, 128, 128), 128, 128);
+            //中间的分解成为
+
+
             //创建一个默认的CommandList
             _cmd = factory.CreateCommandList();
             //创建多个渲染管道，同时开启多个绘制类似DrawPrimitive
-
         }
 
         public void Draw()

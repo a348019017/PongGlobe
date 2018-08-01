@@ -13,7 +13,7 @@ namespace SampleBase
     {
         private readonly Dictionary<Type, BinaryAssetSerializer> _serializers = DefaultSerializers.Get();
 
-        protected Camera _camera;
+        protected MyCamera _camera;
 
         public ApplicationWindow Window { get; }
         public GraphicsDevice GraphicsDevice { get; private set; }
@@ -35,7 +35,7 @@ namespace SampleBase
             Window.Rendering += Draw;
             Window.KeyPressed += OnKeyDown;
 
-            _camera = new Camera(Window.Width, Window.Height);
+            _camera = new MyCamera(Window.Width, Window.Height);
         }
 
         public void OnGraphicsDeviceCreated(GraphicsDevice gd, ResourceFactory factory, Swapchain sc)

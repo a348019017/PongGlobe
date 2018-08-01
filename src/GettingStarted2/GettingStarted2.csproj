@@ -4,6 +4,10 @@
     <OutputType>Exe</OutputType>
    
     <TargetFramework>netcoreapp2.0</TargetFramework>
+   
+    <AssemblyName>PongGlobe</AssemblyName>
+   
+    <RootNamespace>PongGlobe</RootNamespace>
   </PropertyGroup>
   
 <!--
@@ -37,6 +41,10 @@
 
   <ItemGroup>
     <Compile Remove="TextureEarth - 复制 - 复制.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="Shaders\TerrainVS.glsl" />
   </ItemGroup>
 
 
