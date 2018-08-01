@@ -5,11 +5,12 @@
    
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
-
+  
+<!--
   <ItemGroup>
     <Asset Include="$(SamplesAssetsDir)\Earth.png" />
   </ItemGroup>
-
+-->
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
