@@ -60,7 +60,7 @@ namespace PongGlobe.Core
             //此时相机在此参考系下的坐标为（0，0，height）,未考虑平移
 
             //再次计算Tile和heading情况下的旋转偏量           
-            var rotation = Quaternion.CreateFromYawPitchRoll(0, (float)_cameraInfo.Tilt, (float)_cameraInfo.Heading);
+            var rotation = Quaternion.CreateFromYawPitchRoll(0, -(float)_cameraInfo.Tilt, (float)_cameraInfo.Heading);
             var totalRotation = rotate* rotation ;           
             var tt = Vector3.Transform(-Vector3.UnitZ, totalRotation);
             var realPosition = _shape.ToVector3(_cameraInfo.Postion);
@@ -94,7 +94,7 @@ namespace PongGlobe.Core
             var isMouseWhellClick = InputTracker.GetMouseButton(MouseButton.Middle);
             if ((mouseDelta.Y != 0 || mouseDelta.X != 0) && isMouseWhellClick)
             {
-                var deltaAngleY = (float)Math.PI * 0.002f * mouseDelta.Y;
+                var deltaAngleY = -(float)Math.PI * 0.002f * mouseDelta.Y;
                 var deltaAngleX = (float)Math.PI * 2 * 0.001f * mouseDelta.X;
                 _cameraInfo.Tilt += deltaAngleY;
                 _cameraInfo.Heading += (float)deltaAngleX;
@@ -102,9 +102,11 @@ namespace PongGlobe.Core
                 if (_cameraInfo.Tilt < 0) _cameraInfo.Tilt = 0;
                 if (_cameraInfo.Tilt > Math.PI / 2) _cameraInfo.Tilt = (float)Math.PI / 2;
 
+                UpdateCamera();
+
                 //获取相机坐标系的Right系
-                var rotation = Quaternion.CreateFromYawPitchRoll(0, -deltaAngleY, deltaAngleX);
-                _camera.Position = Vector3.Transform(_camera.Position, rotation);
+                //var rotation = Quaternion.CreateFromYawPitchRoll(0, -deltaAngleY, deltaAngleX);
+                //_camera.Position = Vector3.Transform(_camera.Position, rotation);
                 //将世界坐标系下的
 
 
