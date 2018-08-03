@@ -114,7 +114,21 @@ void main()
         vec3 toEye = normalize(ubo.CameraEye - position);
         float intensity = LightIntensity(normal, toLight, toEye, ubo.DiffuseSpecularAmbientShininess);
 
-        fragmentColor = intensity * texture(sampler2D(Tex,Samp), ComputeTextureCoordinates(normal)).rgb;
+		vec2 textureCoordinate=ComputeTextureCoordinates(normal);
+		vec2 distanceToLine = mod(textureCoordinate, vec2(0.1,0.1));
+        vec2 dx = abs(dFdx(textureCoordinate));
+        vec2 dy = abs(dFdy(textureCoordinate));
+        vec2 dF = vec2(max(dx.s, dy.s), max(dx.t, dy.t)) * 1.0;
+
+		if (any(lessThan(distanceToLine, dF)))
+    {
+        fragmentColor = vec3(1.0, 1.0, 1.0);
+    }else
+	{
+	    fragmentColor = intensity * texture(sampler2D(Tex,Samp), textureCoordinate).rgb;
+	}
+
+        
 
         if (UseAverageDepth)
         {

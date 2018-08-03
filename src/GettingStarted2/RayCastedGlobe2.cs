@@ -16,6 +16,9 @@ using GettingStarted2.GISEngine.Core;
 using PongGlobe.Core;
 namespace GettingStarted2
 {
+    /// <summary>
+    /// 
+    /// </summary>
     public class TexturedEarth : SampleApplication,IEarthView
     {
         private readonly ProcessedTexture _stoneTexData;
@@ -34,17 +37,13 @@ namespace GettingStarted2
         private ResourceSet _worldTextureSet;
         private float _ticks;
         private BaseUBO _ubo = new BaseUBO();
-        
+        private MyCamera myCamera;
 
         public Extent Extent { get ; set ; }
 
         public Ellipsoid Shape { get; set; }
 
-        /// <summary>
-        /// 屏幕坐标转世界坐标系
-        /// </summary>
-        //private Vector3 ScreenPositionTo
-
+      
 
         protected override void HandleWindowResize()
         {
@@ -55,11 +54,18 @@ namespace GettingStarted2
 
         public TexturedEarth(ApplicationWindow window) : base(window)
         {
-            
-
+           
             //_stoneTexData = LoadEmbeddedAsset<ProcessedTexture>("Earth.binary");
             //_stoneTexData.MipLevels = 1;
-            Shape = Ellipsoid.ScaledWgs842  ;
+            Shape = Ellipsoid.ScaledWgs842;
+
+            myCamera = new MyCamera(Window.Width, Window.Height,Shape);
+
+            var cameraInfo = new CameraInfo(new Geodetic3D(0, 0, 1), -MathF.PI/4, MathF.PI*25.0/180.0);          
+            _camera = myCamera.Camera;
+            myCamera.CameraInfo = cameraInfo;
+            
+
             var mesh = PongGlobe.Core.BoxTessellator.Compute(2*Shape.Radii);
             _vertices = mesh.Positions;
             _indices = mesh.Indices;
@@ -112,9 +118,7 @@ namespace GettingStarted2
         }
 
         protected unsafe override void CreateResources(ResourceFactory factory)
-        {
-            _camera.Heading = MathF.PI / 2;
-            _camera.Tilt = MathF.PI/8;
+        {           
             _projectionBuffer = factory.CreateBuffer(new BufferDescription(144, BufferUsage.UniformBuffer| BufferUsage.Dynamic));
            // _viewBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
             //_worldBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
@@ -206,6 +210,13 @@ namespace GettingStarted2
             base.OnDeviceDestroyed();
         }
 
+
+        protected override void PreDraw(float deltaSeconds)
+        {
+            base.PreDraw(deltaSeconds);
+            myCamera.Update(deltaSeconds);
+        }
+
         //自转
         protected override void Draw(float deltaSeconds)
         {
@@ -249,11 +260,7 @@ namespace GettingStarted2
             _controller.Render(GraphicsDevice, _cl);
             _cl.End();
             GraphicsDevice.SubmitCommands(_cl);
-            _clMain.Begin();
-            //_clMain.SetFramebuffer(MainSwapchain.Framebuffer);
-            _controller.Render(GraphicsDevice, _clMain);
-            _clMain.End();
-            GraphicsDevice.SubmitCommands(_clMain);
+            
             GraphicsDevice.SwapBuffers(MainSwapchain);
             GraphicsDevice.WaitForIdle();
         }

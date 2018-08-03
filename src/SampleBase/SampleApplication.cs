@@ -13,7 +13,7 @@ namespace SampleBase
     {
         private readonly Dictionary<Type, BinaryAssetSerializer> _serializers = DefaultSerializers.Get();
 
-        protected MyCamera _camera;
+        protected Camera _camera;
 
         public ApplicationWindow Window { get; }
         public GraphicsDevice GraphicsDevice { get; private set; }
@@ -23,7 +23,7 @@ namespace SampleBase
         private float _ticks;
         protected ImGuiController _controller = null;
         private static FrameTimeAverager _fta = new FrameTimeAverager(0.666);
-        protected CommandList _clMain = null;
+        
 
         public SampleApplication(ApplicationWindow window)
         {
@@ -34,8 +34,8 @@ namespace SampleBase
             Window.Rendering += PreDraw;
             Window.Rendering += Draw;
             Window.KeyPressed += OnKeyDown;
-
-            _camera = new MyCamera(Window.Width, Window.Height);
+            
+           
         }
 
         public void OnGraphicsDeviceCreated(GraphicsDevice gd, ResourceFactory factory, Swapchain sc)
@@ -46,8 +46,7 @@ namespace SampleBase
             CreateResources(factory);
             CreateSwapchainResources(factory);
 
-            //为帧率的绘制创建一个_cl,同时创建一个
-            _clMain = factory.CreateCommandList();
+            
             _controller = new ImGuiController(this.GraphicsDevice, this.GraphicsDevice.MainSwapchain.Framebuffer.OutputDescription, (int)this.Window.Width, (int)this.Window.Height);
         }
 
@@ -64,23 +63,13 @@ namespace SampleBase
 
         protected virtual void CreateSwapchainResources(ResourceFactory factory) { }
 
-        private void PreDraw(float deltaSeconds)
+        protected virtual void PreDraw(float deltaSeconds)
         {
             _camera.Update(deltaSeconds);
-
             _controller.Update(1f / 60f, InputTracker.FrameSnapshot);
             _fta.AddTime(deltaSeconds);
             SubmitUI();
-            _ticks += deltaSeconds * 1000f;
-            //_cl.Begin();
-            //_cl.SetFramebuffer(MainSwapchain.Framebuffer);
-            ////_cl.ClearColorTarget(0, RgbaFloat.Black);
-            ////_cl.ClearDepthStencil(1f);           
-            //_controller.Render(GraphicsDevice, _cl);
-            //_cl.End();
-            //GraphicsDevice.SubmitCommands(_cl);
-            //GraphicsDevice.SwapBuffers(MainSwapchain);
-            //GraphicsDevice.WaitForIdle();
+            _ticks += deltaSeconds * 1000f;          
         }
 
         //显示imgui

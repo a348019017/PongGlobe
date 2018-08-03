@@ -13,6 +13,9 @@ namespace PongGlobe.Core
 {
     public struct Geodetic3D : IEquatable<Geodetic3D>
     {
+
+        
+
         public Geodetic3D(double longitude, double latitude, double height)
         {
             _longitude = longitude;
@@ -44,16 +47,19 @@ namespace PongGlobe.Core
         public double Longitude
         {
             get { return _longitude; }
+            set { _longitude = value; }
         }
 
         public double Latitude
         {
             get { return _latitude; }
+            set { _latitude = value; }
         }
 
         public double Height
         {
             get { return _height; }
+            set { _height = value; }
         }
 
         public bool Equals(Geodetic3D other)
@@ -85,8 +91,10 @@ namespace PongGlobe.Core
             return _longitude.GetHashCode() ^ _latitude.GetHashCode() ^ _height.GetHashCode();
         }
 
-        private readonly double _longitude;
-        private readonly double _latitude;
-        private readonly double _height;
+       
+
+        private  double _longitude;
+        private  double _latitude;
+        private  double _height;
     }
 }

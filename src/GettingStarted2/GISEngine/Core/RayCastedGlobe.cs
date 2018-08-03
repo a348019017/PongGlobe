@@ -38,14 +38,16 @@ namespace PongGlobe.Scene
        
         private Mesh _mesh;
         private bool _useAverageDepth;
-
+        private MyCamera _myCamera;
         /// <summary>
         /// 构造可渲染对象
         /// </summary>
         /// <param name="context"></param>
         /// <param name="factory"></param>
         public RayCastedGlobe(ApplicationWindow window):base(window)
-        {        
+        {
+            _myCamera = new MyCamera(window.Width, window.Height);
+            _camera = _myCamera.Camera;
             Shape = Ellipsoid.ScaledWgs84;   
             
         }
@@ -216,7 +218,7 @@ namespace PongGlobe.Scene
             //开始更新命令
             _cl.Begin();
             //更新变换矩阵           
-            Vector3 cameraEyeSquared = _camera.Position * _camera.Position;
+             Vector3 cameraEyeSquared = _camera.Position * _camera.Position;
             _uboBase.CameraEye = _camera.Position;
             _uboBase.CameraEyeSquared = cameraEyeSquared;
             _uboBase.CameraLightPosition = _camera.Position;

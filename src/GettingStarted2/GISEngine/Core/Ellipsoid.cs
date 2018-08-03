@@ -17,11 +17,11 @@ using PongGlobe.Scene;
 namespace PongGlobe.Core
 {
     /// <summary>
-    /// 描述椭球体
+    /// 描述椭球体,注意世界坐标系的定位这里为上Y，右X，面向为Z
     /// </summary>
     public class Ellipsoid
     {
-        public static readonly Ellipsoid Wgs84 = new Ellipsoid(6378137.0f, 6378137.0f, 6356752.314245f);
+        public static readonly Ellipsoid Wgs84 = new Ellipsoid(6378137.0f, 6356752.314245f, 6378137.0f );
         public static readonly Ellipsoid ScaledWgs84 = new Ellipsoid(1.0f, 1.0f, 6356752.314245f / 6378137.0f);
         public static readonly Ellipsoid ScaledWgs842 = new Ellipsoid(1.0f, 6356752.314245f / 6378137.0f, 1.0f );
         public static readonly Ellipsoid UnitSphere = new Ellipsoid(1.0f, 1.0f, 1.0f);
@@ -68,10 +68,10 @@ namespace PongGlobe.Core
         {
             double cosLatitude = Math.Cos(geodetic.Latitude);
 
-            return new Vector3(
-                (float)(cosLatitude * Math.Cos(geodetic.Longitude)),
+            return new Vector3(                
                 (float)(cosLatitude * Math.Sin(geodetic.Longitude)),
-                (float)(Math.Sin(geodetic.Latitude)));
+                (float)(Math.Sin(geodetic.Latitude)),
+                (float)(cosLatitude * Math.Cos(geodetic.Longitude)));
         }
 
         public Vector3 Radii 
