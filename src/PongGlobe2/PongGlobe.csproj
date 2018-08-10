@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>PongGlobe</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Veldrid" Version="4.4.0-beta3-gf6196c3020" />
+    <PackageReference Include="Veldrid.ImageSharp" Version="4.4.0-beta3-gf6196c3020" />
+  </ItemGroup>
+
+</Project>

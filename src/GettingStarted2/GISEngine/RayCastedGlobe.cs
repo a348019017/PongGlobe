@@ -37,8 +37,7 @@ namespace PongGlobe.Scene
         private CommandList _cl;
        
         private Mesh _mesh;
-        private bool _useAverageDepth;
-        private MyCamera _myCamera;
+        private bool _useAverageDepth;        
         /// <summary>
         /// 构造可渲染对象
         /// </summary>
@@ -46,8 +45,8 @@ namespace PongGlobe.Scene
         /// <param name="factory"></param>
         public RayCastedGlobe(ApplicationWindow window):base(window)
         {
-            _myCamera = new MyCamera(window.Width, window.Height);
-            _camera = _myCamera.Camera;
+
+            _camera = new MyCameraController();
             Shape = Ellipsoid.ScaledWgs84;   
             
         }

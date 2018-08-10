@@ -16,7 +16,8 @@ namespace PongGlobe.Core
         /// <returns></returns>
         public static double AngleBetween(this Vector3 t,Vector3 other)
         {
-           return MathF.Acos(Vector3.Dot(Vector3.Normalize(t), Vector3.Normalize(other)));
+            
+           return Math.Acos(Vector3.Dot(Vector3.Normalize(t), Vector3.Normalize(other)));
            //return Math.Acos(Normalize().Dot(other.Normalize()));
         }
 

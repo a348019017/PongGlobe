@@ -309,6 +309,24 @@ namespace PongGlobe.Core
             return positions;
         }
 
+
+        /// <summary>
+        /// 根据地理坐标生成变换矩阵
+        /// </summary>
+        /// <param name="geoPos"></param>
+        /// <returns></returns>
+        public Matrix4x4 geographicToCartesianTransform(Geodetic3D geoPos)
+        {
+            //平移加旋转的矩阵,注意是逆时针和经纬度之间的关系，维度是顺时针也即是负数
+            var rotate = Matrix4x4.CreateFromYawPitchRoll((float)geoPos.Longitude,-(float)geoPos.Latitude,0);
+            var vecTranslate = this.ToVector3(geoPos);
+            //创建一个平移矩阵
+            var translate = Matrix4x4.CreateTranslation(vecTranslate);
+            var transform = rotate * translate;         
+            return transform;
+        }
+
+
         private readonly Vector3 _radii;
         private readonly Vector3 _radiiSquared;
         private readonly Vector3 _radiiToTheFourth;

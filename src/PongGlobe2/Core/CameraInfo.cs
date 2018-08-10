@@ -9,8 +9,14 @@ namespace PongGlobe.Core
     /// </summary>
     public struct CameraInfo
     {
-        public Geodetic3D Postion;
+        //相机所看的中心点
+        public double Latitude;
 
+        public double Longitude;
+
+        public double Altitude;
+
+        //public Geodetic3D Postion;
         /// <summary>
         /// 范围0-90度
         /// </summary>
@@ -21,9 +27,11 @@ namespace PongGlobe.Core
         /// </summary>
         public double Heading;
 
-        public CameraInfo(Geodetic3D postion,double tile,double heading)
+        public CameraInfo(double latitude,double longitude,double altitude,double tile,double heading)
         {
-            Postion = postion;
+            Altitude = altitude;
+            Longitude = longitude;
+            Latitude = latitude;
             Tilt = tile;
             Heading = heading;
         }

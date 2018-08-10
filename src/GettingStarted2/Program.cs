@@ -1,5 +1,7 @@
 ﻿using SampleBase;
 using PongGlobe.Scene;
+using System.Numerics;
+
 
 namespace GettingStarted2
 {

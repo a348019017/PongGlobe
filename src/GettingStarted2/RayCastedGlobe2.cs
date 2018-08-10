@@ -19,7 +19,7 @@ namespace GettingStarted2
     /// <summary>
     /// 
     /// </summary>
-    public class TexturedEarth : SampleApplication,IEarthView
+    public class TexturedEarth : SampleApplication
     {
         private readonly ProcessedTexture _stoneTexData;
         private VertexPosition[] _vertices;
@@ -37,7 +37,7 @@ namespace GettingStarted2
         private ResourceSet _worldTextureSet;
         private float _ticks;
         private BaseUBO _ubo = new BaseUBO();
-        private MyCamera myCamera;
+        
 
         public Extent Extent { get ; set ; }
 
@@ -59,11 +59,10 @@ namespace GettingStarted2
             //_stoneTexData.MipLevels = 1;
             Shape = Ellipsoid.ScaledWgs842;
 
-            myCamera = new MyCamera(Window.Width, Window.Height,Shape);
-
-            var cameraInfo = new CameraInfo(new Geodetic3D(0, 0, 1), -MathF.PI/4, MathF.PI*25.0/180.0);          
-            _camera = myCamera.Camera;
-            myCamera.CameraInfo = cameraInfo;
+            
+            var cameraInfo = new LookAt(MathF.PI / 4, 0, 0, MathF.PI/4, 0,1);
+            _camera = new MyCameraController2(window.Width, window.Height);
+            ((MyCameraController2)_camera).CameraInfo = cameraInfo;
             
 
             var mesh = PongGlobe.Core.BoxTessellator.Compute(2*Shape.Radii);
@@ -213,8 +212,14 @@ namespace GettingStarted2
 
         protected override void PreDraw(float deltaSeconds)
         {
-            base.PreDraw(deltaSeconds);
-            myCamera.Update(deltaSeconds);
+            base.PreDraw(deltaSeconds);            
+            //显示一些Debug信息到其中
+            {
+                //显示帧率
+                //ImGui.Text(string.Format("Camera Location :Latitude {0} Longitude {1} Altitude {2}  Tilt {3} Heading {4},", ((MyCameraController)_camera).CameraInfo.Latitude, ((MyCameraController)_camera).CameraInfo.Longitude , ((MyCameraController)_camera).CameraInfo.Altitude, ((MyCameraController)_camera).CameraInfo.Tilt / MathF.PI * 180, ((MyCameraController)_camera).CameraInfo.Heading / MathF.PI * 180));
+                //ImGui.BeginWindow()
+                //ImGui.Text("Hello, world!");                                        // Display some text (you can use a format string too)                
+            }
         }
 
         //自转

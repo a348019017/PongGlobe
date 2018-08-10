@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AssetPrimitives\AssetPrimitives.csproj" />
+    <ProjectReference Include="..\PongGlobe2\PongGlobe.csproj" />
   </ItemGroup>
 
 </Project>

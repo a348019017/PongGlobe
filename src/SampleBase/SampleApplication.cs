@@ -13,7 +13,7 @@ namespace SampleBase
     {
         private readonly Dictionary<Type, BinaryAssetSerializer> _serializers = DefaultSerializers.Get();
 
-        protected Camera _camera;
+        protected ICameraController _camera;
 
         public ApplicationWindow Window { get; }
         public GraphicsDevice GraphicsDevice { get; private set; }
@@ -22,7 +22,7 @@ namespace SampleBase
 
         private float _ticks;
         protected ImGuiController _controller = null;
-        private static FrameTimeAverager _fta = new FrameTimeAverager(0.666);
+        protected static FrameTimeAverager _fta = new FrameTimeAverager(0.666);
         
 
         public SampleApplication(ApplicationWindow window)

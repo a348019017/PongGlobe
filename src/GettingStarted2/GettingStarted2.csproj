@@ -5,7 +5,7 @@
    
     <TargetFramework>netcoreapp2.0</TargetFramework>
    
-    <AssemblyName>PongGlobe</AssemblyName>
+    <AssemblyName>PongGlobe.Scene</AssemblyName>
    
     <RootNamespace>PongGlobe</RootNamespace>
   </PropertyGroup>
@@ -41,6 +41,7 @@
 
   <ItemGroup>
     <Compile Remove="GISEngine\Core\RayCastedGlobe.cs" />
+    <Compile Remove="GISEngine\RayCastedGlobe.cs" />
     <Compile Remove="TextureEarth - 复制 - 复制.cs" />
   </ItemGroup>
 
@@ -60,6 +61,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AssetPrimitives\AssetPrimitives.csproj" />
+    <ProjectReference Include="..\PongGlobe2\PongGlobe.csproj" />
     <ProjectReference Include="..\SampleBase\SampleBase.csproj" />
   </ItemGroup>
 
