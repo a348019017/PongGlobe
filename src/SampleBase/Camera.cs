@@ -108,7 +108,7 @@ namespace SampleBase
         //视图发送变化时的更新操作
         void WindowResized(float width, float height);
         //返回camera的世界坐标，shader中可能需要
-        Vector3 Position { get; }
+        Vector3 Position { get;  }
     }
 
     /// <summary>

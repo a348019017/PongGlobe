@@ -7,7 +7,8 @@
 // See License.txt or http://www.opensource.org/licenses/mit-license.php.
 //
 layout(set=0, binding = 0) uniform UniformBufferObject {
-    mat4 prjviewmodel;     
+    mat4 prj;     
+    mat4 view;
     vec3 CameraEyeSquared;
     float spa1;
     vec3 CameraEye;   
@@ -45,9 +46,9 @@ struct Intersection
 //
 Intersection RayIntersectEllipsoid(vec3 rayOrigin, vec3 rayOriginSquared, vec3 rayDirection, vec3 oneOverEllipsoidRadiiSquared)
 {
-    float a = dot(rayDirection*rayDirection,vec3(1.0,1.0,1.0));
-    float b = 2.0 * dot(rayOrigin*rayDirection,vec3(1.0,1.0,1.0));
-    float c = dot(rayOrigin*rayOrigin, vec3(1.0,1.0,1.0)) - 1.0;
+    float a = dot(rayDirection*rayDirection,oneOverEllipsoidRadiiSquared);
+    float b = 2.0 * dot(rayOrigin*rayDirection,oneOverEllipsoidRadiiSquared);
+    float c = dot(rayOrigin*rayOrigin, oneOverEllipsoidRadiiSquared) - 1.0;
     float discriminant = b * b - 4.0 * a * c;
 
     //return Intersection(false, 0.0, 0.0);
@@ -69,9 +70,9 @@ Intersection RayIntersectEllipsoid(vec3 rayOrigin, vec3 rayOriginSquared, vec3 r
     return Intersection(true, min(root1, root2), max(root1, root2));
 }
 
-float ComputeWorldPositionDepth(vec3 position, mat4 modelZToClipCoordinates)
+float ComputeWorldPositionDepth(vec3 position, mat4 prj)
 { 
-    vec4 v = modelZToClipCoordinates * vec4(position, 1.0);   // clip coordinates
+    vec4 v = prj*view * vec4(position, 1.0);   // clip coordinates
     v.z /= v.w;                                             // normalized device coordinates
     v.z = (v.z + 1.0) * 0.5;
     return v.z;
@@ -79,7 +80,7 @@ float ComputeWorldPositionDepth(vec3 position, mat4 modelZToClipCoordinates)
 
 vec3 GeodeticSurfaceNormal(vec3 positionOnEllipsoid, vec3 oneOverEllipsoidRadiiSquared)
 {
-    return normalize(positionOnEllipsoid);
+    return normalize(positionOnEllipsoid * oneOverEllipsoidRadiiSquared);
 }
 
 float LightIntensity(vec3 normal, vec3 toLight, vec3 toEye, vec4 diffuseSpecularAmbientShininess)
@@ -97,7 +98,7 @@ float LightIntensity(vec3 normal, vec3 toLight, vec3 toEye, vec4 diffuseSpecular
 
 vec2 ComputeTextureCoordinates(vec3 normal)
 {
-    return vec2(atan(normal.z, normal.x) * og_oneOverTwoPi + 0.5, asin(normal.y) * og_oneOverPi + 0.5);
+    return vec2(atan(normal.x, normal.z) * og_oneOverTwoPi+0.5, asin(normal.y) * og_oneOverPi + 0.5);
 }
 
 void main()
@@ -114,14 +115,28 @@ void main()
         vec3 toEye = normalize(ubo.CameraEye - position);
         float intensity = LightIntensity(normal, toLight, toEye, ubo.DiffuseSpecularAmbientShininess);
 
-        fragmentColor = intensity * texture(sampler2D(Tex,Samp), ComputeTextureCoordinates(normal)).rgb;
+		vec2 textureCoordinate=ComputeTextureCoordinates(normal);
+		vec2 distanceToLine = mod(textureCoordinate, vec2(0.1,0.1));
+        vec2 dx = abs(dFdx(textureCoordinate));
+        vec2 dy = abs(dFdy(textureCoordinate));
+        vec2 dF = vec2(max(dx.s, dy.s), max(dx.t, dy.t)) * 1.0;
+
+		if (any(lessThan(distanceToLine, dF)))
+    {
+        fragmentColor = vec3(1.0, 1.0, 1.0);
+    }else
+	{
+	    fragmentColor = intensity * texture(sampler2D(Tex,Samp), textureCoordinate).rgb;
+	}
+
+        
 
         if (UseAverageDepth)
         {
             position = ubo.CameraEye + (mix(i.NearTime, i.FarTime, 0.5) * rayDirection);
         }
 
-        gl_FragDepth = ComputeWorldPositionDepth(position, ubo.prjviewmodel);
+        gl_FragDepth = ComputeWorldPositionDepth(position, ubo.prj);
     }
     else
     {

@@ -77,9 +77,7 @@ namespace SampleBase
         {
             {
                 //显示帧率
-                ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));
-                //ImGui.BeginWindow()
-                //ImGui.Text("Hello, world!");                                        // Display some text (you can use a format string too)                
+                ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));                                                   
             }
         }
 

@@ -311,7 +311,7 @@ namespace PongGlobe.Core
 
 
         /// <summary>
-        /// 根据地理坐标生成变换矩阵
+        /// 根据地理坐标生成,此点的变换矩阵
         /// </summary>
         /// <param name="geoPos"></param>
         /// <returns></returns>
@@ -326,10 +326,85 @@ namespace PongGlobe.Core
             return transform;
         }
 
+        /// <summary>
+        /// 这个变换结果可以认为是准确的，等同于B参考系到A参考系
+        /// </summary>
+        /// <param name="geoPos"></param>
+        /// <returns></returns>
+        public Matrix4x4 GeographicToCartesianTransform2(Geodetic3D geoPos)
+        {
+            //计算此经纬度坐标的世界坐标系
+            var vectorCoord = this.ToVector3(geoPos);
+            //计算east法向量
+            var east = Vector3.Normalize(new Vector3(vectorCoord.Z, 0, -vectorCoord.X));
+            //计算此点的法向量,垂直于椭球体切平面
+            var normalUp = this.GeodeticSurfaceNormal(vectorCoord);
+            //计算north的法向量,使用叉乘,这里似乎是符合右手定则
+            var north = Vector3.Cross(normalUp, east);
+            //构造一个矩阵
+            var transofrmLoacl = new Matrix4x4(east.X, east.Y, east.Z, 0, north.X, north.Y, north.Z, 0, normalUp.X, normalUp.Y, normalUp.Z, 0, vectorCoord.X, vectorCoord.Y, vectorCoord.Z, 1);
+            return transofrmLoacl;
+        }
+
+        public Matrix4x4 GeographicToCartesianTransform3(Geodetic3D geoPos)
+        {
+            //计算此经纬度坐标的世界坐标系
+            var vectorCoord = this.ToVector3(geoPos);
+            //计算east法向量
+            var east = Vector3.Normalize(new Vector3(vectorCoord.Z, 0, -vectorCoord.X));
+            //计算此点的法向量,垂直于椭球体切平面
+            var normalUp = this.GeodeticSurfaceNormal(vectorCoord);
+            //计算north的法向量,使用叉乘,这里似乎是符合右手定则
+            var north = Vector3.Cross(normalUp, east);
+            //构造一个矩阵
+            var transofrmLoacl = new Matrix4x4(east.X, north.X, normalUp.X, 0, east.Y, north.Y, normalUp.Y, 0, east.Z, north.Z, normalUp.Z, 0, vectorCoord.X, vectorCoord.Y, vectorCoord.Z, 1);
+            return transofrmLoacl;
+        }
+
+
+
+
+
+
 
         private readonly Vector3 _radii;
         private readonly Vector3 _radiiSquared;
         private readonly Vector3 _radiiToTheFourth;
         private readonly Vector3 _oneOverRadiiSquared;
     }
+
+
+
+    public class EllipsoidTest
+    {
+        public static bool TestGeoToCartesianTransform()
+        {
+            //在经度30度，维度30度，高程为1 的情况下，
+            //vector(0,0,1)的实际坐标为
+            var geoCooord = new Geodetic3D(Math.PI / 6, Math.PI / 6, 1);
+            var shape = Ellipsoid.ScaledWgs842;
+            var resultCoord = shape.ToVector3(geoCooord);
+
+            var transfrom = shape.GeographicToCartesianTransform2(new Geodetic3D(Math.PI / 6, Math.PI / 6, 1));
+            var transfrom2 = shape.geographicToCartesianTransform(new Geodetic3D(Math.PI / 6, Math.PI / 6, 1));
+           
+
+            var result2= Vector3.Transform(new Vector3(1, 1, 0), transfrom);
+            //
+            var result3 = Vector3.Transform(new Vector3(1, 1, 0), transfrom2);
+
+            //计算次向量的长度
+            var length = resultCoord.LengthSquared() + 2.0;
+            var length1 = result2.LengthSquared();
+            var length2 = result3.LengthSquared();
+
+
+
+            
+            //var eq
+            //此结果略有误差，尝试分析误差来源
+            return resultCoord.Equals(result2);
+        }
+    }
+
 }

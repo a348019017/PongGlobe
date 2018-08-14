@@ -7,7 +7,7 @@
 // See License.txt or http://www.opensource.org/licenses/mit-license.php.
 //
 layout(set=0, binding = 0) uniform UniformBufferObject {
-    mat4 prjviewmodel;     
+    mat4 prj;         
     vec3 CameraEyeSquared;
     float spa1;
     vec3 CameraEye;   
@@ -69,9 +69,9 @@ Intersection RayIntersectEllipsoid(vec3 rayOrigin, vec3 rayOriginSquared, vec3 r
     return Intersection(true, min(root1, root2), max(root1, root2));
 }
 
-float ComputeWorldPositionDepth(vec3 position, mat4 modelZToClipCoordinates)
+float ComputeWorldPositionDepth(vec3 position, mat4 prj)
 { 
-    vec4 v = modelZToClipCoordinates * vec4(position, 1.0);   // clip coordinates
+    vec4 v = prj * vec4(position, 1.0);   // clip coordinates
     v.z /= v.w;                                             // normalized device coordinates
     v.z = (v.z + 1.0) * 0.5;
     return v.z;
@@ -135,7 +135,7 @@ void main()
             position = ubo.CameraEye + (mix(i.NearTime, i.FarTime, 0.5) * rayDirection);
         }
 
-        gl_FragDepth = ComputeWorldPositionDepth(position, ubo.prjviewmodel);
+        gl_FragDepth = ComputeWorldPositionDepth(position, ubo.prj);
     }
     else
     {

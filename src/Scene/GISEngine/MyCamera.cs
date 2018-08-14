@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using Veldrid;
 using PongGlobe.Core;
 using SampleBase;
-
+using PongGlobe.Core.Extension;
 namespace PongGlobe.Core
 {
     /// <summary>
@@ -184,6 +184,7 @@ namespace PongGlobe.Core
         private PongGlobe.Core.Ellipsoid _shape;
         //当前的摄像机定位信息
         private LookAt _lookAtInfo;
+        private CameraInfo _cameraInfo;
         //前一次的鼠标点
         Vector2 _previousMousePos;
 
@@ -212,8 +213,9 @@ namespace PongGlobe.Core
             //UpdateViewMatrix();
         }
 
-        public LookAt CameraInfo { get { return _lookAtInfo; } set { _lookAtInfo = value; UpdateCamera(); } }
+        public LookAt LookAtInfo { get { return _lookAtInfo; } set { _lookAtInfo = value; UpdateCamera(); } }
 
+        public CameraInfo CameraInfo { get { return _cameraInfo; }set { _cameraInfo = value;UpdateCameraInfo(); } }
 
         //public CameraInfo {get}
 
@@ -224,25 +226,76 @@ namespace PongGlobe.Core
         {
             //首先计算LookAt点所在世界坐标系
              var centerLookAt= _shape.ToVector3(new Geodetic3D(_lookAtInfo.Longitude, _lookAtInfo.Latitude,_lookAtInfo.Altitude));
-
-            //通过Range和Tilt计算相机的位置，
-            var transform = Shape.geographicToCartesianTransform(new Geodetic3D(_lookAtInfo.Longitude, _lookAtInfo.Latitude, _lookAtInfo.Altitude));
-
-            //使用matrix.CreateLookAt创建
-            var transformLocal = Matrix4x4.CreateFromYawPitchRoll(0, -(float)_lookAtInfo.Tilt, -(float)_lookAtInfo.Heading);
+            //描述一个基于基本参考系的旋转平移之后的参考系
+            var transform = Shape.GeographicToCartesianTransform2(new Geodetic3D(_lookAtInfo.Longitude, _lookAtInfo.Latitude, _lookAtInfo.Altitude));
+            //对这个参考系再进行旋转
+            var transformLocal = Matrix4x4.CreateFromYawPitchRoll(0, (float)_lookAtInfo.Tilt, -(float)_lookAtInfo.Heading);
+            //v
+            var localTransformheading = Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ,(float)_lookAtInfo.Heading);
+            //
+            var localTransformTilt = Matrix4x4.CreateFromAxisAngle(Vector3.UnitX,-(float)_lookAtInfo.Tilt);
 
             //再创建平移矩阵
             var transTransform = Matrix4x4.CreateTranslation(0,0,(float)_lookAtInfo.Range);
-            var transformAll = transform * transformLocal * transTransform;
-            var cameraPosition = transformAll.Translation;
-            _positon = cameraPosition;
-            //计算当前点到地球的经纬度
-            var cameraUp = Vector3.Transform(Vector3.UnitY, Quaternion.CreateFromRotationMatrix(transformAll));
+            //var localTransformheading2=  Quaternion.CreateFromAxisAngle(Vector3.UnitZ, (float)_lookAtInfo.Heading);
+            //var result1 = Matrix4x4.Transform(transform, localTransformheading2);
+            //var result2 = transform * localTransformheading;
 
-            //相机一直朝向当前相机的中心点，且此夹角不能超过90度
-            _viewMatrix = Matrix4x4.CreateLookAt(cameraPosition, centerLookAt, cameraUp);
-            // _viewMatrix = transformAll;                     
+            var transformAll2 = transTransform*(localTransformTilt*(localTransformheading*(localTransformheading*transform)));
+            var tttt = transform * localTransformheading * localTransformTilt * transTransform;
+
+            //求其转置矩阵,
+            //_positon = tttt.Translation;
+            //var unitY = Vector3.Transform(Vector3.UnitY, transformAll);
+           Matrix4x4.Invert(tttt,out _viewMatrix);
+            _positon = _viewMatrix.ExtractEyePosition();
+            //_viewMatrix = Matrix4x4.CreateLookAt(_positon, Vector3.Zero, Vector3.UnitY);
         }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void UpdateCameraInfo()
+        {
+            //描述一个基于基本参考系的旋转平移之后的参考系
+            var transform = Shape.GeographicToCartesianTransform2(new Geodetic3D(_lookAtInfo.Longitude, _lookAtInfo.Latitude, _lookAtInfo.Altitude));
+            //对这个参考系再进行旋转
+            var transformLocal = Matrix4x4.CreateFromYawPitchRoll(0, -(float)_lookAtInfo.Tilt, -(float)_lookAtInfo.Heading);
+            //v
+            var localTransformheading = Matrix4x4.CreateRotationZ((float)_lookAtInfo.Heading);
+            //
+            var localTransformTilt = Matrix4x4.CreateRotationX(-(float)_lookAtInfo.Tilt);
+            //再创建平移矩阵
+           //将X，Y坐标反制
+
+        }
+
+        /// <summary>
+        /// 将Camera参数直接转换成view矩阵
+        /// </summary>
+        /// <param name="globe"></param>
+        /// <param name="camera"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
+        protected Matrix4x4 cameraToViewingMatrix(PongGlobe.Core.Ellipsoid shape, Camera camera, Matrix4x4 result)
+        {
+            // TODO interpret altitude mode other than absolute
+            // Transform by the local cartesian transform at the camera's position.
+            //globe.geographicToCartesianTransform(camera.latitude, camera.longitude, camera.altitude, result);
+
+            //// Transform by the heading, tilt and roll.
+            //result.multiplyByRotation(0, 0, 1, -camera.heading); // rotate clockwise about the Z axis
+            //result.multiplyByRotation(1, 0, 0, camera.tilt); // rotate counter-clockwise about the X axis
+            //result.multiplyByRotation(0, 0, 1, camera.roll); // rotate counter-clockwise about the Z axis (again)
+
+            //// Make the transform a viewing matrix.
+            //result.invertOrthonormal();
+
+            //return result;
+            return default(Matrix4x4);
+        }
+
 
         public void Update(float deltaSeconds)
         {
@@ -251,12 +304,12 @@ namespace PongGlobe.Core
 
             if (delta != 0)
             {
-                ////camera的position移动0.1个坐标单位
-                //var de = delta * (_cameraInfo.Altitude) * 0.1;
-                //_cameraInfo.Altitude += de;
-                ////pos.Height += de;
-                ////更新相机位置后更新View矩阵
-                //UpdateCamera();
+                //camera的position移动0.1个坐标单位
+                var de = delta * (_lookAtInfo.Range) * 0.1;
+                _lookAtInfo.Range += de;
+                //pos.Height += de;
+                //更新相机位置后更新View矩阵
+                UpdateCamera();
             }
             Vector2 mouseDelta = InputTracker.MousePosition - _previousMousePos;
             _previousMousePos = InputTracker.MousePosition;

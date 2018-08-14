@@ -2,7 +2,7 @@
 #extension GL_ARB_separate_shader_objects : enable
 
 layout(set=0, binding = 0) uniform UniformBufferObject {
-    mat4 prjviewmodel;     
+     mat4 prj;     
     vec3 CameraEyeSquared;
     float spa1;
     vec3 CameraEye;   
@@ -23,6 +23,6 @@ out gl_PerVertex {
 
 void main()                     
 {
-    gl_Position = ubo.prjviewmodel * vec4(position,1.0); 
+    gl_Position =ubo.prj  * vec4(position,1.0);    
     worldPosition = position;
 }

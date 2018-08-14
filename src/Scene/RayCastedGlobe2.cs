@@ -60,9 +60,9 @@ namespace GettingStarted2
             Shape = Ellipsoid.ScaledWgs842;
 
             
-            var cameraInfo = new LookAt(MathF.PI / 4, 0, 0, MathF.PI/4, 0,1);
+            var cameraInfo = new LookAt(0, 0, 0,MathF.PI/18, 0,1);
             _camera = new MyCameraController2(window.Width, window.Height);
-            ((MyCameraController2)_camera).CameraInfo = cameraInfo;
+            ((MyCameraController2)_camera).LookAtInfo = cameraInfo;
             
 
             var mesh = PongGlobe.Core.BoxTessellator.Compute(2*Shape.Radii);
@@ -118,7 +118,7 @@ namespace GettingStarted2
 
         protected unsafe override void CreateResources(ResourceFactory factory)
         {           
-            _projectionBuffer = factory.CreateBuffer(new BufferDescription(144, BufferUsage.UniformBuffer| BufferUsage.Dynamic));
+            _projectionBuffer = factory.CreateBuffer(new BufferDescription(208, BufferUsage.UniformBuffer| BufferUsage.Dynamic));
            // _viewBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
             //_worldBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
 
@@ -126,7 +126,7 @@ namespace GettingStarted2
             GraphicsDevice.UpdateBuffer(_vertexBuffer, 0, _vertices);
 
             _indexBuffer = factory.CreateBuffer(new BufferDescription(sizeof(ushort) * 400000, BufferUsage.IndexBuffer));
-
+            
             GraphicsDevice.UpdateBuffer(_indexBuffer, 0, _indices);
             var DiffuseIntensity = 0.65f;
             var SpecularIntensity = 0.25f;
@@ -242,15 +242,24 @@ namespace GettingStarted2
                 _camera.ViewMatrix;
 
             
-
             Matrix4x4 rotation =
                 Matrix4x4.CreateFromAxisAngle(-Vector3.UnitY, (float)(_ticks /10* selfrockRate));
             //这里矩阵的定义和后者是有区别的，numberic中是行列，glsl中是列行，因此这里需要反向计算
-            var prjviewWorld = view* prj;
-            _ubo.ProjectionViewModel = prjviewWorld;
-            _ubo.CameraEye = _camera.Position;
-            _ubo.CameraEyeSquared = _camera.Position * _camera.Position;
-            _ubo.CameraLightPosition = _camera.Position;
+            //            < pre >
+            // *m[offset + 0] m[offset + 4] m[offset + 8] m[offset + 12]
+            //* m[offset + 1] m[offset + 5] m[offset + 9] m[offset + 13]
+            //* m[offset + 2] m[offset + 6] m[offset + 10] m[offset + 14]
+            //* m[offset + 3] m[offset + 7] m[offset + 11] m[offset + 15] </ pre >
+
+            //glsl是列主序，C#是行主序，虽然有所差异，但是并不需要装置，glsl中的第一行实际上就是传入矩阵的第一列，此列刚好能参与计算并返回正常值。
+            //设置视点位置为2,2,2 ,target 为在0.2,0.2,0
+
+            var eyePosition = _camera.Position;
+            
+            _ubo.prj = view*prj;
+            _ubo.CameraEye = eyePosition;
+            _ubo.CameraEyeSquared = eyePosition * eyePosition;
+            _ubo.CameraLightPosition = eyePosition;
             
             _cl.UpdateBuffer(_projectionBuffer, 0, _ubo);          
             _cl.SetFramebuffer(MainSwapchain.Framebuffer);
@@ -289,10 +298,9 @@ namespace GettingStarted2
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
     public struct BaseUBO
-    {
-        //变换矩阵
-        public Matrix4x4 ProjectionViewModel;
-                
+    {        
+        public Matrix4x4 prj;
+
         //相机位置的平方
         public Vector3 CameraEyeSquared;
 
