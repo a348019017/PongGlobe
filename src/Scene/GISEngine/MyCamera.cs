@@ -7,6 +7,7 @@ using Veldrid;
 using PongGlobe.Core;
 using SampleBase;
 using PongGlobe.Core.Extension;
+using ImGuiNET;
 namespace PongGlobe.Core
 {
     /// <summary>
@@ -166,7 +167,7 @@ namespace PongGlobe.Core
     {
 
         private float _fov = 1f;
-        private float _near = 1f;
+        private float _near = 0.0001f;
         private float _far = 10f;
 
 
@@ -198,6 +199,45 @@ namespace PongGlobe.Core
             // UpdateViewMatrix();
         }
 
+        //通过Speed参数实现动画效果，如FlyTo等其它操作
+
+
+        /// <summary>
+        /// 二维投影到三维视图
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="projection"></param>
+        /// <param name="view"></param>
+        /// <param name="world"></param>
+        /// <returns></returns>
+        public Vector3 Unproject(Vector3 source, Matrix4x4 projection, Matrix4x4 view, Matrix4x4 world)
+        {           
+            Matrix4x4 matrix;
+             Matrix4x4.Invert(
+                Matrix4x4.Multiply(
+                    Matrix4x4.Multiply(world, view),
+                    projection
+                ),out matrix
+            );
+            source.X = (((source.X ) / ((float)_windowWidth)) * 2f) - 1.0f;
+            source.Y = ((((source.Y) / ((float)_windowHeight)) * 2f) - 1f);
+            source.Z = 0;
+            Vector3 vector = Vector3.Transform(source, matrix);
+            float a = (
+                ((source.X * matrix.M14) + (source.Y * matrix.M24)) +
+                (source.Z * matrix.M34)
+            ) + matrix.M44;
+          //如果a比1要大的话再次向量化
+            if (!(Math.Abs(a - 1.0f) < float.Epsilon))
+            {
+                vector.X = vector.X / a;
+                vector.Y = vector.Y / a;
+                vector.Z = vector.Z / a;
+            }
+            return vector;
+        }
+
+
         public Ellipsoid Shape { get { return _shape; } set { _shape = value; } }
 
         public Matrix4x4 ViewMatrix => _viewMatrix;
@@ -212,6 +252,9 @@ namespace PongGlobe.Core
             UpdatePerspectiveMatrix();
             //UpdateViewMatrix();
         }
+
+        //计算其视椎体对象，以此作为获取数据的范围。具体影响加载的参数有，视椎体，相机距离地面的高度等，具体的参数可在ViewPort中定义并传出，所有可渲染对象的Draw操作均传入ViewPort和GraphicDevice至少这两个对象
+        //private Get
 
         public LookAt LookAtInfo { get { return _lookAtInfo; } set { _lookAtInfo = value; UpdateCamera(); } }
 
@@ -241,15 +284,18 @@ namespace PongGlobe.Core
             //var result1 = Matrix4x4.Transform(transform, localTransformheading2);
             //var result2 = transform * localTransformheading;
 
-            var transformAll2 = transTransform*(localTransformTilt*(localTransformheading*(localTransformheading*transform)));
-            var tttt = transform * localTransformheading * localTransformTilt * transTransform;
-
+            //var transformAll2 = transTransform*(localTransformTilt*(localTransformheading*(localTransformheading*transform)));
+            //var tttt = transform * localTransformheading * localTransformTilt;
+            //* transTransform;
+            var tttt = transTransform* localTransformTilt * localTransformheading * transform;
             //求其转置矩阵,
-            //_positon = tttt.Translation;
-            //var unitY = Vector3.Transform(Vector3.UnitY, transformAll);
-           Matrix4x4.Invert(tttt,out _viewMatrix);
-            _positon = _viewMatrix.ExtractEyePosition();
-            //_viewMatrix = Matrix4x4.CreateLookAt(_positon, Vector3.Zero, Vector3.UnitY);
+            _positon = tttt.Translation;
+            var unitY = Vector3.Transform(Vector3.UnitY, Quaternion.CreateFromRotationMatrix(tttt));
+            // _viewMatrix = tttt.InvertOrthonormal();
+            //_positon = _viewMatrix.ExtractEyePosition();
+            // _positon = new Vector3(_positon.X,-_positon.Y,_positon.Z);
+            var target = Vector3.Transform(-Vector3.UnitZ, Quaternion.CreateFromRotationMatrix(tttt));
+            _viewMatrix = Matrix4x4.CreateLookAt(_positon, _positon+ target, unitY);
         }
 
 
@@ -297,6 +343,35 @@ namespace PongGlobe.Core
         }
 
 
+        /// <summary>
+        /// 屏幕坐标转换成椭球体经纬度坐标
+        /// </summary>
+        private void ScreenPostionToGeodeticPostion()
+        {
+
+        }
+
+
+        private bool testwindowsCoordOnEllipse(Vector2 pos, out Geodetic2D geo)
+        {
+            var rayVector = Unproject(new Vector3(pos.X, pos.Y, 0), this.ProjectionMatrix, this.ViewMatrix, Matrix4x4.Identity);
+            //此rayVector为近裁剪面的世界坐标，与eye相减得到ray向量，ray向量与地球求交即可得到结果
+            //计算是否与地球有交
+            var rayDir = rayVector - _positon;
+            var result = Shape.Intersections(_positon, rayVector - _positon);
+            //计算第一个相交点的世界坐标
+            if (result.Length != 0)
+            {
+                Vector3 deta = Vector3.Normalize(rayDir) * (float)result[0];
+                Vector3 position = _positon + deta;
+                geo = Shape.ToGeodetic2D(position);
+                return true; 
+            }
+            geo = new Geodetic2D();
+            return false;
+        }
+
+
         public void Update(float deltaSeconds)
         {
             ////控制鼠标中键,进行缩放视图
@@ -312,7 +387,21 @@ namespace PongGlobe.Core
                 UpdateCamera();
             }
             Vector2 mouseDelta = InputTracker.MousePosition - _previousMousePos;
-            _previousMousePos = InputTracker.MousePosition;
+            
+          
+            //如果前一个点和当前点均位于地球上，则计算两者的经纬度之差，
+            var isMouseleftClick = InputTracker.GetMouseButton(MouseButton.Left);
+            if (isMouseleftClick && testwindowsCoordOnEllipse(_previousMousePos, out Geodetic2D preCoord) && testwindowsCoordOnEllipse(InputTracker.MousePosition, out Geodetic2D curPos))
+            {
+                var delatLat = curPos.Latitude - preCoord.Latitude;
+                var deltaLon = curPos.Longitude - preCoord.Longitude;
+                //设置lookAt的偏移量
+                _lookAtInfo.Longitude -= deltaLon;
+                _lookAtInfo.Latitude -= delatLat;
+                //重新计算相关参数
+                UpdateCamera();
+            }
+
             var isMouseWhellClick = InputTracker.GetMouseButton(MouseButton.Middle);
             if ((mouseDelta.Y != 0 || mouseDelta.X != 0) && isMouseWhellClick)
             {
@@ -325,6 +414,8 @@ namespace PongGlobe.Core
                 if (_lookAtInfo.Tilt > Math.PI / 2) _lookAtInfo.Tilt = (float)Math.PI / 2;
                 UpdateCamera();
             }
+            _previousMousePos = InputTracker.MousePosition;
+
 
             ////鼠标左右即是旋转地球，改变相机的position
             //if (InputTracker.GetMouseButton(MouseButton.Left) || InputTracker.GetMouseButton(MouseButton.Right))

@@ -131,8 +131,12 @@ namespace PongGlobe.Core
             }
 
             double t = -0.5 * (b + (b > 0.0 ? 1.0 : -1.0) * Math.Sqrt(discriminant));
+            double t1 = -0.5 * b / a;
+            double deta = -0.5 * Math.Sqrt(discriminant) / a;
             double root1 = t / a;
             double root2 = c / t;
+            double root11 = t1 + deta;
+            double root22 = t1 - deta;
 
             // Two intersections - return the smallest first.
             if (root1 < root2)
@@ -201,8 +205,8 @@ namespace PongGlobe.Core
         {
             Vector3 n = GeodeticSurfaceNormal(positionOnEllipsoid);
             return new Geodetic2D(
-                Math.Atan2(n.Y, n.X),
-                Math.Asin(n.Z / n.Length()));
+                Math.Atan2(n.X,n.Z),
+                Math.Asin(n.Y / n.Length()));
         }
 
         public Geodetic3D ToGeodetic3D(Vector3 position)

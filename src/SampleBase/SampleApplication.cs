@@ -65,8 +65,9 @@ namespace SampleBase
 
         protected virtual void PreDraw(float deltaSeconds)
         {
-            _camera.Update(deltaSeconds);
+            
             _controller.Update(1f / 60f, InputTracker.FrameSnapshot);
+            _camera.Update(deltaSeconds);
             _fta.AddTime(deltaSeconds);
             SubmitUI();
             _ticks += deltaSeconds * 1000f;          

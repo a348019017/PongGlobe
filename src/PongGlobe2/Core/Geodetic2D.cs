@@ -70,6 +70,16 @@ namespace PongGlobe.Core
             return _longitude.GetHashCode() ^ _latitude.GetHashCode();
         }
 
+        public override string ToString()
+        {
+            return string.Format("Latitude:{0},Logitude:{1}",_latitude,_longitude);
+        }
+
+        public string ToAngle()
+        {
+            return string.Format("Latitude:{0},Logitude:{1}", _latitude*180/Math.PI, _longitude*180/Math.PI);
+        }
+
         private readonly double _longitude;
         private readonly double _latitude;
     }

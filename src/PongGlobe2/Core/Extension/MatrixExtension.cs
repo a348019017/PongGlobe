@@ -41,7 +41,7 @@ namespace PongGlobe.Core.Extension
             //m[14] = 0;
             //m[15] = 1;
 
-            return new Matrix4x4(m.M11,m.M21,m.M31,m.M14,m.M12,m.M22,m.M32,m.M24,m.M13,m.M32,m.M33,m.M34,-x,-y,-z,m.M44);
+            return new Matrix4x4(m.M11,m.M21,m.M31,m.M14,m.M12,m.M22,m.M32,m.M24,m.M13,m.M23,m.M33,m.M34,-x,-y,-z,m.M44);
             //return default(Matrix4x4);
         }
 
