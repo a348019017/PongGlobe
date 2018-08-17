@@ -64,8 +64,7 @@ namespace SampleBase
         protected virtual void CreateSwapchainResources(ResourceFactory factory) { }
 
         protected virtual void PreDraw(float deltaSeconds)
-        {
-            
+        {            
             _controller.Update(1f / 60f, InputTracker.FrameSnapshot);
             _camera.Update(deltaSeconds);
             _fta.AddTime(deltaSeconds);

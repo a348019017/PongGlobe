@@ -47,6 +47,7 @@ namespace GettingStarted2
 
         protected override void HandleWindowResize()
         {
+            
             if (_controller == null) return;
             _controller.WindowResized((int)this.Window.Width, (int)this.Window.Height);
         }
