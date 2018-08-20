@@ -19,9 +19,9 @@ namespace PongGlobe.Layers
     }
 
     /// <summary>
-    /// 对单个要素进行渲染,独立渲染每个要素
+    /// 对单个要素进行渲染,独立渲染每个要素，当要使用动态水渲染要素时，使用DynamicWaterRender,由FeatureRenderFactory根据参数生成适当的Render对象。
     /// </summary>
-    public class FeatureRender : IRender
+    public class BaseFeatureRender : IRender
     {
         /// <summary>
         /// feature转换成的mesh对象
