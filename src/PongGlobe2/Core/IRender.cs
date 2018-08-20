@@ -8,7 +8,7 @@ namespace PongGlobe.Core
     /// <summary>
     /// 通用接口，对Device的资源创建CreateResource，Draw，Update等操作
     /// </summary>
-    public interface IRender
+    public interface IRender:IDisposable
     {
         void Draw();
         void Update();
