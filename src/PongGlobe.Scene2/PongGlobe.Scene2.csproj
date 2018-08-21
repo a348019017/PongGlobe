@@ -10,8 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Shaders\GlobeFS.spv" LogicalName="GlobeFS.spv"/>
-    <EmbeddedResource Include="Shaders\GlobeVS.spv" LogicalName="GlobeVS.spv"/>
+    <EmbeddedResource Include="Shaders\GlobeFS.spv" LogicalName="GlobeFS.spv" />
+    <EmbeddedResource Include="Shaders\GlobeVS.spv" LogicalName="GlobeVS.spv" />
   </ItemGroup>
 
   <ItemGroup>
