@@ -7,6 +7,8 @@ using System.Numerics;
 using PongGlobe.Core.Extension;
 using NetTopologySuite.IO.ShapeFile.Extended.Entities;
 using System.Linq;
+using PongGlobe.Core.Util;
+using PongGlobe.Scene;
 
 namespace PongGlobe.Layers
 {
@@ -17,6 +19,9 @@ namespace PongGlobe.Layers
     {
 
     }
+
+
+
 
     /// <summary>
     /// 对单个要素进行渲染,独立渲染每个要素，当要使用动态水渲染要素时，使用DynamicWaterRender,由FeatureRenderFactory根据参数生成适当的Render对象。
@@ -32,30 +37,28 @@ namespace PongGlobe.Layers
         //可能用到的纹理
         private Texture _surfaceTexture;
         private TextureView _surfaceTextureView;
-
+        private CommandList _cl;
+        //渲染管线
+        private Pipeline _pipeline;
 
         private Ellipsoid _shape = Ellipsoid.ScaledWgs842;
         /// <summary>
-        /// 
+        /// 当前需要渲染的矢量对象
         /// </summary>
         private IShapefileFeature _feature;
         /// <summary>
         /// 使用_fea构造FeatureRFender对象
         /// </summary>
         /// <param name="_fea"></param>
-        public FeatureRender(IShapefileFeature _fea)
+        public BaseFeatureRender(IShapefileFeature _fea)
         {
             _feature = _fea;
-
         }
-
         /// <summary>
         /// 显示轮廓
         /// </summary>
         /// <returns></returns>
-        public bool ShowWireFrame { get; set; }
-        
-
+        public bool ShowWireFrame { get; set; }      
         /// <summary>
         /// 创建相关资源
         /// </summary>
@@ -77,11 +80,32 @@ namespace PongGlobe.Layers
             var indices= EarClippingOnEllipsoid.Triangulate(positions);
             //三角细分,细分精度为1度
             _mesh = TriangleMeshSubdivision.Compute(positions, indices.ToArray(), Math.PI / 180);
-
-
-
+            _vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)(12 * _mesh.Positions.Count()), BufferUsage.VertexBuffer));
+            gd.UpdateBuffer(_vertexBuffer, 0, _mesh.Positions);
+            _indexBuffer = factory.CreateBuffer(new BufferDescription((uint)(sizeof(ushort) * _mesh.Indices.Length), BufferUsage.IndexBuffer));
+            gd.UpdateBuffer(_indexBuffer, 0, _mesh.Indices);
+            ShaderSetDescription shaderSet = new ShaderSetDescription(
+                new[]
+                {
+                    new VertexLayoutDescription(
+                        new VertexElementDescription("Position", VertexElementSemantic.Position, VertexElementFormat.Float3))
+                },
+                new[]
+                {
+                   ResourceHelper.LoadEmbbedShader(ShaderStages.Vertex,"GlobeVS.spv",gd),
+                   ResourceHelper.LoadEmbbedShader(ShaderStages.Fragment,"GlobeFS.spv",gd)
+                });          
+            _pipeline = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription(
+                BlendStateDescription.SingleOverrideBlend,
+                DepthStencilStateDescription.DepthOnlyLessEqual,
+                RasterizerStateDescription.Default,
+                PrimitiveTopology.TriangleList,
+                shaderSet,
+                //共享View和prj的buffer
+                new ResourceLayout[] { ShareResource.ProjectionResourceLoyout  },
+                gd.MainSwapchain.Framebuffer.OutputDescription));
+            _cl = factory.CreateCommandList();
         }
-
         /// <summary>
         /// 释放相关资源
         /// </summary>
@@ -92,12 +116,12 @@ namespace PongGlobe.Layers
 
         public void Draw()
         {
-            //throw new NotImplementedException();
+            
         }
 
         public void Update()
         {
-            //throw new NotImplementedException();
+            
         }
     }
 

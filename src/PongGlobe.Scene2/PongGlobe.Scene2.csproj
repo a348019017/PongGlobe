@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Shaders\GlobeFS.spv" />
+    <None Remove="Shaders\GlobeVS.spv" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Shaders\GlobeFS.spv" LogicalName="GlobeFS.spv"/>
+    <EmbeddedResource Include="Shaders\GlobeVS.spv" LogicalName="GlobeVS.spv"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Veldrid.ImageSharp" Version="4.5.0-beta1-0008-g978e9591d5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PongGlobe2\PongGlobe.csproj" />
+  </ItemGroup>
+
+</Project>

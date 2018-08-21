@@ -10,7 +10,7 @@ namespace PongGlobe.Core
     /// </summary>
     public interface IRender:IDisposable
     {
-        void Draw();
+        void Draw(CommandList _cl);
         void Update();
         void CreateDeviceResources(GraphicsDevice gd,
             ResourceFactory factory);

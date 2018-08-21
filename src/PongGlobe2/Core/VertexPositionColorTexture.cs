@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Numerics;
 
-namespace GettingStarted2.GISEngine.Core
+namespace PongGlobe.Core
 {
     /// <summary>
     /// 顶点坐标颜色和纹理

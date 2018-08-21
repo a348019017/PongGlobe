@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+
+
+  <ItemGroup>
+    <EmbeddedResource Include="Shaders\SPIR-V\imgui-frag.spv" LogicalName="imgui-frag.spv" />
+    <EmbeddedResource Include="Shaders\SPIR-V\imgui-vertex.spv" LogicalName="imgui-vertex.spv" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Veldrid" Version="4.5.0-beta1-0008-g978e9591d5" />
+    <PackageReference Include="Veldrid.ImGui" Version="4.5.0-beta1-0008-g978e9591d5" />
+    <PackageReference Include="Veldrid.StartupUtilities" Version="4.5.0-beta1-0008-g978e9591d5" />
+    <PackageReference Include="Veldrid.Utilities" Version="4.5.0-beta1-0008-g978e9591d5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AssetPrimitives\AssetPrimitives.csproj" />
+    <ProjectReference Include="..\PongGlobe.Scene2\PongGlobe.Scene2.csproj" />
+    <ProjectReference Include="..\PongGlobe2\PongGlobe.csproj" />
+  </ItemGroup>
+
+</Project>

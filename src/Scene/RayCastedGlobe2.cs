@@ -10,9 +10,7 @@ using System.Runtime.InteropServices;
 using ImGuiNET;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
-using GettingStarted2.GISEngine;
 using BruTile;
-using GettingStarted2.GISEngine.Core;
 using PongGlobe.Core;
 namespace GettingStarted2
 {
@@ -37,14 +35,10 @@ namespace GettingStarted2
         private ResourceSet _worldTextureSet;
         private float _ticks;
         private BaseUBO _ubo = new BaseUBO();
-        
-
-        public Extent Extent { get ; set ; }
-
+              
         public Ellipsoid Shape { get; set; }
 
       
-
         protected override void HandleWindowResize()
         {
             
@@ -87,8 +81,6 @@ namespace GettingStarted2
             string entryPoint = stage == ShaderStages.Vertex ? "VS" : "FS";
             return GraphicsDevice.ResourceFactory.CreateShader(new ShaderDescription(stage, shaderBytes, entryPoint));
         }
-
-
 
 
         private  Shader LoadShader(ShaderStages stage)
@@ -194,7 +186,7 @@ namespace GettingStarted2
                 projViewLayout,
                 _projectionBuffer
                 ));
-            
+         
 
             _worldTextureSet = factory.CreateResourceSet(new ResourceSetDescription(
                 worldTextureLayout,            
@@ -205,8 +197,7 @@ namespace GettingStarted2
         }
 
         protected override void OnDeviceDestroyed()
-        {
-            
+        {         
             base.OnDeviceDestroyed();
         }
 
@@ -261,10 +252,12 @@ namespace GettingStarted2
             _ubo.CameraEyeSquared = eyePosition * eyePosition;
             _ubo.CameraLightPosition = eyePosition;
             
-            _cl.UpdateBuffer(_projectionBuffer, 0, _ubo);          
+            _cl.UpdateBuffer(_projectionBuffer, 0, _ubo);      
+            
             _cl.SetFramebuffer(MainSwapchain.Framebuffer);
             _cl.ClearColorTarget(0, RgbaFloat.Black);
             _cl.ClearDepthStencil(1f);
+
             _cl.SetPipeline(_pipeline);
             _cl.SetVertexBuffer(0, _vertexBuffer);
             _cl.SetIndexBuffer(_indexBuffer, IndexFormat.UInt16);
@@ -293,38 +286,7 @@ namespace GettingStarted2
 
 
 
-    /// <summary>
-    /// 可能变化的相关参数
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    public struct BaseUBO
-    {        
-        public Matrix4x4 prj;
-
-        //相机位置的平方
-        public Vector3 CameraEyeSquared;
-
-        public float spa1;
-
-        //相机位置
-        public Vector3 CameraEye;
-
-        public float spa2;
-
-        //光线起始位置，暂等于相机位置
-        public Vector3 CameraLightPosition;
-
-        public float spa3;
-
-        //关照模型的参数
-        public Vector4 DiffuseSpecularAmbientShininess;
-        
-        //固定常量
-        public Vector3 GlobeOneOverRadiiSquared;
-
-        public float spa4;
-
-    }
+    
 
 
 

@@ -1,13 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
    
     <TargetFramework>netcoreapp2.0</TargetFramework>
    
     <AssemblyName>PongGlobe.Scene</AssemblyName>
    
     <RootNamespace>PongGlobe</RootNamespace>
+   
+    <ApplicationIcon />
+   
+    <StartupObject />
   </PropertyGroup>
   
 <!--
@@ -34,14 +38,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="GISEngine\**" />
     <Compile Remove="imgui\**" />
+    <EmbeddedResource Remove="GISEngine\**" />
     <EmbeddedResource Remove="imgui\**" />
+    <None Remove="GISEngine\**" />
     <None Remove="imgui\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="GISEngine\Core\RayCastedGlobe.cs" />
-    <Compile Remove="GISEngine\RayCastedGlobe.cs" />
+    <Compile Remove="RayCastedGlobe2 - 副本.cs" />
+    <Compile Remove="RayCastedGlobe2.cs" />
     <Compile Remove="TextureEarth - 复制 - 复制.cs" />
   </ItemGroup>
 
@@ -62,7 +69,6 @@
   <ItemGroup>
     <ProjectReference Include="..\AssetPrimitives\AssetPrimitives.csproj" />
     <ProjectReference Include="..\PongGlobe2\PongGlobe.csproj" />
-    <ProjectReference Include="..\SampleBase\SampleBase.csproj" />
   </ItemGroup>
 
 </Project>

@@ -60,7 +60,7 @@ namespace PongGlobe.Core
 
             Vector3 planeToPoint = point - pyramidApex;
 
-            return ((Vector3.Dot(planeToPoint,n0) < 0) && (Vector3.Dot(planeToPoint, n1) < 0) && Vector3.Dot(planeToPoint, n2) < 0));
+            return ((Vector3.Dot(planeToPoint,n0) < 0) && (Vector3.Dot(planeToPoint, n1) < 0) && Vector3.Dot(planeToPoint, n2) < 0);
         }
     }
 }
