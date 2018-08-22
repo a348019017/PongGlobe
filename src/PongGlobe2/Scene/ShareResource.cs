@@ -16,9 +16,11 @@ namespace PongGlobe.Scene
         /// </summary>
         public static DeviceBuffer ProjectionBuffer { get; set; }
         /// <summary>
-        /// 
+        /// 投影矩阵的布局信息
         /// </summary>
         public static ResourceLayout ProjectionResourceLoyout { get; set; }
+
+        public static ResourceSet ProjectuibResourceSet { get; set; }
     }
 
 

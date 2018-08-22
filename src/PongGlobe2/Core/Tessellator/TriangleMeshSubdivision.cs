@@ -155,7 +155,7 @@ namespace PongGlobe.Core
 
             }
             var mesh= new Mesh<Vector3>();
-            mesh.Positions = positions.ToArray();
+            mesh.Positions = subdividedPositions.ToArray();
             mesh.Indices = subdividedIndices.ToArray();
             return mesh;
         }

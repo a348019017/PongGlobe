@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.Reflection;
 using Veldrid.ImageSharp;
+using Veldrid;
 
 
 namespace PongGlobe.Styles
@@ -83,7 +84,7 @@ namespace PongGlobe.Styles
         /// <summary>
         /// 线的颜色
         /// </summary>
-        private Color _lineColor;
+        private RgbaFloat _lineColor;
         /// <summary>
         /// 线宽
         /// </summary>
@@ -91,7 +92,7 @@ namespace PongGlobe.Styles
         /// <summary>
         /// 面的填充色
         /// </summary>
-        private Color _fillColor;       
+        private RgbaFloat _fillColor;       
         /// <summary>
         /// 图标的ImageIndex
         /// </summary>
@@ -113,8 +114,8 @@ namespace PongGlobe.Styles
         /// </remarks>
         public VectorStyle()
         {
-            _fillColor = Color.FromArgb(128,128,0,0);
-            _lineColor= Color.FromArgb(255, 0, 0, 0);
+            _fillColor =new  RgbaFloat(0,0.5f,0,0.5f);
+            _lineColor= new RgbaFloat(0.5f, 0, 0, 1);
             //三个像素宽的线
             _width = 3;
             //Outline = new Pen(Color.Black, 1);
@@ -130,7 +131,7 @@ namespace PongGlobe.Styles
         /// <summary>
         /// 线的颜色
         /// </summary>
-        public Color LineColor
+        public RgbaFloat LineColor
         {
             get { return _lineColor; }
             set { _lineColor = value; }
@@ -149,7 +150,7 @@ namespace PongGlobe.Styles
         /// <summary>
         /// Fillstyle for Polygon geometries
         /// </summary>
-        public Color FillColor
+        public RgbaFloat FillColor
         {
             get { return _fillColor; }
             set { _fillColor = value; }

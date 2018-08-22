@@ -1,6 +1,10 @@
-#version 450
+﻿#version 450
 #extension GL_ARB_separate_shader_objects : enable
                  
+layout(location = 0) in vec3 worldPosition;
+layout(location = 1) in vec3 positionToLight;
+layout(location = 2) in vec3 positionToEye;
+layout(location = 0) out vec4 fragmentColor;
 
 
 layout(set=0, binding = 0) uniform UniformBufferObject {
@@ -16,18 +20,9 @@ layout(set=0, binding = 0) uniform UniformBufferObject {
     float spa4;
 } ubo;
 
-layout(set=1, binding = 0) uniform Style 
-{
-    vec4 fillColor;           
-	vec4 lineColor;
-} style;
-
-
-layout(location = 0) in vec3 worldPosition;
-layout(location = 1) in vec3 positionToLight;
-layout(location = 2) in vec3 positionToEye;
-layout(location = 0) out vec4 fragmentColor;
-
+layout(set=0, binding = 1) uniform Style {
+    vec4 fillColor;             
+} ;
 
 
 
@@ -54,5 +49,5 @@ void main()
 	vec3 normal = GeodeticSurfaceNormal(worldPosition, ubo.GlobeOneOverRadiiSquared);
     float intensity = LightIntensity(normal,  normalize(positionToLight), normalize(positionToEye), ubo.DiffuseSpecularAmbientShininess);
 
-	fragmentColor = vec4(intensity * style.fillColor.rgb, style.fillColor.a);
+	fragmentColor = vec4(intensity * Style.fillColor.rgb, Style.fillColor.a);
 }

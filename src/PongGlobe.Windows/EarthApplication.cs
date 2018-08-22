@@ -22,10 +22,10 @@ namespace PongGlobe.Windows
         /// <summary>
         /// 当前的各个子渲染对象
         /// </summary>
-        //private List<IRender> renders = new List<IRender>();
+        private List<IRender> renders = new List<IRender>();
         //地球渲染对象
         private IRender globeRender;
-
+        private IRender vectorLayerRender;
         public ApplicationWindow Window { get; }
         public GraphicsDevice GraphicsDevice { get; private set; }
         public ResourceFactory ResourceFactory { get; private set; }
@@ -47,7 +47,11 @@ namespace PongGlobe.Windows
             //首先创建一个场景对象
             _scene = new Scene.Scene(window.Width, window.Height);
             globeRender = new RayCastedGlobe(_scene);
-            
+            var path = @"E:\swyy\Lib\PongGlobe\PongGlobe\assets\Vector\NaturalEarth\110m-admin-0-countries\110m_admin_0_countries.shp";
+            vectorLayerRender = new Renders.VectorLayerRender(path, _scene);
+            renders.Add(globeRender);
+            renders.Add(vectorLayerRender);
+
         }
 
         /// <summary>
@@ -77,8 +81,15 @@ namespace PongGlobe.Windows
 
         protected virtual unsafe void CreateResources(ResourceFactory factory)
         {
+            //创建一个公共资源
+
+
+
             _cl = factory.CreateCommandList();
-            globeRender.CreateDeviceResources(GraphicsDevice, ResourceFactory);
+            foreach (var item in renders)
+            {
+                item.CreateDeviceResources(GraphicsDevice, factory);
+            }
         }
 
         protected virtual void CreateSwapchainResources(ResourceFactory factory) { }
@@ -94,7 +105,11 @@ namespace PongGlobe.Windows
             _scene.Camera.Update(deltaSeconds);
             _fta.AddTime(deltaSeconds);
             SubmitUI();
-            _ticks += deltaSeconds * 1000f;           
+            _ticks += deltaSeconds * 1000f;
+            foreach (var item in renders)
+            {
+                item.Update();
+            }
         }
 
         //显示imgui
@@ -118,9 +133,14 @@ namespace PongGlobe.Windows
             _cl.SetFramebuffer(GraphicsDevice.MainSwapchain.Framebuffer);
             _cl.ClearColorTarget(0, RgbaFloat.Black);
             _cl.ClearDepthStencil(1f);
-            globeRender.Draw(_cl);
-            _controller.Render(GraphicsDevice,_cl);
-            
+
+            foreach (var item in renders)
+            {
+                //if (item is RayCastedGlobe) continue;
+                item.Draw(_cl);
+            }
+            //最后渲染IMGUI
+            _controller.Render(GraphicsDevice,_cl);           
             _cl.End();            
             GraphicsDevice.SubmitCommands(_cl);                                 
             GraphicsDevice.SwapBuffers(GraphicsDevice.MainSwapchain);

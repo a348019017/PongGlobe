@@ -60,10 +60,10 @@ namespace PongGlobe.Scene
             // _viewBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
             //_worldBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
 
-            _vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)(VertexPositionColorTexture.SizeInBytes * 100000), BufferUsage.VertexBuffer));
+            _vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)(VertexPositionColorTexture.SizeInBytes * _vertices.Length), BufferUsage.VertexBuffer));
             gd.UpdateBuffer(_vertexBuffer, 0, _vertices);
 
-            _indexBuffer = factory.CreateBuffer(new BufferDescription(sizeof(ushort) * 400000, BufferUsage.IndexBuffer));
+            _indexBuffer = factory.CreateBuffer(new BufferDescription((uint)(sizeof(ushort) * _indices.Length), BufferUsage.IndexBuffer));
 
             gd.UpdateBuffer(_indexBuffer, 0, _indices);
             var DiffuseIntensity = 0.65f;
@@ -133,12 +133,15 @@ namespace PongGlobe.Scene
                 _projectionBuffer
                 ));
 
-
             _worldTextureSet = factory.CreateResourceSet(new ResourceSetDescription(
                 worldTextureLayout,
                 _surfaceTextureView,
                 gd.Aniso4xSampler));
 
+            //保存一些公共资源
+            ShareResource.ProjectionBuffer = _projectionBuffer;
+            ShareResource.ProjectionResourceLoyout = projViewLayout;
+            ShareResource.ProjectuibResourceSet = _projViewSet;
             //_cl = factory.CreateCommandList();
         }
 

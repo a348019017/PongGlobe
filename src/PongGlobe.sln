@@ -10,11 +10,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PongGlobe", "PongGlobe2\PongGlobe.csproj", "{F6AB7E9B-E58D-4CCB-B0F7-8EEA84A71488}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PongGlobe.Scene", "Scene\PongGlobe.Scene.csproj", "{A16890B9-0F74-435D-989E-063B3C939391}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PongGlobe.Scene", "PongGlobe.Scene2\PongGlobe.Scene.csproj", "{37FBB02A-A223-47E6-8B14-D07880BFD13A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PongGlobe.Scene2", "PongGlobe.Scene2\PongGlobe.Scene2.csproj", "{37FBB02A-A223-47E6-8B14-D07880BFD13A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PongGlobe.Windows", "PongGlobe.Windows\PongGlobe.Windows.csproj", "{9482A60A-2BC2-4767-809B-828D37587D45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PongGlobe.Windows", "PongGlobe.Windows\PongGlobe.Windows.csproj", "{9482A60A-2BC2-4767-809B-828D37587D45}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -74,18 +72,6 @@ Global
 		{F6AB7E9B-E58D-4CCB-B0F7-8EEA84A71488}.Release|x64.Build.0 = Release|Any CPU
 		{F6AB7E9B-E58D-4CCB-B0F7-8EEA84A71488}.Release|x86.ActiveCfg = Release|Any CPU
 		{F6AB7E9B-E58D-4CCB-B0F7-8EEA84A71488}.Release|x86.Build.0 = Release|Any CPU
-		{A16890B9-0F74-435D-989E-063B3C939391}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A16890B9-0F74-435D-989E-063B3C939391}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A16890B9-0F74-435D-989E-063B3C939391}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{A16890B9-0F74-435D-989E-063B3C939391}.Debug|x64.Build.0 = Debug|Any CPU
-		{A16890B9-0F74-435D-989E-063B3C939391}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{A16890B9-0F74-435D-989E-063B3C939391}.Debug|x86.Build.0 = Debug|Any CPU
-		{A16890B9-0F74-435D-989E-063B3C939391}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A16890B9-0F74-435D-989E-063B3C939391}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A16890B9-0F74-435D-989E-063B3C939391}.Release|x64.ActiveCfg = Release|Any CPU
-		{A16890B9-0F74-435D-989E-063B3C939391}.Release|x64.Build.0 = Release|Any CPU
-		{A16890B9-0F74-435D-989E-063B3C939391}.Release|x86.ActiveCfg = Release|Any CPU
-		{A16890B9-0F74-435D-989E-063B3C939391}.Release|x86.Build.0 = Release|Any CPU
 		{37FBB02A-A223-47E6-8B14-D07880BFD13A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{37FBB02A-A223-47E6-8B14-D07880BFD13A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37FBB02A-A223-47E6-8B14-D07880BFD13A}.Debug|x64.ActiveCfg = Debug|Any CPU

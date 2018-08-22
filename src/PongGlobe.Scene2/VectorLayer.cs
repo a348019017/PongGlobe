@@ -9,17 +9,76 @@ using NetTopologySuite.IO.ShapeFile.Extended.Entities;
 using System.Linq;
 using PongGlobe.Core.Util;
 using PongGlobe.Scene;
+using System.Runtime.InteropServices;
+using PongGlobe.Styles;
 
-namespace PongGlobe.Layers
+namespace PongGlobe.Renders
 {
     /// <summary>
     /// 矢量图层类,根据点线面的不同这里还是区分出来
     /// </summary>
-    public class VectorLayer
+    public class VectorLayerRender : IRender
     {
+        private IEnumerable<IShapefileFeature> _features;
+        private Scene.Scene _scene;
+        private List<BaseFeatureRender> renders = new List<BaseFeatureRender>();
 
+        public VectorLayerRender(string shpPath,Scene.Scene scene)
+        {
+            var shpReader = new NetTopologySuite.IO.ShapeFile.Extended.ShapeDataReader(shpPath);
+            var fea= shpReader.ReadByMBRFilter(shpReader.ShapefileBounds);
+            _features = fea;
+            _scene = scene;
+        }
+
+        /// <summary>
+        /// 测试一个feature一个render对象
+        /// </summary>
+        /// <param name="gd"></param>
+        /// <param name="factory"></param>
+        public void CreateDeviceResources(GraphicsDevice gd, ResourceFactory factory)
+        {
+            if (_features == null) return;
+            foreach (var item in _features)
+            {
+                var featureRender = new BaseFeatureRender(item, _scene);
+                renders.Add(featureRender);
+                featureRender.CreateDeviceResources(gd, factory);
+            }
+        }
+
+        public void Dispose()
+        {
+            foreach (var item in renders)
+            {
+                item.Dispose();
+            }
+        }
+
+        public void Draw(CommandList _cl)
+        {
+            foreach (var item in renders)
+            {
+                item.Draw(_cl);
+            }
+        }
+
+        public void Update()
+        {
+            //throw new NotImplementedException();
+        }
     }
 
+    /// <summary>
+    /// 将VectorStyle转换成结构体UBO
+    /// </summary>
+    public static class VectorStyleExtension
+    {
+        public static VectorStyleUBO ToUBO(this VectorStyle style)
+        {
+            return new VectorStyleUBO(style.FillColor,style.LineColor);
+        }
+    }
 
 
 
@@ -34,10 +93,12 @@ namespace PongGlobe.Layers
         private Mesh<Vector3> _mesh = null;
         private DeviceBuffer _vertexBuffer;
         private DeviceBuffer _indexBuffer;
+        private DeviceBuffer _styleBuffer;
+        private ResourceSet _styleResourceSet;
         //可能用到的纹理
         private Texture _surfaceTexture;
         private TextureView _surfaceTextureView;
-        private CommandList _cl;
+        //private CommandList _cl;
         //渲染管线
         private Pipeline _pipeline;
 
@@ -50,15 +111,21 @@ namespace PongGlobe.Layers
         /// 使用_fea构造FeatureRFender对象
         /// </summary>
         /// <param name="_fea"></param>
-        public BaseFeatureRender(IShapefileFeature _fea)
+        public BaseFeatureRender(IShapefileFeature _fea,Scene.Scene _scene)
         {
             _feature = _fea;
+            _shape = _scene.Ellipsoid;
+            Style = new VectorStyle();
         }
         /// <summary>
         /// 显示轮廓
         /// </summary>
         /// <returns></returns>
-        public bool ShowWireFrame { get; set; }      
+        public bool ShowWireFrame { get; set; }  
+        /// <summary>
+        /// 图层渲染的样式信息
+        /// </summary>
+        public Styles.VectorStyle Style { get; set; }
         /// <summary>
         /// 创建相关资源
         /// </summary>
@@ -76,6 +143,8 @@ namespace PongGlobe.Layers
                 //将其转换成弧度制,自动贴地
                 positions.Add(_shape.ToVector3(new Geodetic3D(MathExtension.ToRadius(coord.X), MathExtension.ToRadius(coord.Y))));
             }
+
+
             //三角网化
             var indices= EarClippingOnEllipsoid.Triangulate(positions);
             //三角细分,细分精度为1度
@@ -84,6 +153,19 @@ namespace PongGlobe.Layers
             gd.UpdateBuffer(_vertexBuffer, 0, _mesh.Positions);
             _indexBuffer = factory.CreateBuffer(new BufferDescription((uint)(sizeof(ushort) * _mesh.Indices.Length), BufferUsage.IndexBuffer));
             gd.UpdateBuffer(_indexBuffer, 0, _mesh.Indices);
+
+            //创建一个Color的Buffer并更新
+            _styleBuffer = factory.CreateBuffer(new BufferDescription(32, BufferUsage.UniformBuffer|BufferUsage.Dynamic));
+            gd.UpdateBuffer(_styleBuffer,0,Style.ToUBO());
+
+            //创建一个stylelayout
+            ResourceLayout styleLayout = factory.CreateResourceLayout(
+               new ResourceLayoutDescription(
+                   new ResourceLayoutElementDescription("Style", ResourceKind.UniformBuffer,  ShaderStages.Fragment)
+
+                   ));
+
+
             var curAss = this.GetType().Assembly;
             ShaderSetDescription shaderSet = new ShaderSetDescription(
                 new[]
@@ -103,8 +185,14 @@ namespace PongGlobe.Layers
                 PrimitiveTopology.TriangleList,
                 shaderSet,
                 //共享View和prj的buffer
-                new ResourceLayout[] { ShareResource.ProjectionResourceLoyout  },
+                new ResourceLayout[] { ShareResource.ProjectionResourceLoyout, styleLayout },
                 gd.MainSwapchain.Framebuffer.OutputDescription));
+            //创建一个StyleresourceSet
+            _styleResourceSet = factory.CreateResourceSet(new ResourceSetDescription(
+               styleLayout,
+               _styleBuffer
+               ));
+            //创建一个ResourceSet
             //_cl = factory.CreateCommandList();
         }
         /// <summary>
@@ -117,12 +205,37 @@ namespace PongGlobe.Layers
 
         public void Draw(CommandList _cl)
         {
-            
+            _cl.SetPipeline(_pipeline);
+            _cl.SetVertexBuffer(0, _vertexBuffer);
+            _cl.SetIndexBuffer(_indexBuffer, IndexFormat.UInt16);
+            _cl.SetGraphicsResourceSet(0, ShareResource.ProjectuibResourceSet);
+            _cl.SetGraphicsResourceSet(1, _styleResourceSet);
+            _cl.DrawIndexed((uint)_mesh.Indices.Length, 1, 0, 0, 0);
         }
 
         public void Update()
         {
             
+        }
+    }
+
+
+    /// <summary>
+    /// 样式信息的结构体
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct VectorStyleUBO
+    {
+        /// <summary>
+        /// 多边形的颜色,结构类似vector4
+        /// </summary>
+        public RgbaFloat FillColor;
+        public RgbaFloat LineColor;
+
+        public VectorStyleUBO(RgbaFloat fillColor,RgbaFloat lineColor)
+        {
+            FillColor = fillColor;
+            LineColor = lineColor;
         }
     }
 

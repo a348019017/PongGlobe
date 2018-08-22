@@ -30,7 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AssetPrimitives\AssetPrimitives.csproj" />
-    <ProjectReference Include="..\PongGlobe.Scene2\PongGlobe.Scene2.csproj" />
+    <ProjectReference Include="..\PongGlobe.Scene2\PongGlobe.Scene.csproj" />
     <ProjectReference Include="..\PongGlobe2\PongGlobe.csproj" />
   </ItemGroup>
 
