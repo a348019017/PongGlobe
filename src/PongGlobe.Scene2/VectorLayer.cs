@@ -145,7 +145,7 @@ namespace PongGlobe.Renders
             //去除重复的数据
             var posClearUp= SimplePolygonAlgorithms.Cleanup<Vector2>(positions);
             //如果不是顺时针，强制转换成顺时针
-            if (SimplePolygonAlgorithms.ComputeWindingOrder(posClearUp) != PolygonWindingOrder.Clockwise)
+            if (SimplePolygonAlgorithms.ComputeWindingOrder(posClearUp) == PolygonWindingOrder.Clockwise)
             {
                 posClearUp = posClearUp.Reverse().ToArray();
             }           

@@ -150,7 +150,7 @@ namespace PongGlobe.Core
                 Vector2 p1 = node.Value.Vector;
                 Vector2 p2 = nextNode.Value.Vector;
 
-                if (!IsTipConvex(p0, p1, p2))
+                if (IsTipConvex(p0, p1, p2))
                 {
                     bool isEar = true;
                     for (LinkedListNode<IndexedVector<Vector2>> n = ((nextNode.Next != null) ? nextNode.Next : remainingPositions.First);
@@ -224,7 +224,10 @@ namespace PongGlobe.Core
             Vector2 p0p = p - p0;
             Vector2 p1p = p - p1;
             Vector2 p2p = p - p2;
-            return p0p.Cross( p1p) > 0 && p0p.Cross ( p2p) > 0;
+            double t1 = p0p.Cross(p1p);
+            double t2 = p1p.Cross(p2p);
+            double t3 = p2p.Cross(p0p);
+            return t1 * t2 >= 0 && t1* t3 > 0;
         }
 
         private static bool IsTipConvex(Vector2 p0, Vector2 p1, Vector2 p2)
@@ -232,7 +235,7 @@ namespace PongGlobe.Core
             Vector2 u = p1 - p0;
             Vector2 v = p2 - p1;
             ///大于0为逆时针，小于0为顺势整，如果与多边形相同则为凸多边形，这里默认多边形为顺时针
-            return u.X * v.Y - u.Y * v.X < 0;
+            return u.X * v.Y - u.Y * v.X <= 0;
         }
     }
 }
