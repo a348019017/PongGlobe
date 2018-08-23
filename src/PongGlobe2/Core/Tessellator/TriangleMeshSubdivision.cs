@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Linq;
-
+using PongGlobe.Core.Extension;
 namespace PongGlobe.Core
 {
    /// <summary>

@@ -33,7 +33,6 @@ namespace PongGlobe.Core.Algorithm
                     cleanedPositions.Add(v1);
                 }
             }
-
             cleanedPositions.TrimExcess();
             return cleanedPositions;
         }

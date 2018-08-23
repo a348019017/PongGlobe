@@ -7,7 +7,7 @@ using Veldrid;
 using ImGuiNET;
 using PongGlobe.Core;
 using PongGlobe.Scene;
-
+using PongGlobe.Renders;
 namespace PongGlobe.Windows
 {
     //地球的应用程序对象
@@ -49,6 +49,8 @@ namespace PongGlobe.Windows
             globeRender = new RayCastedGlobe(_scene);
             var path = @"E:\swyy\Lib\PongGlobe\PongGlobe\assets\Vector\NaturalEarth\110m-admin-0-countries\110m_admin_0_countries.shp";
             vectorLayerRender = new Renders.VectorLayerRender(path, _scene);
+            var shareRender = new ShareRender(_scene);
+            renders.Add(shareRender);
             renders.Add(globeRender);
             renders.Add(vectorLayerRender);
 
@@ -136,7 +138,7 @@ namespace PongGlobe.Windows
 
             foreach (var item in renders)
             {
-                //if (item is RayCastedGlobe) continue;
+                if (item is RayCastedGlobe) continue;
                 item.Draw(_cl);
             }
             //最后渲染IMGUI

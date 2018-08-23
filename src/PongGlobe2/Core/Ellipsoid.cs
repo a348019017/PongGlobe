@@ -13,7 +13,7 @@ using System.Collections.Generic;
 using Veldrid;
 using System.Numerics;
 using PongGlobe.Scene;
-
+using PongGlobe.Core.Extension;
 namespace PongGlobe.Core
 {
     /// <summary>
@@ -153,6 +153,8 @@ namespace PongGlobe.Core
         {
             return ToVector3(new Geodetic3D(geodetic.Longitude, geodetic.Latitude, 0.0));
         }
+
+        
 
         public Vector3 ToVector3(Geodetic3D geodetic)
         {

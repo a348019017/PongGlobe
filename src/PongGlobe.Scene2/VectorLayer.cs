@@ -11,6 +11,7 @@ using PongGlobe.Core.Util;
 using PongGlobe.Scene;
 using System.Runtime.InteropServices;
 using PongGlobe.Styles;
+using PongGlobe.Core.Algorithm;
 
 namespace PongGlobe.Renders
 {
@@ -133,22 +134,36 @@ namespace PongGlobe.Renders
         /// <param name="factory"></param>
         public void CreateDeviceResources(GraphicsDevice gd, ResourceFactory factory)
         {
-            List<Vector3> positions = new List<Vector3>();
-            //记录其indices
-            // List<ushort> indics = new List<ushort>();
+            List<Vector2> positions = new List<Vector2>();          
             //填充顶点跟索引
             //详细流程，如果是投影坐标，将其转换成wgs84的经纬度坐标，再使用参考系计算出其真实的地理坐标         
             foreach (var coord in _feature.Geometry.Coordinates)
             {
                 //将其转换成弧度制,自动贴地
-                positions.Add(_shape.ToVector3(new Geodetic3D(MathExtension.ToRadius(coord.X), MathExtension.ToRadius(coord.Y))));
+                positions.Add(new Vector2(MathExtension.ToRadius(coord.X), MathExtension.ToRadius(coord.Y)));
+            }
+            //去除重复的数据
+            var posClearUp= SimplePolygonAlgorithms.Cleanup<Vector2>(positions);
+            //如果不是顺时针，强制转换成顺时针
+            if (SimplePolygonAlgorithms.ComputeWindingOrder(posClearUp) != PolygonWindingOrder.Clockwise)
+            {
+                posClearUp = posClearUp.Reverse().ToArray();
+            }           
+            var indices = EarClippingOnEllipsoid.Triangulate2D(posClearUp);
+            //将vector2转换成vector3 
+            List<Vector3> worldPosition = new List<Vector3>();
+            foreach (var item in posClearUp)
+            {
+                var vec = _shape.ToVector3(new Geodetic2D(item.X, item.Y));
+                worldPosition.Add(vec);
             }
 
-
-            //三角网化
-            var indices= EarClippingOnEllipsoid.Triangulate(positions);
+             _mesh = new Mesh<Vector3>();        
+            _mesh.Indices = indices.ToArray();
+            _mesh.Positions = worldPosition.ToArray();
+            
             //三角细分,细分精度为1度
-            _mesh = TriangleMeshSubdivision.Compute(positions, indices.ToArray(), Math.PI / 180);
+            //_mesh = TriangleMeshSubdivision.Compute(posClearUp, indices.ToArray(), Math.PI / 180);
             _vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)(12 * _mesh.Positions.Count()), BufferUsage.VertexBuffer));
             gd.UpdateBuffer(_vertexBuffer, 0, _mesh.Positions);
             _indexBuffer = factory.CreateBuffer(new BufferDescription((uint)(sizeof(ushort) * _mesh.Indices.Length), BufferUsage.IndexBuffer));

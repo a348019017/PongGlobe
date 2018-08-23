@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Numerics;
 
-namespace PongGlobe.Core
+namespace PongGlobe.Core.Extension
 {
     //对vector等的扩展方法
     public static class VectorExtension
@@ -19,6 +19,17 @@ namespace PongGlobe.Core
             
            return Math.Acos(Vector3.Dot(Vector3.Normalize(t), Vector3.Normalize(other)));
            //return Math.Acos(Normalize().Dot(other.Normalize()));
+        }
+
+        /// <summary>
+        /// 二维向量的叉乘
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public static double Cross(this Vector2 t, Vector2 other)
+        {
+            return t.X * other.Y - t.Y * other.X;
         }
 
         /// <summary>

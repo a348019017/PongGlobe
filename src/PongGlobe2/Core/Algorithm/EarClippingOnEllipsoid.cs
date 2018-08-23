@@ -10,6 +10,7 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using PongGlobe.Core.Extension;
 
 namespace PongGlobe.Core
 {
@@ -29,7 +30,6 @@ namespace PongGlobe.Core
             {
                 throw new ArgumentNullException("positions");
             }
-
             //
             // Doubly linked list.  This would be a tad cleaner if it were also circular.
             //
@@ -111,6 +111,95 @@ namespace PongGlobe.Core
             return indices;
         }
 
+
+        public static IEnumerable<ushort> Triangulate2D(IEnumerable<Vector2> positions)
+        {
+            if (positions == null)
+            {
+                throw new ArgumentNullException("positions");
+            }
+            //
+            // Doubly linked list.  This would be a tad cleaner if it were also circular.
+            //
+            LinkedList<IndexedVector<Vector2>> remainingPositions = new LinkedList<IndexedVector<Vector2>>(); ;
+
+            int index = 0;
+            foreach (Vector2 position in positions)
+            {
+                remainingPositions.AddLast(new IndexedVector<Vector2>(position, index++));
+            }
+
+            if (remainingPositions.Count < 3)
+            {
+                throw new ArgumentOutOfRangeException("positions", "At least three positions are required.");
+            }
+
+            List<ushort> indices = new List<ushort>(3 * (remainingPositions.Count - 2));
+
+            ///////////////////////////////////////////////////////////////////
+
+            LinkedListNode<IndexedVector<Vector2>> previousNode = remainingPositions.First;
+            LinkedListNode<IndexedVector<Vector2>> node = previousNode.Next;
+            LinkedListNode<IndexedVector<Vector2>> nextNode = node.Next;
+
+            int bailCount = remainingPositions.Count * remainingPositions.Count;
+
+            while (remainingPositions.Count > 3)
+            {
+                Vector2 p0 = previousNode.Value.Vector;
+                Vector2 p1 = node.Value.Vector;
+                Vector2 p2 = nextNode.Value.Vector;
+
+                if (!IsTipConvex(p0, p1, p2))
+                {
+                    bool isEar = true;
+                    for (LinkedListNode<IndexedVector<Vector2>> n = ((nextNode.Next != null) ? nextNode.Next : remainingPositions.First);
+                        n != previousNode;
+                        n = ((n.Next != null) ? n.Next : remainingPositions.First))
+                    {
+                        if (TrangleContainPoint( p0, p1, p2,n.Value.Vector))
+                        {
+                            isEar = false;
+                            break;
+                        }
+                    }
+
+                    if (isEar)
+                    {
+                        ///
+                        indices.Add((ushort)previousNode.Value.Index);
+                        indices.Add((ushort)node.Value.Index);
+                        indices.Add((ushort)nextNode.Value.Index);
+                        //indices.AddTriangle(new TriangleIndicesUnsignedInt(previousNode.Value.Index, node.Value.Index, nextNode.Value.Index));
+                        remainingPositions.Remove(node);
+
+                        node = nextNode;
+                        nextNode = (nextNode.Next != null) ? nextNode.Next : remainingPositions.First;
+                        continue;
+                    }
+                }
+
+                previousNode = (previousNode.Next != null) ? previousNode.Next : remainingPositions.First;
+                node = (node.Next != null) ? node.Next : remainingPositions.First;
+                nextNode = (nextNode.Next != null) ? nextNode.Next : remainingPositions.First;
+
+                if (--bailCount == 0)
+                {
+                    break;
+                }
+            }
+
+            LinkedListNode<IndexedVector<Vector2>> n0 = remainingPositions.First;
+            LinkedListNode<IndexedVector<Vector2>> n1 = n0.Next;
+            LinkedListNode<IndexedVector<Vector2>> n2 = n1.Next;
+            //indices.AddTriangle(new TriangleIndicesUnsignedInt(n0.Value.Index, n1.Value.Index, n2.Value.Index));
+            indices.Add((ushort)n0.Value.Index);
+            indices.Add((ushort)n1.Value.Index);
+            indices.Add((ushort)n2.Value.Index);
+            return indices;
+        }
+
+
         /// <summary>
         /// 计算凹凸性
         /// </summary>
@@ -124,6 +213,26 @@ namespace PongGlobe.Core
             Vector3 v = p2 - p1;
 
             return Vector3.Dot(Vector3.Cross(u, v),p1) >= 0.0; 
+        }
+
+        /// <summary>
+        /// 点是否在三角形中，vector2的计算,无论p0123是顺逆时针
+        /// </summary>
+        /// <returns></returns>
+        private static bool TrangleContainPoint(Vector2 p0, Vector2 p1, Vector2 p2,Vector2 p)
+        {
+            Vector2 p0p = p - p0;
+            Vector2 p1p = p - p1;
+            Vector2 p2p = p - p2;
+            return p0p.Cross( p1p) > 0 && p0p.Cross ( p2p) > 0;
+        }
+
+        private static bool IsTipConvex(Vector2 p0, Vector2 p1, Vector2 p2)
+        {
+            Vector2 u = p1 - p0;
+            Vector2 v = p2 - p1;
+            ///大于0为逆时针，小于0为顺势整，如果与多边形相同则为凸多边形，这里默认多边形为顺时针
+            return u.X * v.Y - u.Y * v.X < 0;
         }
     }
 }

@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Core\Algorithm\EllipsoidTangentPlane.cs" />
     <Compile Remove="Data\BaseProvider.cs" />
     <Compile Remove="Data\IProvider.cs" />
     <Compile Remove="Data\IProviderBase.cs" />

@@ -8,8 +8,8 @@ using System.Runtime.InteropServices;
 using PongGlobe.Core.Util;
 using System.Numerics;
 using Veldrid.ImageSharp;
-
-namespace PongGlobe.Scene
+using PongGlobe.Scene;
+namespace PongGlobe.Renders
 {
     /// <summary>
     /// 基于RayCast的globe渲染类，可独立渲染
@@ -18,21 +18,16 @@ namespace PongGlobe.Scene
     {      
         private VertexPosition[] _vertices;
         private ushort[] _indices;
-        private DeviceBuffer _projectionBuffer;
-        //private DeviceBuffer _viewBuffer;
-        //private DeviceBuffer _worldBuffer;
+              
         private DeviceBuffer _vertexBuffer;
         private DeviceBuffer _indexBuffer;
-        //private CommandList _cl;
         private Texture _surfaceTexture;
         private TextureView _surfaceTextureView;
         private Pipeline _pipeline;
-        private ResourceSet _projViewSet;
         private ResourceSet _worldTextureSet;
-        private float _ticks;
-        private BaseUBO _ubo = new BaseUBO();
+             
         public Ellipsoid Shape { get; set; }
-        private ICameraController _camera;
+       
         private GraphicsDevice GraphicsDevice;
 
         
@@ -41,10 +36,10 @@ namespace PongGlobe.Scene
         /// 通过当前的场景信息够着渲染对象
         /// </summary>
         /// <param name="scene"></param>
-        public RayCastedGlobe(Scene scene)
+        public RayCastedGlobe(Scene.Scene scene)
         {
             this.Shape = scene.Ellipsoid;
-            this._camera = scene.Camera;
+            
 
         }
 
@@ -56,7 +51,7 @@ namespace PongGlobe.Scene
             _vertices = mesh.Positions;
             _indices = mesh.Indices;
 
-            _projectionBuffer = factory.CreateBuffer(new BufferDescription(208, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            
             // _viewBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
             //_worldBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
 
@@ -64,23 +59,8 @@ namespace PongGlobe.Scene
             gd.UpdateBuffer(_vertexBuffer, 0, _vertices);
 
             _indexBuffer = factory.CreateBuffer(new BufferDescription((uint)(sizeof(ushort) * _indices.Length), BufferUsage.IndexBuffer));
-
             gd.UpdateBuffer(_indexBuffer, 0, _indices);
-            var DiffuseIntensity = 0.65f;
-            var SpecularIntensity = 0.25f;
-            var AmbientIntensity = 0.10f;
-            var Shininess = 12;
-            var lightModel = new Vector4(
-                DiffuseIntensity,
-                SpecularIntensity,
-                AmbientIntensity,
-                Shininess);
-            _ubo.DiffuseSpecularAmbientShininess = lightModel;
-            _ubo.GlobeOneOverRadiiSquared = Shape.OneOverRadiiSquared;
-            //_ubo.UseAverageDepth = false;
-            //提前更新参数
-            gd.UpdateBuffer(_projectionBuffer, 0, _ubo);
-
+           
 
             var inPath = @"E:\swyy\Lib\veldrid-samples\assets\NE2_50M_SR_W_4096.jpg";
             ImageSharpTexture inputImage = new ImageSharpTexture(inPath, false);
@@ -103,11 +83,7 @@ namespace PongGlobe.Scene
                    ResourceHelper.LoadEmbbedShader(ShaderStages.Fragment,"GlobeFS.spv",gd,curAssembly)
                 });
 
-            ResourceLayout projViewLayout = factory.CreateResourceLayout(
-                new ResourceLayoutDescription(
-                    new ResourceLayoutElementDescription("Projection", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment)
-
-                    ));
+            
 
             ResourceLayout worldTextureLayout = factory.CreateResourceLayout(
                 new ResourceLayoutDescription(
@@ -125,23 +101,17 @@ namespace PongGlobe.Scene
                 rd,
                 PrimitiveTopology.TriangleList,
                 shaderSet,
-                new[] { projViewLayout, worldTextureLayout },
+                new[] { ShareResource.ProjectionResourceLoyout, worldTextureLayout },
                 gd.MainSwapchain.Framebuffer.OutputDescription));
 
-            _projViewSet = factory.CreateResourceSet(new ResourceSetDescription(
-                projViewLayout,
-                _projectionBuffer
-                ));
+            
 
             _worldTextureSet = factory.CreateResourceSet(new ResourceSetDescription(
                 worldTextureLayout,
                 _surfaceTextureView,
                 gd.Aniso4xSampler));
 
-            //保存一些公共资源
-            ShareResource.ProjectionBuffer = _projectionBuffer;
-            ShareResource.ProjectionResourceLoyout = projViewLayout;
-            ShareResource.ProjectuibResourceSet = _projViewSet;
+            
             //_cl = factory.CreateCommandList();
         }
 
@@ -149,45 +119,14 @@ namespace PongGlobe.Scene
         {
             //throw new NotImplementedException();
         }
-
         public void Draw(CommandList _cl)
-        {
-            //_cl.Begin();
-            //_cl.SetFramebuffer(GraphicsDevice.MainSwapchain.Framebuffer);
-            //_cl.ClearColorTarget(0, RgbaFloat.Black);
-            //_cl.ClearDepthStencil(1f);
-            //投影矩阵
-            var prj = _camera.ProjectionMatrix;
-            var view =
-                _camera.ViewMatrix;          
-            //这里矩阵的定义和后者是有区别的，numberic中是行列，glsl中是列行，因此这里需要反向计算
-            //            < pre >
-            // *m[offset + 0] m[offset + 4] m[offset + 8] m[offset + 12]
-            //* m[offset + 1] m[offset + 5] m[offset + 9] m[offset + 13]
-            //* m[offset + 2] m[offset + 6] m[offset + 10] m[offset + 14]
-            //* m[offset + 3] m[offset + 7] m[offset + 11] m[offset + 15] </ pre >
-
-            //glsl是列主序，C#是行主序，虽然有所差异，但是并不需要装置，glsl中的第一行实际上就是传入矩阵的第一列，此列刚好能参与计算并返回正常值。
-            //设置视点位置为2,2,2 ,target 为在0.2,0.2,0
-            var eyePosition = _camera.Position;
-
-            _ubo.prj = view * prj;
-            _ubo.CameraEye = eyePosition;
-            _ubo.CameraEyeSquared = eyePosition * eyePosition;
-            _ubo.CameraLightPosition = eyePosition;
-
-            _cl.UpdateBuffer(_projectionBuffer, 0, _ubo);
-
-            
+        {                                
             _cl.SetPipeline(_pipeline);
             _cl.SetVertexBuffer(0, _vertexBuffer);
             _cl.SetIndexBuffer(_indexBuffer, IndexFormat.UInt16);
-            _cl.SetGraphicsResourceSet(0, _projViewSet);
+            _cl.SetGraphicsResourceSet(0, ShareResource.ProjectuibResourceSet);
             _cl.SetGraphicsResourceSet(1, _worldTextureSet);
-            _cl.DrawIndexed((uint)_indices.Length, 1, 0, 0, 0);           
-            //_cl.End();
-            //GraphicsDevice.SubmitCommands(_cl);
-            //GraphicsDevice.SwapBuffers(GraphicsDevice.MainSwapchain);
+            _cl.DrawIndexed((uint)_indices.Length, 1, 0, 0, 0);                      
         }
 
         public void Update()
