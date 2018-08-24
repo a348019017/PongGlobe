@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using NetTopologySuite.IO.ShapeFile.Extended.Entities;
 using PongGlobe.Core;
-using Veldrid;
-using System.Numerics;
-using PongGlobe.Core.Extension;
-using NetTopologySuite.IO.ShapeFile.Extended.Entities;
-using System.Linq;
+using PongGlobe.Core.Algorithm;
 using PongGlobe.Core.Util;
 using PongGlobe.Scene;
-using System.Runtime.InteropServices;
 using PongGlobe.Styles;
-using PongGlobe.Core.Algorithm;
+using System.Collections.Generic;
+using System.Numerics;
+using System.Runtime.InteropServices;
+using Veldrid;
+
 
 namespace PongGlobe.Renders
 {
@@ -23,7 +20,10 @@ namespace PongGlobe.Renders
         private IEnumerable<IShapefileFeature> _features;
         private Scene.Scene _scene;
         private List<BaseFeatureRender> renders = new List<BaseFeatureRender>();
-
+        /// <summary>
+        /// 构件一个最大范围为-1-1-1，111的八叉树，最大子节点为100
+        /// </summary>
+        private Octree<IShapefileFeature> _quadTree = new Octree<IShapefileFeature>(new BoundingBox(new Vector3(-1,-1,-1),new Vector3(1,1,1)),100);
         public VectorLayerRender(string shpPath,Scene.Scene scene)
         {
             var shpReader = new NetTopologySuite.IO.ShapeFile.Extended.ShapeDataReader(shpPath);
@@ -85,23 +85,34 @@ namespace PongGlobe.Renders
 
     /// <summary>
     /// 对单个要素进行渲染,独立渲染每个要素，当要使用动态水渲染要素时，使用DynamicWaterRender,由FeatureRenderFactory根据参数生成适当的Render对象。
+    /// 测试模拟鼠标移动的高亮，首先实现CPU RayCasting Picking。这适用于polygon对象，可能并不适合其它对象。
+    /// 这便需要建立四叉树对场景中所有的对象进行管理。然后使用ray去于对象进行求交判断
     /// </summary>
     public class BaseFeatureRender : IRender
     {
         /// <summary>
         /// feature转换成的mesh对象
         /// </summary>
-        private Mesh<Vector3> _mesh = null;
-        private DeviceBuffer _vertexBuffer;
-        private DeviceBuffer _indexBuffer;
+        private List<Mesh<Vector3>> _mesh = null;
+        List<Pipeline> _pipeLines;        
+        private List<DeviceBuffer> _vertexBuffer=new List<DeviceBuffer>();
+        private List<DeviceBuffer> _indexBuffer=new List<DeviceBuffer>();
+        private List<DeviceBuffer> _boundingboxvertexBuffer = new List<DeviceBuffer>();
+        private List<DeviceBuffer> _boundingBoxindiceBuffer = new List<DeviceBuffer>();
         private DeviceBuffer _styleBuffer;
         private ResourceSet _styleResourceSet;
+        private bool ShowBoundingBox = true;
         //可能用到的纹理
         private Texture _surfaceTexture;
         private TextureView _surfaceTextureView;
         //private CommandList _cl;
         //渲染管线
         private Pipeline _pipeline;
+        /// <summary>
+        /// 绘制一个立方体居然用到了两个渲染管线
+        /// </summary>
+        private Pipeline _boundingBoxPipeLine;
+        private Pipeline _boundingBoxPipeLine2;
 
         private Ellipsoid _shape = Ellipsoid.ScaledWgs842;
         /// <summary>
@@ -134,41 +145,19 @@ namespace PongGlobe.Renders
         /// <param name="factory"></param>
         public void CreateDeviceResources(GraphicsDevice gd, ResourceFactory factory)
         {
-            List<Vector2> positions = new List<Vector2>();          
-            //填充顶点跟索引
-            //详细流程，如果是投影坐标，将其转换成wgs84的经纬度坐标，再使用参考系计算出其真实的地理坐标         
-            foreach (var coord in _feature.Geometry.Coordinates)
-            {
-                //将其转换成弧度制,自动贴地
-                positions.Add(new Vector2(MathExtension.ToRadius(coord.X), MathExtension.ToRadius(coord.Y)));
-            }
-            //去除重复的数据
-            var posClearUp= SimplePolygonAlgorithms.Cleanup<Vector2>(positions);
-            //如果不是顺时针，强制转换成顺时针
-            if (SimplePolygonAlgorithms.ComputeWindingOrder(posClearUp) == PolygonWindingOrder.Clockwise)
-            {
-                posClearUp = posClearUp.Reverse().ToArray();
-            }           
-            var indices = EarClippingOnEllipsoid.Triangulate2D(posClearUp);
-            //将vector2转换成vector3 
-            List<Vector3> worldPosition = new List<Vector3>();
-            foreach (var item in posClearUp)
-            {
-                var vec = _shape.ToVector3(new Geodetic2D(item.X, item.Y));
-                worldPosition.Add(vec);
-            }
-
-             _mesh = new Mesh<Vector3>();        
-            _mesh.Indices = indices.ToArray();
-            _mesh.Positions = worldPosition.ToArray();
+            //计算每个mesh的boundbox                      
+            _mesh= FeatureTrianglator.FeatureToMesh(this._feature, this._shape);
             
+            foreach (var item in _mesh)
+            {
+                var typle = item.CreateGraphicResource(gd, factory);
+                var box= BoundingBox.CreateFromPoints(item.Positions);
+                _vertexBuffer.Add(typle.Item1);
+                _indexBuffer.Add(typle.Item2);
+            }
             //三角细分,细分精度为1度
             //_mesh = TriangleMeshSubdivision.Compute(posClearUp, indices.ToArray(), Math.PI / 180);
-            _vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)(12 * _mesh.Positions.Count()), BufferUsage.VertexBuffer));
-            gd.UpdateBuffer(_vertexBuffer, 0, _mesh.Positions);
-            _indexBuffer = factory.CreateBuffer(new BufferDescription((uint)(sizeof(ushort) * _mesh.Indices.Length), BufferUsage.IndexBuffer));
-            gd.UpdateBuffer(_indexBuffer, 0, _mesh.Indices);
-
+           
             //创建一个Color的Buffer并更新
             _styleBuffer = factory.CreateBuffer(new BufferDescription(32, BufferUsage.UniformBuffer|BufferUsage.Dynamic));
             gd.UpdateBuffer(_styleBuffer,0,Style.ToUBO());
@@ -179,8 +168,6 @@ namespace PongGlobe.Renders
                    new ResourceLayoutElementDescription("Style", ResourceKind.UniformBuffer,  ShaderStages.Fragment)
 
                    ));
-
-
             var curAss = this.GetType().Assembly;
             ShaderSetDescription shaderSet = new ShaderSetDescription(
                 new[]
@@ -202,6 +189,31 @@ namespace PongGlobe.Renders
                 //共享View和prj的buffer
                 new ResourceLayout[] { ShareResource.ProjectionResourceLoyout, styleLayout },
                 gd.MainSwapchain.Framebuffer.OutputDescription));
+
+            //创建一个渲染boundingBox的渲染管线
+            var rasterizer = RasterizerStateDescription.Default;
+            rasterizer.FillMode = PolygonFillMode.Wireframe;
+            _boundingBoxPipeLine = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription(
+                BlendStateDescription.SingleOverrideBlend,
+                DepthStencilStateDescription.DepthOnlyLessEqual,
+                rasterizer,
+                PrimitiveTopology.LineStrip,
+                shaderSet,
+                //共享View和prj的buffer
+                new ResourceLayout[] { ShareResource.ProjectionResourceLoyout },
+                gd.MainSwapchain.Framebuffer.OutputDescription));
+          
+            _boundingBoxPipeLine2 = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription(
+                BlendStateDescription.SingleOverrideBlend,
+                DepthStencilStateDescription.DepthOnlyLessEqual,
+                rasterizer,
+                PrimitiveTopology.LineList,
+                shaderSet,
+                //共享View和prj的buffer
+                new ResourceLayout[] { ShareResource.ProjectionResourceLoyout },
+                gd.MainSwapchain.Framebuffer.OutputDescription));
+
+
             //创建一个StyleresourceSet
             _styleResourceSet = factory.CreateResourceSet(new ResourceSetDescription(
                styleLayout,
@@ -220,12 +232,33 @@ namespace PongGlobe.Renders
 
         public void Draw(CommandList _cl)
         {
-            _cl.SetPipeline(_pipeline);
-            _cl.SetVertexBuffer(0, _vertexBuffer);
-            _cl.SetIndexBuffer(_indexBuffer, IndexFormat.UInt16);
+            _cl.SetPipeline(_pipeline);          
             _cl.SetGraphicsResourceSet(0, ShareResource.ProjectuibResourceSet);
             _cl.SetGraphicsResourceSet(1, _styleResourceSet);
-            _cl.DrawIndexed((uint)_mesh.Indices.Length, 1, 0, 0, 0);
+            for (int i = 0; i < _mesh.Count; i++)
+            {
+                _cl.SetVertexBuffer(0, _vertexBuffer[i]);
+                _cl.SetIndexBuffer(_indexBuffer[i], IndexFormat.UInt16);
+                _cl.DrawIndexed((uint)_mesh[i].Indices.Length, 1, 0, 0, 0);                
+            }
+           
+            for (int i = 0; i < _mesh.Count; i++)
+            {
+                //同时显示每个polygonMesh的外包盒子
+                _cl.SetPipeline(_boundingBoxPipeLine);
+                //_boundingBoxPipeLine.
+                _cl.SetGraphicsResourceSet(0, ShareResource.ProjectuibResourceSet);
+                _cl.SetVertexBuffer(0, _vertexBuffer[i]);
+                _cl.SetIndexBuffer(_indexBuffer[i], IndexFormat.UInt16);
+                //绘制上面
+                _cl.DrawIndexed(5, 1, 0, 0, 0);
+                //绘制下面
+                _cl.DrawIndexed(5, 1, 0, 0, 0);
+                //切换到渲染管线2
+                _cl.SetPipeline(_boundingBoxPipeLine2);
+                //绘制四条边线
+                _cl.DrawIndexed((uint)_mesh[i].Indices.Length, 1, 0, 0, 0);
+            }
         }
 
         public void Update()
@@ -233,6 +266,9 @@ namespace PongGlobe.Renders
             
         }
     }
+
+
+    //public class PolygonRender
 
 
     /// <summary>

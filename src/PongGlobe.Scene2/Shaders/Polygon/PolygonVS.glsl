@@ -29,6 +29,7 @@ out gl_PerVertex {
 void main()                     
 {
     gl_Position = ubo.prj * vec4(position,1.0); 
+	gl_Position.y=-gl_Position.y;	
     worldPosition = position.xyz;
     positionToLight = ubo.CameraLightPosition - worldPosition;
     positionToEye = ubo.CameraEye - worldPosition;

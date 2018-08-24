@@ -123,11 +123,11 @@ namespace PongGlobe.Scene
             //描述一个基于基本参考系的旋转平移之后的参考系
             var transform = Shape.GeographicToCartesianTransform2(new Geodetic3D(_lookAtInfo.Longitude, _lookAtInfo.Latitude, _lookAtInfo.Altitude));
             //对这个参考系再进行旋转
-            var transformLocal = Matrix4x4.CreateFromYawPitchRoll(0, (float)_lookAtInfo.Tilt, -(float)_lookAtInfo.Heading);
+            //var transformLocal = Matrix4x4.CreateFromYawPitchRoll(0,(float)_lookAtInfo.Tilt, -(float)_lookAtInfo.Heading);
             //v
             var localTransformheading = Matrix4x4.CreateFromAxisAngle(Vector3.UnitZ, (float)_lookAtInfo.Heading);
             //
-            var localTransformTilt = Matrix4x4.CreateFromAxisAngle(Vector3.UnitX, -(float)_lookAtInfo.Tilt);
+            var localTransformTilt = Matrix4x4.CreateFromAxisAngle(Vector3.UnitX, (float)_lookAtInfo.Tilt);
 
             //再创建平移矩阵
             var transTransform = Matrix4x4.CreateTranslation(0, 0, (float)_lookAtInfo.Range);
@@ -190,11 +190,11 @@ namespace PongGlobe.Scene
 
         private bool testwindowsCoordOnEllipse(Vector2 pos, out Geodetic2D geo)
         {
-            var rayVector = Unproject(new Vector3(pos.X, pos.Y, 0), this.ProjectionMatrix, this.ViewMatrix, Matrix4x4.Identity);
+            var rayVector = Unproject(new Vector3(pos.X, this._windowHeight-pos.Y, 0), this.ProjectionMatrix, this.ViewMatrix, Matrix4x4.Identity);
             //此rayVector为近裁剪面的世界坐标，与eye相减得到ray向量，ray向量与地球求交即可得到结果
             //计算是否与地球有交
             var rayDir = rayVector - _positon;
-            var result = Shape.Intersections(_positon, rayVector - _positon);
+            var result = Shape.Intersections(_positon, rayDir);
             //计算第一个相交点的世界坐标
             if (result.Length != 0)
             {
@@ -246,10 +246,10 @@ namespace PongGlobe.Scene
             var isMouseWhellClick = InputTracker.GetMouseButton(MouseButton.Middle);
             if ((mouseDelta.Y != 0 || mouseDelta.X != 0) && isMouseWhellClick)
             {
-                var deltaAngleY = -(float)Math.PI * 0.002f * mouseDelta.Y;
+                var deltaAngleY = (float)Math.PI * 0.002f * mouseDelta.Y;
                 var deltaAngleX = (float)Math.PI * 2 * 0.0005f * mouseDelta.X;
-                _lookAtInfo.Tilt += deltaAngleY;
-                _lookAtInfo.Heading += (float)deltaAngleX;
+                _lookAtInfo.Tilt += -deltaAngleY;
+                _lookAtInfo.Heading += -(float)deltaAngleX;
                 if (_lookAtInfo.Heading > Math.PI * 2) _lookAtInfo.Heading = (float)Math.PI * 2;
                 if (_lookAtInfo.Tilt < 0) _lookAtInfo.Tilt = 0;
                 if (_lookAtInfo.Tilt > Math.PI / 2) _lookAtInfo.Tilt = (float)Math.PI / 2;

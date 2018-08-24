@@ -7,8 +7,7 @@
 // See License.txt or http://www.opensource.org/licenses/mit-license.php.
 //
 layout(set=0, binding = 0) uniform UniformBufferObject {
-    mat4 prj;     
-    mat4 view;
+    mat4 prj;         
     vec3 CameraEyeSquared;
     float spa1;
     vec3 CameraEye;   
@@ -72,7 +71,7 @@ Intersection RayIntersectEllipsoid(vec3 rayOrigin, vec3 rayOriginSquared, vec3 r
 
 float ComputeWorldPositionDepth(vec3 position, mat4 prj)
 { 
-    vec4 v = prj*view * vec4(position, 1.0);   // clip coordinates
+    vec4 v = prj * vec4(position, 1.0);   // clip coordinates
     v.z /= v.w;                                             // normalized device coordinates
     v.z = (v.z + 1.0) * 0.5;
     return v.z;
@@ -98,7 +97,7 @@ float LightIntensity(vec3 normal, vec3 toLight, vec3 toEye, vec4 diffuseSpecular
 
 vec2 ComputeTextureCoordinates(vec3 normal)
 {
-    return vec2(atan(normal.x, normal.z) * og_oneOverTwoPi+0.5, asin(normal.y) * og_oneOverPi + 0.5);
+    return vec2(atan(normal.x, normal.z) * og_oneOverTwoPi+0.5, asin(normal.y) * og_oneOverPi - 0.5);
 }
 
 void main()

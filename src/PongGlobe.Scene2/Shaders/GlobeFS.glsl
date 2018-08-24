@@ -97,7 +97,7 @@ float LightIntensity(vec3 normal, vec3 toLight, vec3 toEye, vec4 diffuseSpecular
 
 vec2 ComputeTextureCoordinates(vec3 normal)
 {
-    return vec2(atan(normal.x, normal.z) * og_oneOverTwoPi+0.5, asin(normal.y) * og_oneOverPi + 0.5);
+    return vec2(atan(normal.x, normal.z) * og_oneOverTwoPi+0.5, -asin(normal.y) * og_oneOverPi + 0.5);
 }
 
 void main()

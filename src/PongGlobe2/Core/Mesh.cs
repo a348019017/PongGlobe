@@ -68,9 +68,18 @@ namespace PongGlobe.Core
         //mesh的实体类型
         public PrimitiveType PrimitiveType { get; set; }
 
-        public bool CreateGraphicResource(ResourceFactory factory)
+        /// <summary>
+        /// 创建相应的顶点和indices的资源，同时也更新部分资源,资源的释放由使用者处理
+        /// </summary>
+        /// <param name="factory"></param>
+        /// <returns>返回顶点缓存和索引缓存</returns>
+        public System.Tuple<DeviceBuffer,DeviceBuffer> CreateGraphicResource(GraphicsDevice gd,ResourceFactory factory)
         {
-            return true;
+            var _vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)(12 * this.Positions.Length), BufferUsage.VertexBuffer));
+            gd.UpdateBuffer(_vertexBuffer, 0, this.Positions);
+            var _indexBuffer = factory.CreateBuffer(new BufferDescription((uint)(sizeof(ushort) * this.Indices.Length), BufferUsage.IndexBuffer));
+            gd.UpdateBuffer(_indexBuffer, 0, this.Indices);
+            return new System.Tuple<DeviceBuffer, DeviceBuffer>(_vertexBuffer,_indexBuffer);
         }
     }
 

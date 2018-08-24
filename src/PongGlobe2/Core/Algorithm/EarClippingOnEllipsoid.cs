@@ -163,7 +163,6 @@ namespace PongGlobe.Core
                             break;
                         }
                     }
-
                     if (isEar)
                     {
                         ///
@@ -221,21 +220,21 @@ namespace PongGlobe.Core
         /// <returns></returns>
         private static bool TrangleContainPoint(Vector2 p0, Vector2 p1, Vector2 p2,Vector2 p)
         {
-            Vector2 p0p = p - p0;
-            Vector2 p1p = p - p1;
-            Vector2 p2p = p - p2;
+            Vector2 p0p =Vector2.Normalize(p - p0);
+            Vector2 p1p =Vector2.Normalize(p - p1);
+            Vector2 p2p =Vector2.Normalize(p - p2);
             double t1 = p0p.Cross(p1p);
             double t2 = p1p.Cross(p2p);
             double t3 = p2p.Cross(p0p);
-            return t1 * t2 >= 0 && t1* t3 > 0;
+            return t1 * t2 >= 0 && t1* t3 >= 0;
         }
 
         private static bool IsTipConvex(Vector2 p0, Vector2 p1, Vector2 p2)
         {
-            Vector2 u = p1 - p0;
-            Vector2 v = p2 - p1;
+            Vector2 u = Vector2.Normalize(p1 - p0);
+            Vector2 v =Vector2.Normalize(p2 - p1);
             ///大于0为逆时针，小于0为顺势整，如果与多边形相同则为凸多边形，这里默认多边形为顺时针
-            return u.X * v.Y - u.Y * v.X <= 0;
+            return u.Cross(v) <= 0;
         }
     }
 }

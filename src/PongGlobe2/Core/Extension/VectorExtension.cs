@@ -30,6 +30,7 @@ namespace PongGlobe.Core.Extension
         public static double Cross(this Vector2 t, Vector2 other)
         {
             return t.X * other.Y - t.Y * other.X;
+
         }
 
         /// <summary>
