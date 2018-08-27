@@ -8,6 +8,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <OutputPath>E:\swyy\Lib\PongGlobe\PongGlobe\bin\Debug\PongGlobe.Windows\netcoreapp2.0\win7-x64\</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -21,11 +22,14 @@
     <EmbeddedResource Include="Shaders\SPIR-V\imgui-vertex.spv" LogicalName="imgui-vertex.spv" />
   </ItemGroup>
 
+
+
   <ItemGroup>
-    <PackageReference Include="Veldrid" Version="4.5.0-beta1-0008-g978e9591d5" />
-    <PackageReference Include="Veldrid.ImGui" Version="4.5.0-beta1-0008-g978e9591d5" />
-    <PackageReference Include="Veldrid.StartupUtilities" Version="4.5.0-beta1-0008-g978e9591d5" />
-    <PackageReference Include="Veldrid.Utilities" Version="4.5.0-beta1-0008-g978e9591d5" />
+    <PackageReference Include="Veldrid" Version="4.5.0-beta1-0008-g171a33ad23" />
+    <PackageReference Include="Veldrid.ImGui" Version="4.5.0-beta1-0008-g171a33ad23" />
+    <PackageReference Include="Veldrid.SDL2" Version="4.5.0-beta1-0008-g171a33ad23" />
+    <PackageReference Include="Veldrid.StartupUtilities" Version="4.5.0-beta1-0008-g171a33ad23" />
+    <PackageReference Include="Veldrid.Utilities" Version="4.5.0-beta1-0008-g171a33ad23" />
   </ItemGroup>
 
   <ItemGroup>

@@ -14,9 +14,9 @@ namespace PongGlobe.Core.Extension
             var position = bounding.GetCorners();
             var _vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)(12 * position.Length), BufferUsage.VertexBuffer));
             gd.UpdateBuffer(_vertexBuffer, 0, position);
-            //前10个点使用linestrip绘制上下两个面，中间4条线使用line绘制四条线,共18个indices
-            var indices = new ushort[] { 0,1,2,3,0,4,5,6,7,4,0,4,1,5,2,6,3,7};
-            var _indexBuffer = factory.CreateBuffer(new BufferDescription((uint)(sizeof(ushort) * this.Indices.Length), BufferUsage.IndexBuffer));
+            //共24个indices,使用line模式绘制
+            var indices = new ushort[] { 0,1,1,2,2,3,3,0,4,5,5,6,6,7,7,4,0,4,1,5,2,6,3,7};
+            var _indexBuffer = factory.CreateBuffer(new BufferDescription((uint)(sizeof(ushort) * indices.Length), BufferUsage.IndexBuffer));
             gd.UpdateBuffer(_indexBuffer, 0, indices);
             return new System.Tuple<DeviceBuffer, DeviceBuffer>(_vertexBuffer, _indexBuffer);
         }

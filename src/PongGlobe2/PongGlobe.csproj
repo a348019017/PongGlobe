@@ -16,9 +16,9 @@
 
   <ItemGroup>
     <PackageReference Include="NetTopologySuite.IO.ShapeFile" Version="1.15.2" />
-    <PackageReference Include="Veldrid" Version="4.4.0-beta3-gf6196c3020" />
-    <PackageReference Include="Veldrid.ImageSharp" Version="4.4.0-beta3-gf6196c3020" />
-    <PackageReference Include="Veldrid.SDL2" Version="4.5.0-beta1-0008-g978e9591d5" />
+    <PackageReference Include="Veldrid" Version="4.5.0-beta1-0008-g171a33ad23" />
+    <PackageReference Include="Veldrid.ImageSharp" Version="4.5.0-beta1-0008-g171a33ad23" />
+    <PackageReference Include="Veldrid.StartupUtilities" Version="4.5.0-beta1-0008-g171a33ad23" />
   </ItemGroup>
 
   <ItemGroup>

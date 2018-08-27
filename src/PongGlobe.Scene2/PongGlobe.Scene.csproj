@@ -5,6 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Shaders\CommonLine\LineFS.spv" />
+    <None Remove="Shaders\CommonLine\LineVS.spv" />
     <None Remove="Shaders\GlobeFS.spv" />
     <None Remove="Shaders\GlobeVS.spv" />
     <None Remove="Shaders\Polygon\PolygonFS.spv" />
@@ -12,15 +14,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Shaders\CommonLine\LineFS.spv" LogicalName="LineFS.spv" />
+    <EmbeddedResource Include="Shaders\CommonLine\LineVS.spv" LogicalName="LineVS.spv" />
     <EmbeddedResource Include="Shaders\GlobeFS.spv" LogicalName="GlobeFS.spv" />
     <EmbeddedResource Include="Shaders\GlobeVS.spv" LogicalName="GlobeVS.spv" />
-    <EmbeddedResource Include="Shaders\Polygon\PolygonFS.spv" LogicalName="PolygonFS.spv"/>
-    <EmbeddedResource Include="Shaders\Polygon\PolygonVS.spv" LogicalName="PolygonVS.spv"/>
+    <EmbeddedResource Include="Shaders\Polygon\PolygonFS.spv" LogicalName="PolygonFS.spv" />
+    <EmbeddedResource Include="Shaders\Polygon\PolygonVS.spv" LogicalName="PolygonVS.spv" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="NetTopologySuite.IO.ShapeFile" Version="1.15.2" />
-    <PackageReference Include="Veldrid.ImageSharp" Version="4.5.0-beta1-0008-g978e9591d5" />
+    <PackageReference Include="Veldrid.ImageSharp" Version="4.5.0-beta1-0008-g171a33ad23" />
   </ItemGroup>
 
   <ItemGroup>

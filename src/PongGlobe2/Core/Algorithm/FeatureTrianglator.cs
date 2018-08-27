@@ -83,7 +83,85 @@ namespace PongGlobe.Core.Algorithm
             return null;
         }
 
+        /// <summary>
+        /// 将一个Feature转换成
+        /// </summary>
+        /// <param name="_feature"></param>
+        /// <param name="_shape"></param>
+        /// <returns></returns>
+        public static Mesh<Vector3> FeatureToPoints(IShapefileFeature _feature, Ellipsoid _shape)
+        {            
+            if (_feature == null) return null;
+            List<Vector3> points = new List<Vector3>();
+            List<ushort> indices = new List<ushort>();
+            if (_feature.Geometry is GeoAPI.Geometries.IMultiPolygon)
+            {
+                foreach (var item in ((GeoAPI.Geometries.IMultiPolygon)_feature.Geometry).Geometries)
+                {
+                    PolygonToPoints(item as GeoAPI.Geometries.IPolygon, _shape, points,indices);                  
+                }             
+            }
+            if (_feature.Geometry is GeoAPI.Geometries.IPolygon)
+            {
+                PolygonToPoints(_feature.Geometry as GeoAPI.Geometries.IPolygon, _shape,points,indices);
+                //查找其Hole
+                var geo = _feature.Geometry as GeoAPI.Geometries.IPolygon;               
+            }
+            var mesh = new Mesh<Vector3>();
+            mesh.PrimitiveType = PrimitiveType.LineStrip;
+            mesh.Positions = points.ToArray();
+            mesh.Indices = indices.ToArray();
+            return mesh;
+        }
 
+        /// <summary>
+        /// 如果两个点的间距低于当前精度，则进一步细分
+        /// </summary>
+        /// <param name="_polygon"></param>
+        /// <param name="_shape"></param>
+        /// <returns></returns>
+        public static bool PolygonToPoints(GeoAPI.Geometries.IPolygon _polygon, Ellipsoid _shape, List<Vector3> positions,List<ushort> indices)
+        {
+            if (_polygon == null) throw new Exception("_polygon is Null");
+            List<Vector2> positions2D = new List<Vector2>();
+            //填充顶点跟索引
+            //详细流程，如果是投影坐标，将其转换成wgs84的经纬度坐标，再使用参考系计算出其真实的地理坐标         
+            ///0xFFFF/0xFFFFFFFF分别表示16位和32位的indice中断符
+            ushort breakupIndice = 0xFFFF;
+            var extRing = _polygon.ExteriorRing;
+            var interRing = _polygon.InteriorRings;
+            var ccc = extRing as GeoAPI.Geometries.ILinearRing;
+            ///判断是否为逆时针，可能需要调整其方向
+            var isCCW = ccc.IsCCW;
+            ///添加外环
+            ushort indicesMax = (ushort)positions.Count();
+            foreach (var coord in extRing.Coordinates)
+            {                
+                //将其转换成弧度制,自动贴地
+                var geoDetic = new Vector2(MathExtension.ToRadius(coord.X), MathExtension.ToRadius(coord.Y));
+                positions2D.Add(geoDetic);
+                indices.Add(indicesMax++);
+            }
+            indices.Add(breakupIndice);
+            //添加内环
+            foreach (var item in interRing)
+            {
+                foreach (var coord in item.Coordinates)
+                {
+                    var geoDetic = new Vector2(MathExtension.ToRadius(coord.X), MathExtension.ToRadius(coord.Y));
+                    positions2D.Add(geoDetic);
+                    indices.Add(indicesMax++);
+                }
+                indices.Add(breakupIndice);
+            }
+            //这里计算的并不准确
+            //if (SimplePolygonAlgorithms.ComputeWindingOrder(positions2D) != PolygonWindingOrder.Clockwise)
+            //{
+            //    positions2D.Reverse();
+            //}
+            positions.AddRange(positions2D.ConvertAll(i=>_shape.ToVector3(new Geodetic2D(i.X,i.Y))));
+            return true;
+        }
 
     }
 }

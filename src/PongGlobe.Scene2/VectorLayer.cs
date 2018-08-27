@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Veldrid;
-
+using PongGlobe.Core.Extension;
 
 namespace PongGlobe.Renders
 {
@@ -94,11 +94,13 @@ namespace PongGlobe.Renders
         /// feature转换成的mesh对象
         /// </summary>
         private List<Mesh<Vector3>> _mesh = null;
-        List<Pipeline> _pipeLines;        
+        private Mesh<Vector3> _meshLine = null;
         private List<DeviceBuffer> _vertexBuffer=new List<DeviceBuffer>();
         private List<DeviceBuffer> _indexBuffer=new List<DeviceBuffer>();
         private List<DeviceBuffer> _boundingboxvertexBuffer = new List<DeviceBuffer>();
         private List<DeviceBuffer> _boundingBoxindiceBuffer = new List<DeviceBuffer>();
+        private DeviceBuffer _lineVertexBuffer;
+        private DeviceBuffer _lineIndicesBuffer; 
         private DeviceBuffer _styleBuffer;
         private ResourceSet _styleResourceSet;
         private bool ShowBoundingBox = true;
@@ -112,8 +114,7 @@ namespace PongGlobe.Renders
         /// 绘制一个立方体居然用到了两个渲染管线
         /// </summary>
         private Pipeline _boundingBoxPipeLine;
-        private Pipeline _boundingBoxPipeLine2;
-
+        private Pipeline _linePipeLine;
         private Ellipsoid _shape = Ellipsoid.ScaledWgs842;
         /// <summary>
         /// 当前需要渲染的矢量对象
@@ -147,13 +148,20 @@ namespace PongGlobe.Renders
         {
             //计算每个mesh的boundbox                      
             _mesh= FeatureTrianglator.FeatureToMesh(this._feature, this._shape);
-            
+            //提取所有点绘制其
+            _meshLine = FeatureTrianglator.FeatureToPoints(this._feature, this._shape);
+            ///创建并更新资源
+            var result = _meshLine.CreateGraphicResource(gd, factory);
+            _lineVertexBuffer = result.Item1;
+            _lineIndicesBuffer = result.Item2;
+
             foreach (var item in _mesh)
             {
                 var typle = item.CreateGraphicResource(gd, factory);
                 var box= BoundingBox.CreateFromPoints(item.Positions);
+                var ttt = box.CreateResource(gd, factory);
                 _vertexBuffer.Add(typle.Item1);
-                _indexBuffer.Add(typle.Item2);
+                _indexBuffer.Add(typle.Item2);               
             }
             //三角细分,细分精度为1度
             //_mesh = TriangleMeshSubdivision.Compute(posClearUp, indices.ToArray(), Math.PI / 180);
@@ -179,7 +187,20 @@ namespace PongGlobe.Renders
                 {
                    ResourceHelper.LoadEmbbedShader(ShaderStages.Vertex,"PolygonVS.spv",gd,curAss),
                    ResourceHelper.LoadEmbbedShader(ShaderStages.Fragment,"PolygonFS.spv",gd,curAss)
-                });          
+                });
+            ShaderSetDescription shaderSetBoundingBox = new ShaderSetDescription(
+                new[]
+                {
+                    new VertexLayoutDescription(
+                        new VertexElementDescription("Position", VertexElementSemantic.Position, VertexElementFormat.Float3))
+                },
+                new[]
+                {
+                   ResourceHelper.LoadEmbbedShader(ShaderStages.Vertex,"LineVS.spv",gd,curAss),
+                   ResourceHelper.LoadEmbbedShader(ShaderStages.Fragment,"LineFS.spv",gd,curAss)
+                });
+
+
             _pipeline = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription(
                 BlendStateDescription.SingleOverrideBlend,
                 DepthStencilStateDescription.DepthOnlyLessEqual,
@@ -193,26 +214,17 @@ namespace PongGlobe.Renders
             //创建一个渲染boundingBox的渲染管线
             var rasterizer = RasterizerStateDescription.Default;
             rasterizer.FillMode = PolygonFillMode.Wireframe;
+          
             _boundingBoxPipeLine = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription(
                 BlendStateDescription.SingleOverrideBlend,
                 DepthStencilStateDescription.DepthOnlyLessEqual,
                 rasterizer,
                 PrimitiveTopology.LineStrip,
-                shaderSet,
+                shaderSetBoundingBox,
                 //共享View和prj的buffer
                 new ResourceLayout[] { ShareResource.ProjectionResourceLoyout },
                 gd.MainSwapchain.Framebuffer.OutputDescription));
           
-            _boundingBoxPipeLine2 = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription(
-                BlendStateDescription.SingleOverrideBlend,
-                DepthStencilStateDescription.DepthOnlyLessEqual,
-                rasterizer,
-                PrimitiveTopology.LineList,
-                shaderSet,
-                //共享View和prj的buffer
-                new ResourceLayout[] { ShareResource.ProjectionResourceLoyout },
-                gd.MainSwapchain.Framebuffer.OutputDescription));
-
 
             //创建一个StyleresourceSet
             _styleResourceSet = factory.CreateResourceSet(new ResourceSetDescription(
@@ -241,24 +253,11 @@ namespace PongGlobe.Renders
                 _cl.SetIndexBuffer(_indexBuffer[i], IndexFormat.UInt16);
                 _cl.DrawIndexed((uint)_mesh[i].Indices.Length, 1, 0, 0, 0);                
             }
-           
-            for (int i = 0; i < _mesh.Count; i++)
-            {
-                //同时显示每个polygonMesh的外包盒子
-                _cl.SetPipeline(_boundingBoxPipeLine);
-                //_boundingBoxPipeLine.
-                _cl.SetGraphicsResourceSet(0, ShareResource.ProjectuibResourceSet);
-                _cl.SetVertexBuffer(0, _vertexBuffer[i]);
-                _cl.SetIndexBuffer(_indexBuffer[i], IndexFormat.UInt16);
-                //绘制上面
-                _cl.DrawIndexed(5, 1, 0, 0, 0);
-                //绘制下面
-                _cl.DrawIndexed(5, 1, 0, 0, 0);
-                //切换到渲染管线2
-                _cl.SetPipeline(_boundingBoxPipeLine2);
-                //绘制四条边线
-                _cl.DrawIndexed((uint)_mesh[i].Indices.Length, 1, 0, 0, 0);
-            }
+            _cl.SetPipeline(_boundingBoxPipeLine);
+            _cl.SetGraphicsResourceSet(0, ShareResource.ProjectuibResourceSet);
+            _cl.SetVertexBuffer(0, _lineVertexBuffer);
+            _cl.SetIndexBuffer( _lineIndicesBuffer, IndexFormat.UInt16);
+            _cl.DrawIndexed((uint)_meshLine.Indices.Length,1,0,0,0);
         }
 
         public void Update()
