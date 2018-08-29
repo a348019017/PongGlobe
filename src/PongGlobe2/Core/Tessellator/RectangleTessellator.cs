@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Numerics;
 using System.Drawing;
+using Veldrid;
 namespace PongGlobe.Core
 {
     /// <summary>
@@ -23,7 +24,7 @@ namespace PongGlobe.Core
             }
             //创建一个二维顶点对象，即其坐标为二维坐标
             Mesh<Vector2> mesh = new Mesh<Vector2>();
-            mesh.PrimitiveType = PrimitiveType.Triangles;          
+            mesh.PrimitiveTopology = PrimitiveTopology.TriangleList;          
             int numberOfPositions = (numberOfPartitionsX + 1) * (numberOfPartitionsY + 1);          
             int numberOfIndices = (numberOfPartitionsX * numberOfPartitionsY) * 6;
             List<ushort> indices = new List<ushort>(numberOfIndices);

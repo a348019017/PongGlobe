@@ -149,6 +149,21 @@ namespace PongGlobe.Core
             }
         }
 
+        /// <summary>
+        /// 返回两个相交的地理坐标中的靠近eye的一方
+        /// </summary>
+        /// <param name="ray"></param>
+        /// <returns></returns>
+        public bool Intersections(Ray ray,out Geodetic2D geo)
+        {
+            geo = default(Geodetic2D);
+            var result = Intersections(ray.Position, ray.Direction);
+            if (result == null||result.Length==0) return false;
+            Vector3 position = ray.Position + ((float)result[0] * Vector3.Normalize(ray.Direction));
+            geo=ToGeodetic2D(position);
+            return true;
+        }
+
         public Vector3 ToVector3(Geodetic2D geodetic)
         {
             return ToVector3(new Geodetic3D(geodetic.Longitude, geodetic.Latitude, 0.0));

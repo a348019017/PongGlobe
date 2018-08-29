@@ -24,10 +24,11 @@
 
   <ItemGroup>
     <PackageReference Include="NetTopologySuite.IO.ShapeFile" Version="1.15.2" />
-    <PackageReference Include="Veldrid.ImageSharp" Version="4.5.0-beta1-0008-g171a33ad23" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\veldrid\src\Veldrid.ImageSharp\Veldrid.ImageSharp.csproj" />
+    <ProjectReference Include="..\..\..\..\veldrid\src\Veldrid.ImGui\Veldrid.ImGui.csproj" />
     <ProjectReference Include="..\PongGlobe2\PongGlobe.csproj" />
   </ItemGroup>
 

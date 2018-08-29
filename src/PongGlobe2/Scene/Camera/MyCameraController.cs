@@ -28,8 +28,8 @@ namespace PongGlobe.Scene
         private float _windowHeight;
 
         //相机距离地球表面的最大最小距离
-        private const float _maxDistance = 100f;
-        private const float _minDistance = 0.01f;
+        private const float _maxDistance = 10f;
+        private const float _minDistance = 0.001f;
         //地球当前的椭球体，参与部分参数的计算
         private PongGlobe.Core.Ellipsoid _shape;
         //当前的摄像机定位信息
@@ -177,7 +177,10 @@ namespace PongGlobe.Scene
         }
 
 
-        
+        public float WindowsHeight => _windowHeight;
+        public float WindowsWidth => _windowWidth;
+
+
 
         /// <summary>
         /// 屏幕坐标转换成椭球体经纬度坐标
@@ -188,7 +191,7 @@ namespace PongGlobe.Scene
         }
 
 
-        private bool testwindowsCoordOnEllipse(Vector2 pos, out Geodetic2D geo)
+        public bool testwindowsCoordOnEllipse(Vector2 pos, out Geodetic2D geo)
         {
             var rayVector = Unproject(new Vector3(pos.X, this._windowHeight-pos.Y, 0), this.ProjectionMatrix, this.ViewMatrix, Matrix4x4.Identity);
             //此rayVector为近裁剪面的世界坐标，与eye相减得到ray向量，ray向量与地球求交即可得到结果
@@ -256,20 +259,7 @@ namespace PongGlobe.Scene
                 UpdateCamera();
             }
             _previousMousePos = InputTracker.MousePosition;
-
-
-            ////鼠标左右即是旋转地球，改变相机的position
-            //if (InputTracker.GetMouseButton(MouseButton.Left) || InputTracker.GetMouseButton(MouseButton.Right))
-            //{
-            //    ////左右旋转
-            //    //if (mouseDelta.X != 0)
-            //    //{
-            //    //   
-            //    //    Quaternion lookRotation = Quaternion.CreateFromYawPitchRoll((float)deltaAngle, 0, 0);
-            //    //    _position = Vector3.Transform(_position, lookRotation);
-            //    //    UpdateViewMatrix();
-            //    //}               
-            //}
+           
         }
 
 

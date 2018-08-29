@@ -7,7 +7,7 @@ using NetTopologySuite.IO.ShapeFile.Extended.Entities;
 using System.Collections;
 using PongGlobe.Core.Extension;
 using System.Linq;
-
+using Veldrid;
 namespace PongGlobe.Core.Algorithm
 {
     /// <summary>
@@ -108,11 +108,95 @@ namespace PongGlobe.Core.Algorithm
                 var geo = _feature.Geometry as GeoAPI.Geometries.IPolygon;               
             }
             var mesh = new Mesh<Vector3>();
-            mesh.PrimitiveType = PrimitiveType.LineStrip;
+            mesh.PrimitiveTopology = PrimitiveTopology.LineStrip;
             mesh.Positions = points.ToArray();
             mesh.Indices = indices.ToArray();
             return mesh;
         }
+
+
+        public static Mesh<Vector3> FeatureToLineStripAdjacency(IShapefileFeature _feature, Ellipsoid _shape)
+        {
+            if (_feature == null) return null;
+            List<Vector3> points = new List<Vector3>();
+            List<ushort> indices = new List<ushort>();
+            if (_feature.Geometry is GeoAPI.Geometries.IMultiPolygon)
+            {
+                foreach (var item in ((GeoAPI.Geometries.IMultiPolygon)_feature.Geometry).Geometries)
+                {
+                    PolygonToLineStripAdjacency(item as GeoAPI.Geometries.IPolygon, _shape, points, indices);
+                }
+            }
+            if (_feature.Geometry is GeoAPI.Geometries.IPolygon)
+            {
+                PolygonToLineStripAdjacency(_feature.Geometry as GeoAPI.Geometries.IPolygon, _shape, points, indices);          
+            }
+            var mesh = new Mesh<Vector3>();
+            mesh.PrimitiveTopology = PrimitiveTopology.LineStripAdjacency;
+            mesh.Positions = points.ToArray();
+            mesh.Indices = indices.ToArray();
+            return mesh;
+        }
+
+
+        public static bool PolygonToLineStripAdjacency(GeoAPI.Geometries.IPolygon _polygon, Ellipsoid _shape, List<Vector3> positions, List<ushort> indices)
+        {
+            if (_polygon == null) throw new Exception("_polygon is Null");
+            //先进行二维的处理，在转换成贴于地表的三维坐标
+            List<Vector2> positions2D = new List<Vector2>();
+            //填充顶点跟索引
+            //详细流程，如果是投影坐标，将其转换成wgs84的经纬度坐标，再使用参考系计算出其真实的地理坐标         
+            ///0xFFFF/0xFFFFFFFF分别表示16位和32位的indice中断符
+            ushort breakupIndice = 0xFFFF;
+            var extRing = _polygon.ExteriorRing;
+            var interRing = _polygon.InteriorRings;
+            //添加外环
+            LineStringToLineStripAdjacency(extRing,_shape, positions2D, indices);
+            //完事添加间隔符
+            indices.Add(breakupIndice);
+            //添加内环
+            foreach (var item in interRing)
+            {
+                LineStringToLineStripAdjacency(extRing, _shape, positions2D, indices);
+                //完事添加间隔符
+                indices.Add(breakupIndice);
+            }          
+            positions.AddRange(positions2D.ConvertAll(i => _shape.ToVector3(new Geodetic2D(i.X, i.Y))));
+            return true;
+        }
+
+        private static bool LineStringToLineStripAdjacency(GeoAPI.Geometries.ILineString _lineString, Ellipsoid _shape, List<Vector2> positions, List<ushort> indices)
+        {
+            
+            if (_lineString == null)  throw new Exception("_lineString is Null");
+
+            if (_lineString.IsClosed)
+            {
+                //记录起点
+                ushort indicesMax = (ushort)positions.Count();
+                ////添加第一个环的最后一个点
+                //indices.Add((ushort)(indicesMax + _lineString.Coordinates.Length - 1));
+                //对于polygon来说第一个点和最后一个点是相同的,因此只添加一次
+                for (int i = 0; i < _lineString.Coordinates.Length - 1; i++)
+                {
+                    var coord = _lineString.Coordinates[i];
+                    var geoDetic = new Vector2(MathExtension.ToRadius(coord.X), MathExtension.ToRadius(coord.Y));
+                    positions.Add(geoDetic);
+                    indices.Add((ushort)(indicesMax+i));
+                }
+                //添加起点
+                indices.Add(indicesMax);
+                //添加第二个点
+                indices.Add((ushort)(indicesMax + 1));              
+            }
+            else
+            {
+                //非闭合的情况下,首尾特殊处理即可
+                throw new Exception("Not Support!");
+            }
+            return true;
+        }
+
 
         /// <summary>
         /// 如果两个点的间距低于当前精度，则进一步细分

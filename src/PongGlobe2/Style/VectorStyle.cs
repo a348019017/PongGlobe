@@ -11,6 +11,7 @@ namespace PongGlobe.Styles
 {
     /// <summary>
     /// 定义一个矢量数据的样式类，日后考虑使用skia等矢量库渲染之后显示在3d场景中
+    /// GeometryExtrude样式也可以定义在其中，使用Shader实现
     /// </summary>
     [Serializable]
     public class VectorStyle : Style, ICloneable

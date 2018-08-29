@@ -13,20 +13,7 @@ using Veldrid;
 
 namespace PongGlobe.Core
 {
-    public enum PrimitiveType
-    {
-        Points,
-        Lines,
-        LineLoop,
-        LineStrip,
-        Triangles,
-        TriangleStrip,
-        TriangleFan,
-        LinesAdjacency,
-        LineStripAdjacency,
-        TrianglesAdjacency,
-        TriangleStripAdjacency
-    }
+
 
 
     /// <summary>
@@ -44,7 +31,7 @@ namespace PongGlobe.Core
         public ushort[] Indices { get; set; }
 
         //mesh的实体类型
-        public PrimitiveType PrimitiveType { get; set; }
+        public PrimitiveTopology PrimitiveTopology { get; set; }
         //public WindingOrder FrontFaceWindingOrder { get; set; }
 
         //private VertexAttributeCollection _attributes;
@@ -58,7 +45,7 @@ namespace PongGlobe.Core
     {
         public Mesh()
         {
-            PrimitiveType = PrimitiveType.Triangles;
+            PrimitiveTopology = PrimitiveTopology.TriangleList;
         }
 
         public T[] Positions { get; set; }
@@ -66,7 +53,7 @@ namespace PongGlobe.Core
         public ushort[] Indices { get; set; }
 
         //mesh的实体类型
-        public PrimitiveType PrimitiveType { get; set; }
+        public PrimitiveTopology PrimitiveTopology { get; set; }
 
         /// <summary>
         /// 创建相应的顶点和indices的资源，同时也更新部分资源,资源的释放由使用者处理

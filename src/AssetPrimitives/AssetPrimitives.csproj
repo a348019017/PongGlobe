@@ -10,8 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Veldrid" Version="4.4.0-beta3-gf6196c3020" />
-    <PackageReference Include="Veldrid.ImageSharp" Version="4.4.0-beta3-gf6196c3020" />
+    <ProjectReference Include="..\..\..\..\veldrid\src\Veldrid.ImageSharp\Veldrid.ImageSharp.csproj" />
+    <ProjectReference Include="..\..\..\..\veldrid\src\Veldrid\Veldrid.csproj" />
   </ItemGroup>
 
 </Project>

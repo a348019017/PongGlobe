@@ -138,7 +138,7 @@ namespace PongGlobe.Windows
 
             foreach (var item in renders)
             {
-                if (item is RayCastedGlobe) continue;
+                //if (item is RayCastedGlobe) continue;
                 item.Draw(_cl);
             }
             //最后渲染IMGUI

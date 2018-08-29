@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Numerics;
-
+using Veldrid;
 namespace PongGlobe.Core
 {
     /// <summary>
@@ -18,7 +18,7 @@ namespace PongGlobe.Core
             }
 
             Mesh mesh = new Mesh();
-            mesh.PrimitiveType = PrimitiveType.Triangles;
+            mesh.PrimitiveTopology = PrimitiveTopology.TriangleList;
             //mesh.FrontFaceWindingOrder = WindingOrder.Counterclockwise;
             //VertexAttributeDoubleVector3 positionsAttribute = new VertexAttributeDoubleVector3("position", 8);
             //mesh.Attributes.Add(positionsAttribute);

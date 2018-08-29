@@ -8,7 +8,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <OutputPath>E:\swyy\Lib\PongGlobe\PongGlobe\bin\Debug\PongGlobe.Windows\netcoreapp2.0\win7-x64\</OutputPath>
+    <OutputPath>E:\swyy\Lib\PongGlobe\PongGlobe\bin\Debug\PongGlobe.Windows\netcoreapp2.0\win7-x64\netcoreapp2.0\win7-x64\</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -25,14 +25,18 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Veldrid" Version="4.5.0-beta1-0008-g171a33ad23" />
-    <PackageReference Include="Veldrid.ImGui" Version="4.5.0-beta1-0008-g171a33ad23" />
-    <PackageReference Include="Veldrid.SDL2" Version="4.5.0-beta1-0008-g171a33ad23" />
-    <PackageReference Include="Veldrid.StartupUtilities" Version="4.5.0-beta1-0008-g171a33ad23" />
-    <PackageReference Include="Veldrid.Utilities" Version="4.5.0-beta1-0008-g171a33ad23" />
+    <None Include="..\..\..\..\veldrid\bin\Debug\Veldrid.SDL2\netstandard2.0\native\win-x64\SDL2.dll" Link="SDL2.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\veldrid\src\Veldrid.ImageSharp\Veldrid.ImageSharp.csproj" />
+    <ProjectReference Include="..\..\..\..\veldrid\src\Veldrid.ImGui\Veldrid.ImGui.csproj" />
+    <ProjectReference Include="..\..\..\..\veldrid\src\Veldrid.SDL2\Veldrid.SDL2.csproj" />
+    <ProjectReference Include="..\..\..\..\veldrid\src\Veldrid.StartupUtilities\Veldrid.StartupUtilities.csproj" />
+    <ProjectReference Include="..\..\..\..\veldrid\src\Veldrid.Utilities\Veldrid.Utilities.csproj" />
+    <ProjectReference Include="..\..\..\..\veldrid\src\Veldrid\Veldrid.csproj" />
     <ProjectReference Include="..\AssetPrimitives\AssetPrimitives.csproj" />
     <ProjectReference Include="..\PongGlobe.Scene2\PongGlobe.Scene.csproj" />
     <ProjectReference Include="..\PongGlobe2\PongGlobe.csproj" />

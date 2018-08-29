@@ -9,7 +9,11 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Veldrid;
 using PongGlobe.Core.Extension;
-
+using NetTopologySuite.Index.Quadtree;
+using GeoAPI.Geometries;
+using System.Collections.ObjectModel;
+using System;
+using ImGuiNET;
 namespace PongGlobe.Renders
 {
     /// <summary>
@@ -20,16 +24,73 @@ namespace PongGlobe.Renders
         private IEnumerable<IShapefileFeature> _features;
         private Scene.Scene _scene;
         private List<BaseFeatureRender> renders = new List<BaseFeatureRender>();
+        private List<BaseFeatureRender> selectedRenders = new List<BaseFeatureRender>();
+       
+        //构建一个四叉树的来存储其索引
+        private NetTopologySuite.Index.Quadtree.Quadtree<IShapefileFeature> _quadTree = new Quadtree<IShapefileFeature>();
+        private VectorStyle SelectedStyle=new VectorStyle();
+        private VectorStyle Style = new VectorStyle();
         /// <summary>
-        /// 构件一个最大范围为-1-1-1，111的八叉树，最大子节点为100
+        /// 当前选中的要素
         /// </summary>
-        private Octree<IShapefileFeature> _quadTree = new Octree<IShapefileFeature>(new BoundingBox(new Vector3(-1,-1,-1),new Vector3(1,1,1)),100);
+        private List<IShapefileFeature> _selectedFeatures=new List<IShapefileFeature>();
+        /// <summary>
+        /// 当前选中的要素
+        /// </summary>
+        public List<IShapefileFeature> SelectedFeatures { get { return _selectedFeatures; } }
+
+        /// <summary>
+        /// 通过射线来判定第一个相交的要素
+        /// </summary>
+        /// <param name="ray"></param>
+        /// <returns></returns>
+        public bool GetSelectedFeatureByRayCasting(Ray ray)
+        {
+            //计算Ray于地球的交点
+            bool isIntersect =_scene.Ellipsoid.Intersections(ray,out Geodetic2D result);
+            ImGui.Text(string.Format("Latitude:{0},logitude:{1}",result.Latitude,result.Longitude));
+            SelectedFeatures.Clear();
+            if (isIntersect)
+            {
+                //是否考虑根据当前精度生成一个合适的Enve
+                //这里一律采用0.001经纬度的精度
+                var env = new GeoAPI.Geometries.Envelope(new Coordinate(result.Longitude*180/Math.PI - 0.001, result.Latitude * 180 / Math.PI - 0.001), new Coordinate(result.Longitude * 180 / Math.PI + 0.001, result.Latitude * 180 / Math.PI + 0.001));
+                var selectedff= _quadTree.Query(env);
+                SelectedFeatures.AddRange(selectedff);
+                return true;
+            }
+            return false;
+        }
+
+
+        /// <summary>
+        /// 这里统一使用弧度制作为参数
+        /// </summary>
+        /// <param name="shpPath"></param>
+        /// <param name="scene"></param>
         public VectorLayerRender(string shpPath,Scene.Scene scene)
         {
             var shpReader = new NetTopologySuite.IO.ShapeFile.Extended.ShapeDataReader(shpPath);
             var fea= shpReader.ReadByMBRFilter(shpReader.ShapefileBounds);
             _features = fea;
+            //构建索引
+            foreach (var item in _features)
+            {
+                if (item.Geometry is IPolygon)
+                {
+                    var env = item.Geometry.EnvelopeInternal;                 
+                    _quadTree.Insert(item.Geometry.EnvelopeInternal, item);
+                }
+                else if (item.Geometry is IMultiPolygon)
+                {
+                    foreach (var child in item.Geometry as IMultiPolygon )
+                    {
+                        _quadTree.Insert(child.EnvelopeInternal, item);
+                    }
+                }
+            }
             _scene = scene;
+            SelectedStyle.FillColor = RgbaFloat.Orange;
         }
 
         /// <summary>
@@ -66,7 +127,31 @@ namespace PongGlobe.Renders
 
         public void Update()
         {
-            //throw new NotImplementedException();
+            //获取当前的鼠标点位
+            var pos = InputTracker.MousePosition;
+            var camera = (MyCameraController2)_scene.Camera;
+            var rayVector = camera.Unproject(new Vector3(pos.X, camera.WindowsHeight - pos.Y, 0), camera.ProjectionMatrix, camera.ViewMatrix, Matrix4x4.Identity);
+            //此rayVector为近裁剪面的世界坐标，与eye相减得到ray向量，ray向量与地球求交即可得到结果
+            //计算是否与地球有交
+            var rayDir =  rayVector - camera.Position;
+            var ray = new Ray(camera.Position, rayDir);
+            //构造一个射线
+            GetSelectedFeatureByRayCasting(ray);
+
+            //根据当前的选中状态调整render的样式信息
+            foreach (var item in renders)
+            {
+                item.Style = Style;
+                item.Update();
+                foreach (var child in SelectedFeatures)
+                {
+                    if (child.FeatureId == item.Feature.FeatureId)
+                    {
+                        item.Style = SelectedStyle;
+                        item.Update();
+                    }
+                }
+            }          
         }
     }
 
@@ -104,6 +189,7 @@ namespace PongGlobe.Renders
         private DeviceBuffer _styleBuffer;
         private ResourceSet _styleResourceSet;
         private bool ShowBoundingBox = true;
+        private GraphicsDevice _gd;
         //可能用到的纹理
         private Texture _surfaceTexture;
         private TextureView _surfaceTextureView;
@@ -134,7 +220,8 @@ namespace PongGlobe.Renders
         /// 显示轮廓
         /// </summary>
         /// <returns></returns>
-        public bool ShowWireFrame { get; set; }  
+        public bool ShowWireFrame { get; set; }
+        public IShapefileFeature Feature => _feature;
         /// <summary>
         /// 图层渲染的样式信息
         /// </summary>
@@ -146,6 +233,7 @@ namespace PongGlobe.Renders
         /// <param name="factory"></param>
         public void CreateDeviceResources(GraphicsDevice gd, ResourceFactory factory)
         {
+            _gd = gd;
             //计算每个mesh的boundbox                      
             _mesh= FeatureTrianglator.FeatureToMesh(this._feature, this._shape);
             //提取所有点绘制其
@@ -214,12 +302,13 @@ namespace PongGlobe.Renders
             //创建一个渲染boundingBox的渲染管线
             var rasterizer = RasterizerStateDescription.Default;
             rasterizer.FillMode = PolygonFillMode.Wireframe;
-          
+            //gpu的lineWidth实际绘制的效果并不好仍然需要GeometryShader来实现更好的效果
+            //rasterizer.LineWidth = 8.0f;
             _boundingBoxPipeLine = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription(
                 BlendStateDescription.SingleOverrideBlend,
                 DepthStencilStateDescription.DepthOnlyLessEqual,
                 rasterizer,
-                PrimitiveTopology.LineStrip,
+                _meshLine.PrimitiveTopology,
                 shaderSetBoundingBox,
                 //共享View和prj的buffer
                 new ResourceLayout[] { ShareResource.ProjectionResourceLoyout },
@@ -262,7 +351,7 @@ namespace PongGlobe.Renders
 
         public void Update()
         {
-            
+            _gd.UpdateBuffer(_styleBuffer, 0,  Style.ToUBO());
         }
     }
 
