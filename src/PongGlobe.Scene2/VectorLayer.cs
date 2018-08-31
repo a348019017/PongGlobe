@@ -50,13 +50,20 @@ namespace PongGlobe.Renders
             bool isIntersect =_scene.Ellipsoid.Intersections(ray,out Geodetic2D result);
             ImGui.Text(string.Format("Latitude:{0},logitude:{1}",result.Latitude,result.Longitude));
             SelectedFeatures.Clear();
+            var geoFactory = new NetTopologySuite.Geometries.GeometryFactory();
             if (isIntersect)
             {
                 //是否考虑根据当前精度生成一个合适的Enve
                 //这里一律采用0.001经纬度的精度
                 var env = new GeoAPI.Geometries.Envelope(new Coordinate(result.Longitude*180/Math.PI - 0.001, result.Latitude * 180 / Math.PI - 0.001), new Coordinate(result.Longitude * 180 / Math.PI + 0.001, result.Latitude * 180 / Math.PI + 0.001));
                 var selectedff= _quadTree.Query(env);
-                SelectedFeatures.AddRange(selectedff);
+                foreach (var item in selectedff)
+                {
+                    if (item.Geometry.Intersects(geoFactory.ToGeometry(env)))
+                    {
+                        SelectedFeatures.Add(item);
+                    }                    
+                }              
                 return true;
             }
             return false;
@@ -130,7 +137,9 @@ namespace PongGlobe.Renders
             //获取当前的鼠标点位
             var pos = InputTracker.MousePosition;
             var camera = (MyCameraController2)_scene.Camera;
-            var rayVector = camera.Unproject(new Vector3(pos.X, camera.WindowsHeight - pos.Y, 0), camera.ProjectionMatrix, camera.ViewMatrix, Matrix4x4.Identity);
+            var rayVector3 = camera.Unproject(new Vector3(pos.X, pos.Y, 0.01f), camera.ProjectionMatrix, camera.ViewMatrix, Matrix4x4.Identity);
+            var rayVector = camera.Unproject(new Vector3(pos.X,  pos.Y, 5), camera.ProjectionMatrix, camera.ViewMatrix, Matrix4x4.Identity);
+            var rayVector2 = camera.Unproject(new Vector3(pos.X, pos.Y, 10), camera.ProjectionMatrix, camera.ViewMatrix, Matrix4x4.Identity);
             //此rayVector为近裁剪面的世界坐标，与eye相减得到ray向量，ray向量与地球求交即可得到结果
             //计算是否与地球有交
             var rayDir =  rayVector - camera.Position;

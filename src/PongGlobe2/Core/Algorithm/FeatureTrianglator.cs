@@ -8,6 +8,7 @@ using System.Collections;
 using PongGlobe.Core.Extension;
 using System.Linq;
 using Veldrid;
+using GeoAPI.Geometries;
 namespace PongGlobe.Core.Algorithm
 {
     /// <summary>
@@ -115,6 +116,38 @@ namespace PongGlobe.Core.Algorithm
         }
 
 
+        /// <summary>
+        /// 将点要素转换为PointListMesh
+        /// </summary>
+        /// <returns></returns>
+        public static Mesh<Vector3> PointFeatureToPoints(IEnumerable<IShapefileFeature> _features, Ellipsoid _shape)
+        {
+            var points =new Mesh<Vector3>();
+            points.PrimitiveTopology = PrimitiveTopology.PointList;
+            List<Vector3> vectors = new List<Vector3>();
+            List<ushort> indices = new List<ushort>();
+            ushort start = 0;
+            foreach (var item in _features)
+            {
+                var geo = item.Geometry;
+                ///仅添加点和多点
+                if (geo is IPoint)
+                {
+                    vectors.Add(_shape.ToVector3(new Geodetic2D(geo.Coordinate.X,geo.Coordinate.Y)));
+                    indices.Add(start++);
+                } else if (geo is IMultiPoint)
+                {
+                    foreach (var coord in geo as IMultiPoint)
+                    {
+                        vectors.Add(_shape.ToVector3(new Geodetic2D(geo.Coordinate.X, geo.Coordinate.Y)));
+                        indices.Add(start++);
+                    }
+                }
+            }
+            points.Positions = vectors.ToArray();
+            points.Indices = indices.ToArray();
+            return points;
+        }        
         public static Mesh<Vector3> FeatureToLineStripAdjacency(IShapefileFeature _feature, Ellipsoid _shape)
         {
             if (_feature == null) return null;

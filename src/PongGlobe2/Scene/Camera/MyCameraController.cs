@@ -17,11 +17,17 @@ namespace PongGlobe.Scene
         /// </summary>
         //private IDynamicOperator _curDynamicOper;
         private float _fov = 1f;
-        private float _near = 0.01f;
-        private float _far = 10f;
+        private float _near = 0.5f;
+        private float _far = 3.0f;
 
         private Matrix4x4 _viewMatrix;
         private Matrix4x4 _projectionMatrix;
+        /// <summary>
+        /// 视口的变换矩阵，将二维矩阵变换为屏幕的坐标体系，windows的坐标体系是左上角为0，0
+        /// </summary>
+        private Matrix4x4 _viewportMaxtrix;
+
+
         private Vector3 _positon;
 
         private float _windowWidth;
@@ -45,8 +51,11 @@ namespace PongGlobe.Scene
             _windowWidth = width;
             _windowHeight = height;
             UpdatePerspectiveMatrix();
+            //更新视口矩阵
+            UpdateViewPortTransformMaxtrix();
             //UpdateViewMatrix();
             this.LookAtInfo = new LookAt(0, 0, 0, 0, 0, 1);
+            UpdateCamera();
         }
 
         //通过Speed参数实现动画效果，如FlyTo等其它操作
@@ -56,7 +65,7 @@ namespace PongGlobe.Scene
         }
 
         /// <summary>
-        /// 二维投影到三维视图
+        /// 将屏幕坐标转换成世界坐标
         /// </summary>
         /// <param name="source"></param>
         /// <param name="projection"></param>
@@ -67,20 +76,19 @@ namespace PongGlobe.Scene
         {
             Matrix4x4 matrix;
             Matrix4x4.Invert(
-               Matrix4x4.Multiply(
-                   Matrix4x4.Multiply(world, view),
-                   projection
-               ), out matrix
-           );
+              world*view*projection , out matrix
+           );           
+            //计算view
             source.X = (((source.X) / ((float)_windowWidth)) * 2f) - 1.0f;
-            source.Y = ((((source.Y) / ((float)_windowHeight)) * 2f) - 1f);
-            source.Z = 0;
+            source.Y = -((((source.Y) / ((float)_windowHeight)) * 2f) - 1.0f);
+            //这里仍需要考虑传入二维坐标的深度，以计算其在场景中的准确位置，此处也可以判断View坐标范围是0-1，既然非线性
+            source.Z = (source.Z - this._near)  / (this._far - this._near);
             Vector3 vector = Vector3.Transform(source, matrix);
             float a = (
                 ((source.X * matrix.M14) + (source.Y * matrix.M24)) +
                 (source.Z * matrix.M34)
             ) + matrix.M44;
-            //如果a比1要大的话再次向量化
+            //如果a比1要大的话再次向量化，相当于齐次化坐标
             if (!(Math.Abs(a - 1.0f) < float.Epsilon))
             {
                 vector.X = vector.X / a;
@@ -89,6 +97,78 @@ namespace PongGlobe.Scene
             }
             return vector;
         }
+
+        /// <summary>
+        /// vulkan默认深度范围是0-1，进地面是0，远裁剪面是1，刚好与NDC Space的 Z/W相对应。由于depth并非线性，所有还是需要RayCasting与平面求交计算真实的深度值，或直接通过当前像素的深度值反向计算
+        /// </summary>
+        /// <param name="source">The <see cref="Vector3"/> to project.</param>
+        /// <param name="projection">The projection <see cref="Matrix"/>.</param>
+        /// <param name="view">The view <see cref="Matrix"/>.</param>
+        /// <param name="world">The world <see cref="Matrix"/>.</param>
+        /// <returns></returns>
+        public Vector3 Project(Vector3 source, Matrix4x4 projection, Matrix4x4 view, Matrix4x4 world)
+        {
+            Matrix4x4 matrix = Matrix4x4.Multiply(Matrix4x4.Multiply(world, view), projection);
+            Vector3 vector = Vector3.Transform(source, matrix);
+            float a = (((source.X * matrix.M14) + (source.Y * matrix.M24)) + (source.Z * matrix.M34)) + matrix.M44;
+            if (!WithinEpsilon(a, 1f))
+            {
+                vector.X = vector.X / a;
+                vector.Y = vector.Y / a;
+                vector.Z = vector.Z / a;
+            }
+            //此处的计算可以判断Z非线性，且范围为0-1，这里Z的计算暂无意义
+            vector.X = (((vector.X + 1f) * 0.5f) * this._windowWidth) + 0;
+            vector.Y = (((-vector.Y + 1f) * 0.5f) * this._windowHeight) + 0;
+            vector.Z = (vector.Z * (this._far - this._near)) + this._near;
+            return vector;
+        }
+        private static bool WithinEpsilon(float a, float b)
+        {
+            float num = a - b;
+            return ((-1.401298E-45f <= num) && (num <= float.Epsilon));
+        }
+
+
+        /// <summary>
+        /// 测试视口矩阵
+        /// </summary>
+        public void TestViewportMaxtrix()
+        {
+            //因此屏幕坐标的Z值可以定义为距离视点的距离
+            var source = new Vector3(320f, 180f,5);
+
+            //使用矩阵计算
+            bool inverted = Matrix4x4.Invert(_viewportMaxtrix, out Matrix4x4 invert);
+
+            //projection转换后的坐标范围为-1到1，包括Z也是-1到1，定义-1位近裁剪面，1为远裁剪面。
+            var result = Vector3.Transform(source,invert);
+
+
+            source.X = (((source.X) / ((float)_windowWidth)) * 2f) - 1.0f;
+            source.Y = -((((source.Y) / ((float)_windowHeight)) * 2f) - 1.0f);
+            //这里仍需要考虑传入二维坐标的深度，以计算其在场景中的准确位置
+            source.Z = (source.Z - this._near) * 2f / (this._far - this._near) - 1.0f;
+
+        }
+
+
+        /// <summary>
+        /// 将世界坐标转换成屏幕坐标
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="projection"></param>
+        /// <param name="view"></param>
+        /// <param name="world"></param>
+        /// <param name="viewport"></param>
+        /// <returns></returns>
+        public Vector3 Project(Vector3 source, Matrix4x4 projection, Matrix4x4 view, Matrix4x4 world,Matrix4x4 viewport)
+        {
+            return Vector3.Transform(source, world * view * projection*viewport);
+        }
+
+
+
 
 
         public Ellipsoid Shape { get { return _shape; } set { _shape = value; } }
@@ -276,6 +356,26 @@ namespace PongGlobe.Scene
             _projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(_fov, _windowWidth / _windowHeight, _near, _far);
             //ProjectionChanged?.Invoke(_projectionMatrix);
         }
+
+        //计算视口矩阵
+        private void UpdateViewPortTransformMaxtrix()
+        {
+            float halfWidth = this._windowWidth * 0.5f;
+            float halfHeight = this._windowHeight * 0.5f;
+            float halfDepth = (_far - _near) * 0.5f;
+            //
+            // Bottom and top swapped:  MS -> OpenGL
+            //
+            //这里默认为左上角为00，且视口的左上角也是00，当需要多视口时，便需要加上视口实际的内容
+            var maxtrix =new Matrix4x4(
+                halfWidth, 0.0f, 0.0f, 0 + halfWidth,
+                0.0f, -halfHeight, 0.0f, 0 + halfHeight,
+                0.0f, 0.0f, halfDepth, halfDepth+_near,
+                0.0f, 0.0f, 0.0f, 1.0f);
+            _viewportMaxtrix = Matrix4x4.Transpose(maxtrix);
+            //这里需要作一个转置，因为numberic是行许，而opengl为列序，一个左乘一个右乘
+        }
+
 
         public float FarDistance { get => _far; set { _far = value; UpdatePerspectiveMatrix(); } }
         public float FieldOfView => _fov;

@@ -22,7 +22,6 @@ namespace PongGlobe.Styles
         /// 点要素图标的样式,目前的设计是一个图层对应一种图标，以后设计符号化时得考虑多种图标的情况
         /// </summary>
         public static readonly ImageSharpTexture DefaultSymbol;
-
         /// <summary>
         /// Static constructor
         /// </summary>
@@ -187,5 +186,14 @@ namespace PongGlobe.Styles
         }
 
        
+    }
+
+    /// <summary>
+    /// 点的矢量样式，由于样式比较多，抽象出点线面的样式出来
+    /// </summary>
+    [Serializable]
+    public class PointVectorStyle
+    {
+
     }
 }
