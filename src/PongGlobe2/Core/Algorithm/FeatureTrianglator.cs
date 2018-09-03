@@ -147,7 +147,11 @@ namespace PongGlobe.Core.Algorithm
             points.Positions = vectors.ToArray();
             points.Indices = indices.ToArray();
             return points;
-        }        
+        }
+
+
+
+
         public static Mesh<Vector3> FeatureToLineStripAdjacency(IShapefileFeature _feature, Ellipsoid _shape)
         {
             if (_feature == null) return null;

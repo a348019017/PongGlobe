@@ -13,6 +13,8 @@ layout(set=0, binding = 0) uniform UniformBufferObject {
     vec4 DiffuseSpecularAmbientShininess;
     vec3 GlobeOneOverRadiiSquared;
     float spa4;
+	vec2 viewport;
+	vec2 spa5;
 } ubo;
 
 layout(set=1, binding = 0) uniform Style 

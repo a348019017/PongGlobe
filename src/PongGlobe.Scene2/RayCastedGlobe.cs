@@ -167,5 +167,8 @@ namespace PongGlobe.Renders
 
         public float spa4;
 
+        public Vector2 ViewPort;
+        //补位量
+        public Vector2 spa5;
     }
 }

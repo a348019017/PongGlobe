@@ -97,7 +97,8 @@ namespace PongGlobe.Renders
                 }
             }
             _scene = scene;
-            SelectedStyle.FillColor = RgbaFloat.Orange;
+            //设置其选中的样式
+            SelectedStyle.PolygonStyle.FillColor = RgbaFloat.Orange;
         }
 
         /// <summary>
@@ -150,13 +151,13 @@ namespace PongGlobe.Renders
             //根据当前的选中状态调整render的样式信息
             foreach (var item in renders)
             {
-                item.Style = Style;
+                item.VectorStyle = Style;
                 item.Update();
                 foreach (var child in SelectedFeatures)
                 {
                     if (child.FeatureId == item.Feature.FeatureId)
                     {
-                        item.Style = SelectedStyle;
+                        item.VectorStyle = SelectedStyle;
                         item.Update();
                     }
                 }
@@ -169,9 +170,13 @@ namespace PongGlobe.Renders
     /// </summary>
     public static class VectorStyleExtension
     {
-        public static VectorStyleUBO ToUBO(this VectorStyle style)
+        public static PolygonVectorStyleUBO ToUBO(this PolygonVectorStyle style)
         {
-            return new VectorStyleUBO(style.FillColor,style.LineColor);
+            return new PolygonVectorStyleUBO(style.FillColor);
+        }
+        public static LineVectorStyleUBO ToUBO(this LineVectorStyle style)
+        {
+            return new LineVectorStyleUBO(style.LineColor, style.LineWidth);
         }
     }
 
@@ -195,7 +200,8 @@ namespace PongGlobe.Renders
         private List<DeviceBuffer> _boundingBoxindiceBuffer = new List<DeviceBuffer>();
         private DeviceBuffer _lineVertexBuffer;
         private DeviceBuffer _lineIndicesBuffer; 
-        private DeviceBuffer _styleBuffer;
+        private DeviceBuffer _polygonstyleBuffer;
+        private DeviceBuffer _polylinetyleBuffer;
         private ResourceSet _styleResourceSet;
         private bool ShowBoundingBox = true;
         private GraphicsDevice _gd;
@@ -223,7 +229,7 @@ namespace PongGlobe.Renders
         {
             _feature = _fea;
             _shape = _scene.Ellipsoid;
-            Style = new VectorStyle();
+            VectorStyle = new VectorStyle();
         }
         /// <summary>
         /// 显示轮廓
@@ -231,10 +237,8 @@ namespace PongGlobe.Renders
         /// <returns></returns>
         public bool ShowWireFrame { get; set; }
         public IShapefileFeature Feature => _feature;
-        /// <summary>
-        /// 图层渲染的样式信息
-        /// </summary>
-        public Styles.VectorStyle Style { get; set; }
+       
+        public Styles.VectorStyle VectorStyle { get; set; }
         /// <summary>
         /// 创建相关资源
         /// </summary>
@@ -245,8 +249,8 @@ namespace PongGlobe.Renders
             _gd = gd;
             //计算每个mesh的boundbox                      
             _mesh= FeatureTrianglator.FeatureToMesh(this._feature, this._shape);
-            //提取所有点绘制其
-            _meshLine = FeatureTrianglator.FeatureToPoints(this._feature, this._shape);
+            //提取所有点绘制其线
+            _meshLine = FeatureTrianglator.FeatureToLineStripAdjacency(this._feature, this._shape);
             ///创建并更新资源
             var result = _meshLine.CreateGraphicResource(gd, factory);
             _lineVertexBuffer = result.Item1;
@@ -262,16 +266,20 @@ namespace PongGlobe.Renders
             }
             //三角细分,细分精度为1度
             //_mesh = TriangleMeshSubdivision.Compute(posClearUp, indices.ToArray(), Math.PI / 180);
-           
-            //创建一个Color的Buffer并更新
-            _styleBuffer = factory.CreateBuffer(new BufferDescription(32, BufferUsage.UniformBuffer|BufferUsage.Dynamic));
-            gd.UpdateBuffer(_styleBuffer,0,Style.ToUBO());
+
+            //创建一个PolygonStyle的Buffer并更新
+            _polygonstyleBuffer = factory.CreateBuffer(new BufferDescription(16, BufferUsage.UniformBuffer|BufferUsage.Dynamic));
+            gd.UpdateBuffer(_polygonstyleBuffer, 0,VectorStyle.PolygonStyle.ToUBO());
+
+            //创建一个LineStyle的Buffer
+            _polylinetyleBuffer = _polygonstyleBuffer = factory.CreateBuffer(new BufferDescription(32, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            gd.UpdateBuffer(_polylinetyleBuffer, 0, VectorStyle.LineStyle.ToUBO());
 
             //创建一个stylelayout
             ResourceLayout styleLayout = factory.CreateResourceLayout(
                new ResourceLayoutDescription(
-                   new ResourceLayoutElementDescription("Style", ResourceKind.UniformBuffer,  ShaderStages.Fragment)
-
+                   new ResourceLayoutElementDescription("LineStyle", ResourceKind.UniformBuffer,  ShaderStages.Fragment| ShaderStages.Geometry),
+                   new ResourceLayoutElementDescription("PolygonStyle", ResourceKind.UniformBuffer, ShaderStages.Fragment)
                    ));
             var curAss = this.GetType().Assembly;
             ShaderSetDescription shaderSet = new ShaderSetDescription(
@@ -294,7 +302,8 @@ namespace PongGlobe.Renders
                 new[]
                 {
                    ResourceHelper.LoadEmbbedShader(ShaderStages.Vertex,"LineVS.spv",gd,curAss),
-                   ResourceHelper.LoadEmbbedShader(ShaderStages.Fragment,"LineFS.spv",gd,curAss)
+                   ResourceHelper.LoadEmbbedShader(ShaderStages.Fragment,"LineFS.spv",gd,curAss),
+                   ResourceHelper.LoadEmbbedShader(ShaderStages.Geometry,"LineGS.spv",gd,curAss)
                 });
 
 
@@ -320,14 +329,14 @@ namespace PongGlobe.Renders
                 _meshLine.PrimitiveTopology,
                 shaderSetBoundingBox,
                 //共享View和prj的buffer
-                new ResourceLayout[] { ShareResource.ProjectionResourceLoyout },
+                new ResourceLayout[] { ShareResource.ProjectionResourceLoyout, styleLayout },
                 gd.MainSwapchain.Framebuffer.OutputDescription));
           
 
-            //创建一个StyleresourceSet
+            //创建一个StyleresourceSet,0是线样式1是面样式
             _styleResourceSet = factory.CreateResourceSet(new ResourceSetDescription(
                styleLayout,
-               _styleBuffer
+               _polylinetyleBuffer,_polygonstyleBuffer
                ));
             //创建一个ResourceSet
             //_cl = factory.CreateCommandList();
@@ -342,17 +351,18 @@ namespace PongGlobe.Renders
 
         public void Draw(CommandList _cl)
         {
-            _cl.SetPipeline(_pipeline);          
-            _cl.SetGraphicsResourceSet(0, ShareResource.ProjectuibResourceSet);
-            _cl.SetGraphicsResourceSet(1, _styleResourceSet);
-            for (int i = 0; i < _mesh.Count; i++)
-            {
-                _cl.SetVertexBuffer(0, _vertexBuffer[i]);
-                _cl.SetIndexBuffer(_indexBuffer[i], IndexFormat.UInt16);
-                _cl.DrawIndexed((uint)_mesh[i].Indices.Length, 1, 0, 0, 0);                
-            }
+            //_cl.SetPipeline(_pipeline);          
+            //_cl.SetGraphicsResourceSet(0, ShareResource.ProjectuibResourceSet);
+            //_cl.SetGraphicsResourceSet(1, _styleResourceSet);
+            //for (int i = 0; i < _mesh.Count; i++)
+            //{
+            //    _cl.SetVertexBuffer(0, _vertexBuffer[i]);
+            //    _cl.SetIndexBuffer(_indexBuffer[i], IndexFormat.UInt16);
+            //    _cl.DrawIndexed((uint)_mesh[i].Indices.Length, 1, 0, 0, 0);                
+            //}
             _cl.SetPipeline(_boundingBoxPipeLine);
             _cl.SetGraphicsResourceSet(0, ShareResource.ProjectuibResourceSet);
+            _cl.SetGraphicsResourceSet(1, _styleResourceSet);
             _cl.SetVertexBuffer(0, _lineVertexBuffer);
             _cl.SetIndexBuffer( _lineIndicesBuffer, IndexFormat.UInt16);
             _cl.DrawIndexed((uint)_meshLine.Indices.Length,1,0,0,0);
@@ -360,7 +370,8 @@ namespace PongGlobe.Renders
 
         public void Update()
         {
-            _gd.UpdateBuffer(_styleBuffer, 0,  Style.ToUBO());
+            _gd.UpdateBuffer(_polygonstyleBuffer, 0, VectorStyle.PolygonStyle.ToUBO());
+            _gd.UpdateBuffer(_polylinetyleBuffer, 0, VectorStyle.LineStyle.ToUBO());
         }
     }
 
@@ -372,18 +383,40 @@ namespace PongGlobe.Renders
     /// 样式信息的结构体
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct VectorStyleUBO
+    public struct PolygonVectorStyleUBO
     {
         /// <summary>
         /// 多边形的颜色,结构类似vector4
         /// </summary>
-        public RgbaFloat FillColor;
-        public RgbaFloat LineColor;
+        public RgbaFloat FillColor;      
 
-        public VectorStyleUBO(RgbaFloat fillColor,RgbaFloat lineColor)
+        public PolygonVectorStyleUBO(RgbaFloat fillColor)
         {
             FillColor = fillColor;
+            
+        }
+    }
+
+    /// <summary>
+    /// 样式信息的结构体
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct LineVectorStyleUBO
+    {
+        /// <summary>
+        /// 多边形的颜色,结构类似vector4
+        /// </summary>
+        public RgbaFloat LineColor;
+        public float LineWidth;
+        //补位信息
+        public Vector3 spa1;
+
+        public LineVectorStyleUBO(RgbaFloat lineColor, float lineWidth=1.0f)
+        {
+            spa1 = new Vector3();
             LineColor = lineColor;
+            LineWidth = lineWidth;
+
         }
     }
 

@@ -24,9 +24,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\veldrid\src\Veldrid.ImageSharp\Veldrid.ImageSharp.csproj" />
-    <ProjectReference Include="..\..\..\..\veldrid\src\Veldrid.StartupUtilities\Veldrid.StartupUtilities.csproj" />
-    <ProjectReference Include="..\..\..\..\veldrid\src\Veldrid\Veldrid.csproj" />
+    <ProjectReference Include="..\Veldrid.ImageSharp\Veldrid.ImageSharp.csproj" />
+    <ProjectReference Include="..\Veldrid.ImGui\Veldrid.ImGui.csproj" />
+    <ProjectReference Include="..\Veldrid.StartupUtilities\Veldrid.StartupUtilities.csproj" />
+    <ProjectReference Include="..\Veldrid.Utilities\Veldrid.Utilities.csproj" />
+    <ProjectReference Include="..\Veldrid\Veldrid.csproj" />
   </ItemGroup>
 
 </Project>

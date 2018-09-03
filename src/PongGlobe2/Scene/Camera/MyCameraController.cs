@@ -17,7 +17,7 @@ namespace PongGlobe.Scene
         /// </summary>
         //private IDynamicOperator _curDynamicOper;
         private float _fov = 1f;
-        private float _near = 0.5f;
+        private float _near = 0.01f;
         private float _far = 3.0f;
 
         private Matrix4x4 _viewMatrix;
@@ -130,6 +130,13 @@ namespace PongGlobe.Scene
         }
 
 
+        /// <summary>
+        /// 返回视口的大小
+        /// </summary>
+        public Vector2 ViewPort => new Vector2(_windowWidth, _windowHeight);
+        
+
+       
         /// <summary>
         /// 测试视口矩阵
         /// </summary>
@@ -319,7 +326,7 @@ namespace PongGlobe.Scene
                 if (_lookAtInfo.Longitude >= 2 * Math.PI) _lookAtInfo.Longitude -= 2 * Math.PI;
                 if (_lookAtInfo.Longitude <= 0) _lookAtInfo.Longitude += 2 * Math.PI;
 
-                _lookAtInfo.Latitude -= delatLat;
+                _lookAtInfo.Latitude += delatLat;
                 if (_lookAtInfo.Latitude >= Math.PI / 2) _lookAtInfo.Latitude = Math.PI / 2;
                 if (_lookAtInfo.Latitude <= -Math.PI / 2) _lookAtInfo.Latitude = -Math.PI / 2;
                 //重新计算相关参数
@@ -366,11 +373,12 @@ namespace PongGlobe.Scene
             //
             // Bottom and top swapped:  MS -> OpenGL
             //
+            //vulkan定义的深度是0-1，perspctive matrix ,深度是非线性关系的，透视矩阵是线性的
             //这里默认为左上角为00，且视口的左上角也是00，当需要多视口时，便需要加上视口实际的内容
             var maxtrix =new Matrix4x4(
                 halfWidth, 0.0f, 0.0f, 0 + halfWidth,
                 0.0f, -halfHeight, 0.0f, 0 + halfHeight,
-                0.0f, 0.0f, halfDepth, halfDepth+_near,
+                0.0f, 0.0f, 1.0f, 0,
                 0.0f, 0.0f, 0.0f, 1.0f);
             _viewportMaxtrix = Matrix4x4.Transpose(maxtrix);
             //这里需要作一个转置，因为numberic是行许，而opengl为列序，一个左乘一个右乘
@@ -382,7 +390,6 @@ namespace PongGlobe.Scene
         public float NearDistance { get => _near; set { _near = value; UpdatePerspectiveMatrix(); } }
 
         public float AspectRatio => _windowWidth / _windowHeight;
-
         public Vector3 Position => _positon;
     }
 }

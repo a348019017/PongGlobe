@@ -11,7 +11,7 @@ namespace GettingStarted2
         {
             MyCameraController2 camera = new MyCameraController2(640, 360);
             var source = new Vector3(320f, 180f, 2.5f);
-            var reailCoord = new Vector3(1, 0, 0.25f);
+            var reailCoord = new Vector3(1, 0, -1f);
             var resultXX = camera.Project(reailCoord, camera.ProjectionMatrix, camera.ViewMatrix, Matrix4x4.Identity);
             var result1= camera.Unproject(source, camera.ProjectionMatrix, camera.ViewMatrix, Matrix4x4.Identity);
             var source2 = new Vector3(320f, 180f, 6f);

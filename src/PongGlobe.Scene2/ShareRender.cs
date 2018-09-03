@@ -28,10 +28,9 @@ namespace PongGlobe.Renders
             this.Shape = scene.Ellipsoid;
         }
 
-
         public void CreateDeviceResources(GraphicsDevice gd, ResourceFactory factory)
         {
-            _projectionBuffer = factory.CreateBuffer(new BufferDescription(208, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            _projectionBuffer = factory.CreateBuffer(new BufferDescription(224, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             var DiffuseIntensity = 0.65f;
             var SpecularIntensity = 0.25f;
             var AmbientIntensity = 0.10f;
@@ -50,7 +49,7 @@ namespace PongGlobe.Renders
 
             ResourceLayout projViewLayout = factory.CreateResourceLayout(
                 new ResourceLayoutDescription(
-                    new ResourceLayoutElementDescription("Projection", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment)
+                    new ResourceLayoutElementDescription("Projection", ResourceKind.UniformBuffer, ShaderStages.Vertex | ShaderStages.Fragment|ShaderStages.Geometry)
                     ));
 
             _projViewSet = factory.CreateResourceSet(new ResourceSetDescription(
@@ -88,7 +87,8 @@ namespace PongGlobe.Renders
             _ubo.CameraEye = eyePosition;
             _ubo.CameraEyeSquared = eyePosition * eyePosition;
             _ubo.CameraLightPosition = eyePosition;
-            _cl.UpdateBuffer(_projectionBuffer, 0, _ubo);
+            _ubo.ViewPort = ((MyCameraController2)_camera).ViewPort
+;            _cl.UpdateBuffer(_projectionBuffer, 0, _ubo);
         }
 
         public void Update()
