@@ -143,8 +143,7 @@ namespace PongGlobe.Scene
         public void TestViewportMaxtrix()
         {
             //因此屏幕坐标的Z值可以定义为距离视点的距离
-            var source = new Vector3(320f, 180f,5);
-
+            var source = new Vector3(380f, 140f,0.5f);
             //使用矩阵计算
             bool inverted = Matrix4x4.Invert(_viewportMaxtrix, out Matrix4x4 invert);
 
@@ -154,8 +153,8 @@ namespace PongGlobe.Scene
 
             source.X = (((source.X) / ((float)_windowWidth)) * 2f) - 1.0f;
             source.Y = -((((source.Y) / ((float)_windowHeight)) * 2f) - 1.0f);
-            //这里仍需要考虑传入二维坐标的深度，以计算其在场景中的准确位置
-            source.Z = (source.Z - this._near) * 2f / (this._far - this._near) - 1.0f;
+            //这里仍需要考虑传入二维坐标的深度，此Z非线性
+            source.Z = source.Z;
 
         }
 

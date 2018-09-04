@@ -121,8 +121,9 @@ namespace Veldrid.Vk
 
             // Input Assembly
             VkPipelineInputAssemblyStateCreateInfo inputAssemblyCI = VkPipelineInputAssemblyStateCreateInfo.New();
-            //如果是LineStrip或者TriangleStrip
-            if (description.PrimitiveTopology == PrimitiveTopology.LineStrip || description.PrimitiveTopology == PrimitiveTopology.TriangleStrip)
+            //如果是LineStrip或者TriangleStrip,或者是AjacyStrip
+            if (description.PrimitiveTopology == PrimitiveTopology.LineStrip || description.PrimitiveTopology == PrimitiveTopology.TriangleStrip
+                || description.PrimitiveTopology==PrimitiveTopology.LineStripAdjacency|| description.PrimitiveTopology == PrimitiveTopology.TriangleStripAdjacency)
                 inputAssemblyCI.primitiveRestartEnable = true;
             inputAssemblyCI.topology = VkFormats.VdToVkPrimitiveTopology(description.PrimitiveTopology);
 
