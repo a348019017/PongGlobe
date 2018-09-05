@@ -8,7 +8,7 @@
 //传入LineStrip_adjacency
 layout( lines_adjacency ) in;
 //传出Triangle
-layout( triangle_strip, max_vertices = 7 ) out;
+layout( line_strip, max_vertices = 2 ) out;
 
 
 
@@ -50,9 +50,11 @@ vec4 ToNDCSpace(vec4 vertex)
 
 void main()
 {
+//测试添加一个重点
      vec4 p1=gl_in[1].gl_Position;
 	 //vec4 p1w=toScreenSpace(p1);
 	 vec4 p2=gl_in[2].gl_Position;
+	 vec4 p3=p1/2.0f+p2/2.0f;
 	 //vec4 p2w=toScreenSpace(p2);
 	 vec2 offset=vec2(20,20)*vec2(2/ubo.viewport.x,2/ubo.viewport.y);
 	 //计算其向量
@@ -61,14 +63,10 @@ void main()
 	 //vec2 v0=  normalize(p2.xy*vec2(640,360)/p2.w)-(p1.xy*vec2(640,360)/p1.w);
 	 //vec2 v1=normalize(p2.xy-p1.xy);	 	
 	 //if(ubo.viewport.xy!=vec2(640,360))return;	 
-     gl_Position=vec4(p1.xy-offset*v1*p1.w,p1.z,p1.w);
+     gl_Position=p1;
      EmitVertex();
-	 gl_Position=vec4(p1.xy+offset*v1*p1.w,p1.z,p1.w);
-	 EmitVertex();	 
-	 gl_Position=vec4(p2.xy-offset*v1*p2.w,p2.z,p1.w);
-	 EmitVertex();
-	 gl_Position=vec4(p2.xy+offset*v1*p2.w,p2.z,p1.w);
-	 EmitVertex();
+	 gl_Position=p2;
+	 EmitVertex();	 	  
 	 EndPrimitive();   
 //	// get the four vertices passed to the shader:
 //  vec4 p0 = gl_in[0].gl_Position ;	// start of previous segment

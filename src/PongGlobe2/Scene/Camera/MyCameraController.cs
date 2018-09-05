@@ -181,6 +181,8 @@ namespace PongGlobe.Scene
 
         public Matrix4x4 ViewMatrix => _viewMatrix;
         public Matrix4x4 ProjectionMatrix => _projectionMatrix;
+        public Matrix4x4 ViewportMaxtrix => _viewportMaxtrix;
+
 
         public MyCameraController2(float width, float height, Ellipsoid shape)
         {

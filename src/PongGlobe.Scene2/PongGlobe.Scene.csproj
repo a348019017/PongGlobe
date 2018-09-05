@@ -8,6 +8,9 @@
     <None Remove="Shaders\CommonLine\LineFS.spv" />
     <None Remove="Shaders\CommonLine\LineGS.spv" />
     <None Remove="Shaders\CommonLine\LineVS.spv" />
+    <None Remove="Shaders\DrawLine\LineFS.spv" />
+    <None Remove="Shaders\DrawLine\LineGS.spv" />
+    <None Remove="Shaders\DrawLine\LineVS.spv" />
     <None Remove="Shaders\GlobeFS.spv" />
     <None Remove="Shaders\GlobeVS.spv" />
     <None Remove="Shaders\Point\PointFS.spv" />
@@ -20,6 +23,9 @@
     <EmbeddedResource Include="Shaders\CommonLine\LineFS.spv" LogicalName="LineFS.spv" />
     <EmbeddedResource Include="Shaders\CommonLine\LineGS.spv" LogicalName="LineGS.spv" />
     <EmbeddedResource Include="Shaders\CommonLine\LineVS.spv" LogicalName="LineVS.spv" />
+    <EmbeddedResource Include="Shaders\DrawLine\LineFS.spv" LogicalName="DrawLineFS.spv" />
+    <EmbeddedResource Include="Shaders\DrawLine\LineGS.spv" LogicalName="DrawLineGS.spv" />
+    <EmbeddedResource Include="Shaders\DrawLine\LineVS.spv" LogicalName="DrawLineVS.spv" />
     <EmbeddedResource Include="Shaders\GlobeFS.spv" LogicalName="GlobeFS.spv" />
     <EmbeddedResource Include="Shaders\GlobeVS.spv" LogicalName="GlobeVS.spv" />
     <EmbeddedResource Include="Shaders\Point\PointFS.spv" LogicalName="PointFS.spv" />
