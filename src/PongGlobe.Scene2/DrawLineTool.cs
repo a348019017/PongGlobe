@@ -14,7 +14,7 @@ namespace PongGlobe.Scene
     public class DrawLineTool : IRender
     {
         //当前需要绘制的顶点集合
-        private List<Vector2> points = new List<Vector2>();        
+        private List<Vector3> points = new List<Vector3>();        
         private List<ushort> indices = new List<ushort>();
         private LineVectorStyleUBO _lineStyle;
 
@@ -53,6 +53,9 @@ namespace PongGlobe.Scene
 
 
             var curAss = this.GetType().Assembly;
+
+
+            //这里position的定义极有可能是vec3，因此传入vec2可能出现问题，具体可以参考vk里的源码
             ShaderSetDescription shaderSetBoundingBox = new ShaderSetDescription(
                new[]
                {
@@ -69,6 +72,7 @@ namespace PongGlobe.Scene
 
             var rasterizer = RasterizerStateDescription.Default;
             rasterizer.FillMode = PolygonFillMode.Wireframe;
+            rasterizer.FrontFace = FrontFace.CounterClockwise;
             //gpu的lineWidth实际绘制的效果并不好仍然需要GeometryShader来实现更好的效果
             //rasterizer.LineWidth = 8.0f;
             _pipeline = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription(
@@ -114,7 +118,7 @@ namespace PongGlobe.Scene
             if (pos)
             {
                 var point = InputTracker.MousePosition;
-                points.Add(point);
+                points.Add(new Vector3(point,0));
                 //添加点之后更新buffer中的数据
                 UpdateBuffer();
             }
@@ -134,19 +138,19 @@ namespace PongGlobe.Scene
             if (points.Count >= 2)
             {
                 int count = points.Count;
-                List<Vector2> meshPoints = new List<Vector2>(count+2);
+                List<Vector3> meshPoints = new List<Vector3>(count+2);
                 //计算第一个ajacy,根据第一个点和第二个点
                 //将屏幕坐标转换成NDC坐标
                 var viewportMaxtrix= ((MyCameraController2)_scene.Camera).ViewportMaxtrix;
                 Matrix4x4 invertViewportMaxtrix;
                      Matrix4x4.Invert(viewportMaxtrix,out invertViewportMaxtrix);
                 //将视口坐标转换成NDC坐标
-                meshPoints.Add(Vector2.Transform(2 * points[0] - points[1],invertViewportMaxtrix));
-                meshPoints.AddRange(points.ConvertAll(p=>Vector2.Transform(p, invertViewportMaxtrix)));
-                meshPoints.Add(Vector2.Transform(2 * points[count - 1] - points[count - 2], invertViewportMaxtrix));
+                meshPoints.Add(Vector3.Transform(2 * points[0] - points[1],invertViewportMaxtrix));
+                meshPoints.AddRange(points.ConvertAll(p=>Vector3.Transform(p, invertViewportMaxtrix)));
+                meshPoints.Add(Vector3.Transform(2 * points[count - 1] - points[count - 2], invertViewportMaxtrix));
                 //生成Indices
                 indices.Clear();
-                for (ushort i = 1; i < count-1 ; i++)
+                for (ushort i = 1; i < count ; i++)
                 {
                     indices.Add((ushort)(i-1));
                     indices.Add((ushort)(i));

@@ -52,12 +52,12 @@ namespace PongGlobe.Windows
             var shareRender = new ShareRender(_scene);
             renders.Add(shareRender);
             renders.Add(globeRender);
-            //renders.Add(vectorLayerRender);
-            var pat2h = @"E:\swyy\Lib\PongGlobe\PongGlobe\assets\Vector\NaturalEarth\110m-populated-places-simple\110m_populated_places_simple.shp";
+            renders.Add(vectorLayerRender);
+            //var pat2h = @"E:\swyy\Lib\PongGlobe\PongGlobe\assets\Vector\NaturalEarth\110m-populated-places-simple\110m_populated_places_simple.shp";
             //var vectorPoint = new PointVectorLayer(pat2h, _scene);
             //renders.Add(vectorPoint);
-            var drawline = new DrawLineTool(_scene);
-            renders.Add(drawline);
+            //var drawline = new DrawLineTool(_scene);
+           // renders.Add(drawline);
         }
 
         /// <summary>

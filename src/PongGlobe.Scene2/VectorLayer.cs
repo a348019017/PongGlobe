@@ -320,7 +320,7 @@ namespace PongGlobe.Renders
             //创建一个渲染boundingBox的渲染管线
             var rasterizer = RasterizerStateDescription.Default;
             rasterizer.FillMode = PolygonFillMode.Wireframe;
-           
+            rasterizer.FrontFace = FrontFace.CounterClockwise;
             //gpu的lineWidth实际绘制的效果并不好仍然需要GeometryShader来实现更好的效果
             //rasterizer.LineWidth = 8.0f;
             _boundingBoxPipeLine = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription(
