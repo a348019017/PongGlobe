@@ -17,7 +17,7 @@ namespace PongGlobe.Scene
         /// </summary>
         //private IDynamicOperator _curDynamicOper;
         private float _fov = 1f;
-        private float _near = 0.01f;
+        private float _near = 0.001f;
         private float _far = 3.0f;
 
         private Matrix4x4 _viewMatrix;

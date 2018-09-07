@@ -18,6 +18,8 @@ layout(set=0, binding = 0) uniform UniformBufferObject {
 } ubo;
 
 layout(location = 0) in vec3 position;
+layout(location = 0) out vec3 worldPosition;
+
 
 out gl_PerVertex {
     vec4 gl_Position;
@@ -28,10 +30,21 @@ vec3 GeodeticSurfaceNormal(vec3 positionOnEllipsoid, vec3 oneOverEllipsoidRadiiS
     return normalize(positionOnEllipsoid * oneOverEllipsoidRadiiSquared);
 }
 
+bool isEyeEarthCull(vec3 pos)
+{
+   //过滤掉所有不满足需求的点
+	vec3 posToEye=ubo.CameraEye-pos;
+	vec3 posNormal=GeodeticSurfaceNormal(pos,ubo.GlobeOneOverRadiiSquared);
+	//如果position在当前的EarthCull内
+	if(dot(posToEye,posNormal)<0) return false;
+	return true;
+}
 
 
 void main()                     
-{
+{    
+    //if(isEyeEarthCull(position)) return;
     gl_Position = ubo.prj * vec4(position,1.0); 
     gl_Position.y=-gl_Position.y;	
+	worldPosition=position;
 }
