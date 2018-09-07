@@ -106,76 +106,93 @@ void main()
 //  if(!isInViewPort(p1)&&!isInViewPort(p2)) return;
 //  if(!isInViewPort(p1))
    
-  // determine the direction of each of the 3 segments (previous, current, next)
-  vec2 v0 = normalize((p1-p0).xy);
-  vec2 v1 = normalize((p2-p1).xy);
-  vec2 v2 = normalize((p3-p2).xy);
+    vec2 v0 = normalize( (p1 - p0).xy );
+	vec2 v1 = normalize( (p2 - p1).xy );
+	vec2 v2 = normalize( (p3 - p2).xy );
 
-  // determine the normal of each of the 3 segments (previous, current, next)
-  vec2 n0 = vec2(-v0.y, v0.x);
-  vec2 n1 = vec2(-v1.y, v1.x);
-  vec2 n2 = vec2(-v2.y, v2.x);
+	// determine the normal of each of the 3 segments (previous, current, next)
+	vec2 n0 = vec2( -v0.y, v0.x );
+	vec2 n1 = vec2( -v1.y, v1.x );
+	vec2 n2 = vec2( -v2.y, v2.x );
 
-  // determine miter lines by averaging the normals of the 2 segments
-  if(distance(n0+n1,vec2(0,0))==0)
-   return;
-   if(distance(n1+n2,vec2(0,0))==0)
-   return;
-  vec2 miter_a = normalize(n0 + n1);	// miter at start of current segment
-  vec2 miter_b = normalize(n1 + n2);	// miter at end of current segment
+	// determine miter lines by averaging the normals of the 2 segments
+	vec2 miter_a = normalize( n0 + n1 );	// miter at start of current segment
+	vec2 miter_b = normalize( n1 + n2 );	// miter at end of current segment
 
-  // determine the length of the miter by projecting it onto normal and then inverse it
-  //这里length可能计算出很大的值
-  float length_a = width / dot(miter_a, n1);
-  float length_b = width / dot(miter_b, n1);
-  //正常情况宽度一般不会大于线宽的两倍，这个算法最大的问题就是当p0，p2很接近时会形变，这种情况下的渲染最好不要丢失点
-  if(length_a>5*width) length_a=5*width;
-  if(length_b>5*width)length_b=5*width;
+	// determine the length of the miter by projecting it onto normal and then inverse it
+	float length_a = width / dot( miter_a, n1 );
+	float length_b = width / dot( miter_b, n1 );
 
-  //顺时针的情况下
-  if( dot(v0,n1) > 0 ) {      
-	gl_Position = ToNDCSpace(vec4(p1.xy - length_a * miter_a ,  p1.z, 1.0 ));
-	EmitVertex();
-	// proceed to positive normal
-   
-	gl_Position = ToNDCSpace(vec4((p1.xy +  width * n1) , p1.z, 1.0));
-	EmitVertex();
- }
- else { 
-   
-    //这里反向计算的时候深度线性好像丢失了
-	gl_Position =  ToNDCSpace(vec4((p1.xy -  width * n1) ,  p1.z, 1.0) );
-	EmitVertex();
-	
-	gl_Position =  ToNDCSpace(vec4((p1.xy + length_a * miter_a) ,  p1.z, 1.0 ));
-	EmitVertex();
-  } 
-  
-  ///顺时针
-  if( dot(v2,n1) < 0 ) {
-	// proceed to negative miter
-   
-	gl_Position = ToNDCSpace(vec4(p2.xy - length_b * miter_b , p2.z, 1.0 ));
-	EmitVertex();
-	
-	gl_Position = ToNDCSpace(vec4(p2.xy +  width * n1 , p2.z, 1.0 ));
-	EmitVertex();
-	
-	gl_Position = ToNDCSpace(vec4(p2.xy +  width * n2 ,p2.z, 1.0 ));
-	EmitVertex();
-  }
-  else { 
-    vec4 tmp=   vec4(p2.xy -  width * n1 ,p2.z , 1.0);
-	gl_Position = ToNDCSpace(tmp);
-	EmitVertex();
-	// proceed to positive miter
-	gl_Position =  ToNDCSpace(vec4(p2.xy + length_b * miter_b,p2.z, 1.0 ));
-	EmitVertex();
-	// end at negative normal
-	gl_Position = ToNDCSpace(vec4( p2.xy -  width * n2 , p2.z, 1.0) );
-	EmitVertex();
-  }
-  EndPrimitive();
+	// prevent excessively long miters at sharp corners
+	if( dot( v0, v1 ) < -MITER_LIMIT ) {
+		miter_a = n1;
+		length_a = width;
 
+		// close the gap
+		if( dot( v0, n1 ) > 0 ) {
+			VertexOut.mTexCoord = vec2( 0, 0 );
+			VertexOut.mColor = VertexIn[1].mColor;
+			gl_Position = vec4( ( p1 + THICKNESS * n0 ) / WIN_SCALE, 0.0, 1.0 );
+			EmitVertex();
+
+			VertexOut.mTexCoord = vec2( 0, 0 );
+			VertexOut.mColor = VertexIn[1].mColor;
+			gl_Position = vec4( ( p1 + THICKNESS * n1 ) / WIN_SCALE, 0.0, 1.0 );
+			EmitVertex();
+
+			VertexOut.mTexCoord = vec2( 0, 0.5 );
+			VertexOut.mColor = VertexIn[1].mColor;
+			gl_Position = vec4( p1 / WIN_SCALE, 0.0, 1.0 );
+			EmitVertex();
+
+			EndPrimitive();
+		}
+		else {
+			VertexOut.mTexCoord = vec2( 0, 1 );
+			VertexOut.mColor = VertexIn[1].mColor;
+			gl_Position = vec4( ( p1 - THICKNESS * n1 ) / WIN_SCALE, 0.0, 1.0 );
+			EmitVertex();
+
+			VertexOut.mTexCoord = vec2( 0, 1 );
+			VertexOut.mColor = VertexIn[1].mColor;
+			gl_Position = vec4( ( p1 - THICKNESS * n0 ) / WIN_SCALE, 0.0, 1.0 );
+			EmitVertex();
+
+			VertexOut.mTexCoord = vec2( 0, 0.5 );
+			VertexOut.mColor = VertexIn[1].mColor;
+			gl_Position = vec4( p1 / WIN_SCALE, 0.0, 1.0 );
+			EmitVertex();
+
+			EndPrimitive();
+		}
+	}
+
+	if( dot( v1, v2 ) < -MITER_LIMIT ) {
+		miter_b = n1;
+		length_b = THICKNESS;
+	}
+
+	// generate the triangle strip
+	VertexOut.mTexCoord = vec2( 0, 0 );
+	VertexOut.mColor = VertexIn[1].mColor;
+	gl_Position = vec4( ( p1 + length_a * miter_a ) / WIN_SCALE, 0.0, 1.0 );
+	EmitVertex();
+
+	VertexOut.mTexCoord = vec2( 0, 1 );
+	VertexOut.mColor = VertexIn[1].mColor;
+	gl_Position = vec4( ( p1 - length_a * miter_a ) / WIN_SCALE, 0.0, 1.0 );
+	EmitVertex();
+
+	VertexOut.mTexCoord = vec2( 0, 0 );
+	VertexOut.mColor = VertexIn[2].mColor;
+	gl_Position = vec4( ( p2 + length_b * miter_b ) / WIN_SCALE, 0.0, 1.0 );
+	EmitVertex();
+
+	VertexOut.mTexCoord = vec2( 0, 1 );
+	VertexOut.mColor = VertexIn[2].mColor;
+	gl_Position = vec4( ( p2 - length_b * miter_b ) / WIN_SCALE, 0.0, 1.0 );
+	EmitVertex();
+
+	EndPrimitive();
 	
 }
