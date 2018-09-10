@@ -17,13 +17,6 @@ layout(set=0, binding = 0) uniform UniformBufferObject {
 	vec2 spa5;
 } ubo;
 
-layout(set=1, binding = 0) uniform Style 
-{
-    vec4 pointColor;           
-    float pointSize;
-    vec3 spa1;
-} style;
-
 
 layout(location = 0) in vec3 position;
 
@@ -37,5 +30,5 @@ void main()
     gl_Position = ubo.prj * vec4(position,1.0); 
 	gl_Position.y=-gl_Position.y;	
 	//gl_pointSize渲染的点是方形的点，仍然需要使用GeometryShader渲染成可观的点
-	gl_PointSize=style.pointSize;
+	//gl_PointSize=style.pointSize;
 }

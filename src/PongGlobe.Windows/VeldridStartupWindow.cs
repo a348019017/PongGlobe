@@ -37,6 +37,7 @@ namespace PongGlobe.Windows
                 WindowTitle = title,
             };
             _window = VeldridStartup.CreateWindow(ref wci);
+           // _window.Resized
             _window.Resized += () =>
             {
                 _windowResized = true;

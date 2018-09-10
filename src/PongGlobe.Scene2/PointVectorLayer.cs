@@ -14,7 +14,7 @@ using GeoAPI.Geometries;
 using System.Collections.ObjectModel;
 using System;
 using ImGuiNET;
-using PongGlobe.Core;
+using Veldrid.ImageSharp;
 
 namespace PongGlobe.Scene
 {
@@ -34,6 +34,8 @@ namespace PongGlobe.Scene
         ShaderSetDescription shaderSet;
         private ResourceSet _pointStyleRSet;
         private ResourceLayout _pointstyleLayout;
+        private TextureView _pointTextureView;
+        private Texture _pointTexture;
 
         public PointVectorLayer(string shpPath, Scene scene)
         {
@@ -47,7 +49,11 @@ namespace PongGlobe.Scene
 
         public void CreateDeviceResources(GraphicsDevice gd, ResourceFactory factory)
         {
-           
+            var inPath = @"E:\swyy\Lib\PongGlobe\PongGlobe\assets\icon\vaves.png";
+            ImageSharpTexture inputImage = new ImageSharpTexture(inPath, false);
+            _pointTexture= inputImage.CreateDeviceTexture(gd, factory);
+            _pointTextureView = factory.CreateTextureView(_pointTexture);
+
             var result = _meshPoints.CreateGraphicResource(gd, factory);
             _VertexBuffer = result.Item1;
             _IndicesBuffer = result.Item2;
@@ -62,7 +68,8 @@ namespace PongGlobe.Scene
                 new[]
                 {
                    ResourceHelper.LoadEmbbedShader(ShaderStages.Vertex,"PointVS.spv",gd,curAss),
-                   ResourceHelper.LoadEmbbedShader(ShaderStages.Fragment,"PointFS.spv",gd,curAss)
+                   ResourceHelper.LoadEmbbedShader(ShaderStages.Fragment,"PointFS.spv",gd,curAss),
+                   ResourceHelper.LoadEmbbedShader(ShaderStages.Geometry,"PointGS.spv",gd,curAss)
                 });
 
             //创建一个pointStyle的UBO,一共32字节，8个浮点值
@@ -70,8 +77,9 @@ namespace PongGlobe.Scene
             //创建一个Style的ResourceLayout
              _pointstyleLayout = factory.CreateResourceLayout(
                new ResourceLayoutDescription(
-                   new ResourceLayoutElementDescription("Style", ResourceKind.UniformBuffer, ShaderStages.Fragment|ShaderStages.Vertex)
-
+                   new ResourceLayoutElementDescription("Style", ResourceKind.UniformBuffer, ShaderStages.Fragment|ShaderStages.Geometry),
+                   new ResourceLayoutElementDescription("SurfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
+                   new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment)
                    ));
             _pointStyleUBO = new PointStyleUBO(RgbaFloat.Red);
             //更新变量等
@@ -80,14 +88,20 @@ namespace PongGlobe.Scene
             //创建一个StyleresourceSet
             _pointStyleRSet = factory.CreateResourceSet(new ResourceSetDescription(
                _pointstyleLayout,
-               _pointStyle
+               _pointStyle,
+               _pointTextureView,
+               gd.Aniso4xSampler
                ));
+
+            var rasterizer = RasterizerStateDescription.Default;
+            rasterizer.FillMode = PolygonFillMode.Solid;
+            rasterizer.FrontFace = FrontFace.Clockwise;
 
             //创建渲染管道
             _pointPipeLine = factory.CreateGraphicsPipeline(new GraphicsPipelineDescription(
                BlendStateDescription.SingleOverrideBlend,
                DepthStencilStateDescription.DepthOnlyLessEqual,
-               RasterizerStateDescription.Default,
+               rasterizer,
                _meshPoints.PrimitiveTopology,
                shaderSet,
                //共享View和prj的buffer
