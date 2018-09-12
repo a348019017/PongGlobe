@@ -88,9 +88,6 @@ namespace PongGlobe.Windows
         protected virtual unsafe void CreateResources(ResourceFactory factory)
         {
             //创建一个公共资源
-
-
-
             _cl = factory.CreateCommandList();
             foreach (var item in renders)
             {

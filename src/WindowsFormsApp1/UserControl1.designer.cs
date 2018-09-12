@@ -1,4 +1,4 @@
-﻿namespace PongGlobeWinForm
+﻿namespace WindowsFormsApp1
 {
     partial class UserControl1
     {

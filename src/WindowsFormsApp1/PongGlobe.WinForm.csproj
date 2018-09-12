@@ -4,13 +4,14 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F96453EA-9DCE-4CC8-ABAE-EE95C3ABDB2F}</ProjectGuid>
+    <ProjectGuid>{5A738A3B-5F54-4C79-9E36-B6B2A6C99564}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>PongGlobeWinForm</RootNamespace>
-    <AssemblyName>PongGlobeWinForm</AssemblyName>
+    <RootNamespace>PongGlobe.WinForm</RootNamespace>
+    <AssemblyName>PongGlobe.WinForm</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects> 
+	<RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -21,6 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -48,7 +50,7 @@
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
+    <Compile Include="Form1.designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
@@ -56,9 +58,12 @@
     <Compile Include="UserControl1.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UserControl1.Designer.cs">
+    <Compile Include="UserControl1.designer.cs">
       <DependentUpon>UserControl1.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -67,6 +72,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="UserControl1.resx">
       <DependentUpon>UserControl1.cs</DependentUpon>
@@ -83,6 +89,36 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PongGlobe.Scene2\PongGlobe.Scene.csproj">
+      <Project>{37fbb02a-a223-47e6-8b14-d07880bfd13a}</Project>
+      <Name>PongGlobe.Scene</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PongGlobe2\PongGlobe.csproj">
+      <Project>{f6ab7e9b-e58d-4ccb-b0f7-8eea84a71488}</Project>
+      <Name>PongGlobe</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Veldrid.ImageSharp\Veldrid.ImageSharp.csproj">
+      <Project>{6a204977-fc5e-48d3-a20c-34a98eb870ef}</Project>
+      <Name>Veldrid.ImageSharp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Veldrid.ImGui\Veldrid.ImGui.csproj">
+      <Project>{86930806-bb6b-4ca2-81d7-a97ff7061d66}</Project>
+      <Name>Veldrid.ImGui</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Veldrid.StartupUtilities\Veldrid.StartupUtilities.csproj">
+      <Project>{2c9af9c5-4c8f-4b16-9d13-c3ae8c994286}</Project>
+      <Name>Veldrid.StartupUtilities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Veldrid.Utilities\Veldrid.Utilities.csproj">
+      <Project>{31ee1559-03dc-4e09-ac1c-fe385022a568}</Project>
+      <Name>Veldrid.Utilities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Veldrid\Veldrid.csproj">
+      <Project>{0bba03ce-ee39-4321-bcfa-b2fdb88fde0f}</Project>
+      <Name>Veldrid</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

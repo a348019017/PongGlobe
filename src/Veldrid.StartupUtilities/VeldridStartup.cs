@@ -205,6 +205,20 @@ namespace Veldrid.StartupUtilities
             return gd;
         }
 
+        //创建一个仅适用于win32的Vulkan的GraphicDevice,给winform或者wpf使用
+        public static unsafe GraphicsDevice CreateVulkanGraphicsDeviceForWin32(GraphicsDeviceOptions options, IntPtr hwnd, IntPtr hinstance,int width,int height)
+        {  
+            var swapSource = SwapchainSource.CreateWin32(hwnd, hinstance);
+            SwapchainDescription scDesc = new SwapchainDescription(
+                swapSource,
+                (uint)width,
+                (uint)height,
+                options.SwapchainDepthFormat,
+                options.SyncToVerticalBlank);
+            GraphicsDevice gd = GraphicsDevice.CreateVulkan(options, scDesc);
+            return gd;
+        }
+
         private static unsafe Veldrid.Vk.VkSurfaceSource GetSurfaceSource(SDL_SysWMinfo sysWmInfo)
         {
             switch (sysWmInfo.subsystem)
