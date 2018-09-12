@@ -204,7 +204,7 @@ namespace PongGlobe.Scene
         /// <summary>
         /// 更新camera参数
         /// </summary>
-        private void UpdateCamera()
+        public void UpdateCamera()
         {
             //首先计算LookAt点所在世界坐标系
             var centerLookAt = _shape.ToVector3(new Geodetic3D(_lookAtInfo.Longitude, _lookAtInfo.Latitude, _lookAtInfo.Altitude));
@@ -302,51 +302,51 @@ namespace PongGlobe.Scene
         public void Update(float deltaSeconds)
         {
             ////控制鼠标中键,进行缩放视图
-            //var delta = InputTracker.GetMouseWheelDelta();
+            var delta = InputTracker.GetMouseWheelDelta();
 
-            //if (delta != 0)
-            //{
-            //    //camera的position移动0.1个坐标单位
-            //    var de = delta * (_lookAtInfo.Range) * 0.1;
-            //    _lookAtInfo.Range += de;
-            //    //pos.Height += de;
-            //    //更新相机位置后更新View矩阵
-            //    UpdateCamera();
-            //}
-            //Vector2 mouseDelta = InputTracker.MousePosition - _previousMousePos;
+            if (delta != 0)
+            {
+                //camera的position移动0.1个坐标单位
+                var de = delta * (_lookAtInfo.Range) * 0.1;
+                _lookAtInfo.Range += de;
+                //pos.Height += de;
+                //更新相机位置后更新View矩阵
+                UpdateCamera();
+            }
+            Vector2 mouseDelta = InputTracker.MousePosition - _previousMousePos;
 
 
-            ////如果前一个点和当前点均位于地球上，则计算两者的经纬度之差，
-            //var isMouseleftClick = InputTracker.GetMouseButton(MouseButton.Left);
-            //if (isMouseleftClick && testwindowsCoordOnEllipse(_previousMousePos, out Geodetic2D preCoord) && testwindowsCoordOnEllipse(InputTracker.MousePosition, out Geodetic2D curPos))
-            //{
-            //    var delatLat = curPos.Latitude - preCoord.Latitude;
-            //    var deltaLon = curPos.Longitude - preCoord.Longitude;
-            //    //设置lookAt的偏移量       
-            //    _lookAtInfo.Longitude -= deltaLon;
-            //    if (_lookAtInfo.Longitude >= 2 * Math.PI) _lookAtInfo.Longitude -= 2 * Math.PI;
-            //    if (_lookAtInfo.Longitude <= 0) _lookAtInfo.Longitude += 2 * Math.PI;
+            //如果前一个点和当前点均位于地球上，则计算两者的经纬度之差，
+            var isMouseleftClick = InputTracker.GetMouseButton(MouseButton.Left);
+            if (isMouseleftClick && testwindowsCoordOnEllipse(_previousMousePos, out Geodetic2D preCoord) && testwindowsCoordOnEllipse(InputTracker.MousePosition, out Geodetic2D curPos))
+            {
+                var delatLat = curPos.Latitude - preCoord.Latitude;
+                var deltaLon = curPos.Longitude - preCoord.Longitude;
+                //设置lookAt的偏移量       
+                _lookAtInfo.Longitude -= deltaLon;
+                if (_lookAtInfo.Longitude >= 2 * Math.PI) _lookAtInfo.Longitude -= 2 * Math.PI;
+                if (_lookAtInfo.Longitude <= 0) _lookAtInfo.Longitude += 2 * Math.PI;
 
-            //    _lookAtInfo.Latitude += delatLat;
-            //    if (_lookAtInfo.Latitude >= Math.PI / 2) _lookAtInfo.Latitude = Math.PI / 2;
-            //    if (_lookAtInfo.Latitude <= -Math.PI / 2) _lookAtInfo.Latitude = -Math.PI / 2;
-            //    //重新计算相关参数
-            //    UpdateCamera();
-            //}
+                _lookAtInfo.Latitude += delatLat;
+                if (_lookAtInfo.Latitude >= Math.PI / 2) _lookAtInfo.Latitude = Math.PI / 2;
+                if (_lookAtInfo.Latitude <= -Math.PI / 2) _lookAtInfo.Latitude = -Math.PI / 2;
+                //重新计算相关参数
+                UpdateCamera();
+            }
 
-            //var isMouseWhellClick = InputTracker.GetMouseButton(MouseButton.Middle);
-            //if ((mouseDelta.Y != 0 || mouseDelta.X != 0) && isMouseWhellClick)
-            //{
-            //    var deltaAngleY = (float)Math.PI * 0.002f * mouseDelta.Y;
-            //    var deltaAngleX = (float)Math.PI * 2 * 0.0005f * mouseDelta.X;
-            //    _lookAtInfo.Tilt += -deltaAngleY;
-            //    _lookAtInfo.Heading += -(float)deltaAngleX;
-            //    if (_lookAtInfo.Heading > Math.PI * 2) _lookAtInfo.Heading = (float)Math.PI * 2;
-            //    if (_lookAtInfo.Tilt < 0) _lookAtInfo.Tilt = 0;
-            //    if (_lookAtInfo.Tilt > Math.PI / 2) _lookAtInfo.Tilt = (float)Math.PI / 2;
-            //    UpdateCamera();
-            //}
-            //_previousMousePos = InputTracker.MousePosition;
+            var isMouseWhellClick = InputTracker.GetMouseButton(MouseButton.Middle);
+            if ((mouseDelta.Y != 0 || mouseDelta.X != 0) && isMouseWhellClick)
+            {
+                var deltaAngleY = (float)Math.PI * 0.002f * mouseDelta.Y;
+                var deltaAngleX = (float)Math.PI * 2 * 0.0005f * mouseDelta.X;
+                _lookAtInfo.Tilt += -deltaAngleY;
+                _lookAtInfo.Heading += -(float)deltaAngleX;
+                if (_lookAtInfo.Heading > Math.PI * 2) _lookAtInfo.Heading = (float)Math.PI * 2;
+                if (_lookAtInfo.Tilt < 0) _lookAtInfo.Tilt = 0;
+                if (_lookAtInfo.Tilt > Math.PI / 2) _lookAtInfo.Tilt = (float)Math.PI / 2;
+                UpdateCamera();
+            }
+            _previousMousePos = InputTracker.MousePosition;
             UpdateCamera();
 
         }

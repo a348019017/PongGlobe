@@ -96,11 +96,66 @@ namespace Veldrid.Sdl2
             else
             {
                 _window = SDL_CreateWindowFrom(windowHandle);
+                if (_window == IntPtr.Zero)
+                {
+                    
+                    throw new Exception("SDL_CreateWindowFrom()", new Exception(UTF8_ToManaged((IntPtr)SDL_GetError(),false)));
+                }
                 WindowID = SDL_GetWindowID(_window);
                 Sdl2EventProcessor.RegisterWindow(this);
                 PostWindowCreated(0);
             }
         }
+
+        internal  unsafe string UTF8_ToManaged(IntPtr s, bool freePtr = false)
+        {
+            if (s == IntPtr.Zero)
+            {
+                return null;
+            }
+
+            /* We get to do strlen ourselves! */
+            byte* ptr = (byte*)s;
+            while (*ptr != 0)
+            {
+                ptr++;
+            }
+
+            /* TODO: This #ifdef is only here because the equivalent
+			 * .NET 2.0 constructor appears to be less efficient?
+			 * Here's the pretty version, maybe steal this instead:
+			 *
+			string result = new string(
+				(sbyte*) s, // Also, why sbyte???
+				0,
+				(int) (ptr - (byte*) s),
+				System.Text.Encoding.UTF8
+			);
+			 * See the CoreCLR source for more info.
+			 * -flibit
+			 */
+#if NETSTANDARD2_0
+            /* Modern C# lets you just send the byte*, nice! */
+            string result = System.Text.Encoding.UTF8.GetString(
+                (byte*)s,
+                (int)(ptr - (byte*)s)
+            );
+#else
+			/* Old C# requires an extra memcpy, bleh! */
+			int len = (int) (ptr - (byte*) s);
+			char* chars = stackalloc char[len];
+			int strLen = System.Text.Encoding.UTF8.GetChars((byte*) s, len, chars, len);
+			string result = new string(chars, 0, strLen);
+#endif
+
+            /* Some SDL functions will malloc, we have to free! */
+            if (freePtr)
+            {
+                //SDL_free(s);
+            }
+            return result;
+        }
+
 
         public int X { get => _cachedPosition.Value.X; set => SetWindowPosition(value, Y); }
         public int Y { get => _cachedPosition.Value.Y; set => SetWindowPosition(X, value); }

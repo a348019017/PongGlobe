@@ -10,8 +10,8 @@
     <AssemblyName>PongGlobe.WinForm</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects> 
-	<RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -53,6 +53,8 @@
     <Compile Include="Form1.designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="imgui\FrameTimeAverager.cs" />
+    <Compile Include="imgui\ImGuiController.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserControl1.cs">
@@ -106,6 +108,10 @@
     <ProjectReference Include="..\Veldrid.ImGui\Veldrid.ImGui.csproj">
       <Project>{86930806-bb6b-4ca2-81d7-a97ff7061d66}</Project>
       <Name>Veldrid.ImGui</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Veldrid.SDL2\Veldrid.SDL2.csproj">
+      <Project>{3dfe4f74-3747-432b-b058-a5b66f8b18f9}</Project>
+      <Name>Veldrid.SDL2</Name>
     </ProjectReference>
     <ProjectReference Include="..\Veldrid.StartupUtilities\Veldrid.StartupUtilities.csproj">
       <Project>{2c9af9c5-4c8f-4b16-9d13-c3ae8c994286}</Project>

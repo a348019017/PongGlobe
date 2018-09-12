@@ -15,14 +15,23 @@ namespace WindowsFormsApp1
         public Form1()
         {         
             InitializeComponent();
+            this.Shown += Form1_Shown;
+            //this.WindowState=
+        }
+        UserControl1 control;
+
+        private void Form1_Shown(object sender, EventArgs e)
+        {
+            //control.Run();
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            UserControl1 control = new UserControl1();
-            //control.Dock = DockStyle.Fill;
-            control.Margin = new Padding(10);
-            this.Controls.Add(control);
+            control = new UserControl1();
+            control.Dock = DockStyle.Fill;
+            //control.Margin = new Padding(10);
+            this.Controls.Add(control);      
+            
         }
     }
 }
