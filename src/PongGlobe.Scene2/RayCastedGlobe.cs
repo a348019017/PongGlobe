@@ -30,8 +30,7 @@ namespace PongGlobe.Renders
        
         private GraphicsDevice GraphicsDevice;
 
-        
-
+       
         /// <summary>
         /// 通过当前的场景信息够着渲染对象
         /// </summary>
@@ -50,11 +49,7 @@ namespace PongGlobe.Renders
             var mesh = PongGlobe.Core.BoxTessellator.Compute(2 * Shape.Radii);
             _vertices = mesh.Positions;
             _indices = mesh.Indices;
-
-            
-            // _viewBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
-            //_worldBuffer = factory.CreateBuffer(new BufferDescription(64, BufferUsage.UniformBuffer));
-
+                    
             _vertexBuffer = factory.CreateBuffer(new BufferDescription((uint)(VertexPositionColorTexture.SizeInBytes * _vertices.Length), BufferUsage.VertexBuffer));
             gd.UpdateBuffer(_vertexBuffer, 0, _vertices);
 

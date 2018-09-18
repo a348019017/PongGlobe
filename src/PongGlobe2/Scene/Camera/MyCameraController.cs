@@ -55,7 +55,7 @@ namespace PongGlobe.Scene
             UpdateViewPortTransformMaxtrix();
             //UpdateViewMatrix();
             this.LookAtInfo = new LookAt(0, 0, 0, 0, 0, 1);
-            UpdateCamera();
+            UpdateCamera();            
         }
 
         //通过Speed参数实现动画效果，如FlyTo等其它操作
@@ -65,7 +65,7 @@ namespace PongGlobe.Scene
         }
 
         /// <summary>
-        /// 将屏幕坐标转换成世界坐标
+        /// 将屏幕坐标转换成世界坐标,这种转换是非线性的。
         /// </summary>
         /// <param name="source"></param>
         /// <param name="projection"></param>

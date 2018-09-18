@@ -14,6 +14,7 @@ namespace Veldrid.Sdl2
 
     public enum SDLInitFlags : uint
     {
-        Video = 0x00000020u
+        Video = 0x00000020u,
+        EVENTS= 0x00004000u
     }
 }

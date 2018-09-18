@@ -5,6 +5,8 @@
 
 //Line的GeometryShader，主要是绘制线宽，参考https://github.com/paulhoux/Cinder-Samples/blob/master/GeometryShader/assets/shaders/lines2.geom                
 
+
+
 //传入点的顶点
 layout( points ) in;
 //传出Triangle，一个四边形
@@ -36,6 +38,10 @@ layout(set=0, binding = 0) uniform UniformBufferObject {
     float Thickess;
 } linestyle;
 
+//记录每个billborad的envolope
+//处理覆盖的billborad逻辑，按顺序添加每个billboard的屏幕坐标，如有相交比较z值，z值叫小忽略不渲染，z值交大修改其范围，修改范围后又需要重新比较因此是比较低效的
+
+//vec4[] extents; 
 
 
 //View坐标转换为屏幕坐标，这里的屏幕坐标左上角原点

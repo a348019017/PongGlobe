@@ -95,10 +95,14 @@ namespace Veldrid.Sdl2
             }
             else
             {
+                //初始化事件子系统和Vedio子系统后就sdlwindows就可以正常工作了，还有其它很多子系统请自行查看定义
+                //SDL是一个跨平台的GamePlatform，这里暂时只使用其事件处理，达到通用的目的，类似GLTW库的功能
+                //veldrid暴露的sdl函数和接口并不完全，可以考虑使用SDLSharp的接口，这里暂不深究。
+                Sdl2Native.SDL_Init(SDLInitFlags.EVENTS| SDLInitFlags.Video);
                 _window = SDL_CreateWindowFrom(windowHandle);
+                //给出一定的错误提示
                 if (_window == IntPtr.Zero)
                 {
-                    
                     throw new Exception("SDL_CreateWindowFrom()", new Exception(UTF8_ToManaged((IntPtr)SDL_GetError(),false)));
                 }
                 WindowID = SDL_GetWindowID(_window);

@@ -83,7 +83,6 @@ namespace PongGlobe.Windows
                     Rendering?.Invoke(deltaSeconds);
                 }
             }
-
             _gd.WaitForIdle();
             _factory.DisposeCollector.DisposeAll();
             _gd.Dispose();

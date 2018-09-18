@@ -33,7 +33,7 @@ namespace WindowsFormsApp1
 
         private GraphicsDevice _gd;
         private DisposeCollectorResourceFactory _factory;
-
+        private Task _renderTask;
         public event Action<float> Rendering;
         public event Action<GraphicsDevice, ResourceFactory, Swapchain> GraphicsDeviceCreated;
         public event Action GraphicsDeviceDestroyed;
@@ -66,15 +66,11 @@ namespace WindowsFormsApp1
 
 
         public unsafe UserControl1()
-        {
-           
-
+        {         
             try
             {
                 InitializeComponent();
-
                 if (this.DesignMode) return;
-
                 this.MouseWheel += UserControl1_MouseWheel;
 
                 //释放组件
@@ -103,9 +99,7 @@ namespace WindowsFormsApp1
                 var shareRender = new ShareRender(_scene);
                 this.renders.Add(shareRender);
                 this.renders.Add(globeRender);
-
-
-                
+              
                 //创建完相关对象后注册事件
                 this.GraphicsDeviceCreated += OnGraphicsDeviceCreated;
                 this.GraphicsDeviceDestroyed += OnDeviceDestroyed;
@@ -114,26 +108,21 @@ namespace WindowsFormsApp1
 
 
                 GraphicsDeviceCreated?.Invoke(_gd, _factory, _gd.MainSwapchain);
-
-
                 _window = new Sdl2Window(hwnd, false);
-
                 //创建一个计时器
                 sw = Stopwatch.StartNew();
-                 previousElapsed = sw.Elapsed.TotalSeconds;
-
+                previousElapsed = sw.Elapsed.TotalSeconds;
                 //this.ParentForm.Shown += ParentForm_Shown;
                 //开始运行
                 //Run();
                 //创建一个线程执行run,使用多线程之后便需要考虑不同线程变量同步的问题了，例如isrunning变量的修改需要lock之后再修改，有时可以使用线程安全的集合来处理不同线程的变量交换，
                 //c#封装了很多，这些都不是问题_coomadList并不是线程安全的，在主线程创建，在子线程使用，这样问题并不大，当时两个子线程同时使用commandLits便可能出现问题
                 //这里的渲染仍然是单线程的，每个不同的render都可以独开线程并提交渲染任务
-                Task.Factory.StartNew(()=> { Run(); });
+                _renderTask= Task.Factory.StartNew(()=> { Run(); });
             }
             catch (Exception ex)
             {
-
-                throw;
+                Console.WriteLine(ex.ToString());
             }
            
         }
@@ -217,13 +206,7 @@ namespace WindowsFormsApp1
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-
-            
-
         }
-
-
-
 
         protected override void OnSizeChanged(EventArgs e)
         {
@@ -303,6 +286,12 @@ namespace WindowsFormsApp1
             _gd.WaitForIdle();
             _factory.DisposeCollector.DisposeAll();
             _gd.Dispose();
+            //释放掉渲染线程
+            if (_renderTask != null) _renderTask.Dispose();
+            //置空相关变量
+            GraphicsDevice = null;
+            ResourceFactory = null;
+            MainSwapchain = null;
         }
 
 

@@ -75,7 +75,9 @@ float ComputeWorldPositionDepth(vec3 position, mat4 prj)
 { 
     vec4 v = prj * vec4(position, 1.0);   // clip coordinates
     v.z /= v.w;                                             // normalized device coordinates
-    v.z = (v.z + 1.0) * 0.5;
+    //这里z/w原本的范围就是0-1符合vulkan0-1（提前设定）的深度范围
+	//此变换-1，1变换到0-1
+	//v.z = (v.z + 1.0) * 0.5;
     return v.z;
 }
 
