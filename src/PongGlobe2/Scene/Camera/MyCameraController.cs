@@ -170,7 +170,26 @@ namespace PongGlobe.Scene
         /// <returns></returns>
         public Vector3 Project(Vector3 source, Matrix4x4 projection, Matrix4x4 view, Matrix4x4 world,Matrix4x4 viewport)
         {
+            //其结果可能没有归一化
             return Vector3.Transform(source, world * view * projection*viewport);
+        }
+
+        public Vector3 Project(Vector3 source)
+        {
+            Matrix4x4 matrix = Matrix4x4.Multiply(Matrix4x4.Multiply(Matrix4x4.Identity, this.ViewMatrix), this.ProjectionMatrix);
+            Vector3 vector = Vector3.Transform(source, matrix);
+            float a = (((source.X * matrix.M14) + (source.Y * matrix.M24)) + (source.Z * matrix.M34)) + matrix.M44;
+            if (!WithinEpsilon(a, 1f))
+            {
+                vector.X = vector.X / a;
+                vector.Y = vector.Y / a;
+                vector.Z = vector.Z / a;
+            }
+            //此处的计算可以判断Z非线性，且范围为0-1，这里Z的计算暂无意义
+            vector.X = (((vector.X + 1f) * 0.5f) * this._windowWidth) + 0;
+            vector.Y = (((-vector.Y + 1f) * 0.5f) * this._windowHeight) + 0;
+            vector.Z = (vector.Z * (this._far - this._near)) + this._near;
+            return vector;
         }
 
 

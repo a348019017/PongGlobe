@@ -54,8 +54,8 @@ namespace PongGlobe.Windows
             renders.Add(globeRender);
             renders.Add(vectorLayerRender);
             var pat2h = @"E:\swyy\Lib\PongGlobe\PongGlobe\assets\Vector\NaturalEarth\110m-populated-places-simple\110m_populated_places_simple.shp";
-            var vectorPoint = new PointVectorLayer(pat2h, _scene);
-            //renders.Add(vectorPoint);
+            var vectorPoint = new PointVectorLayerRender(pat2h, _scene);
+            renders.Add(vectorPoint);
             //var drawline = new DrawLineTool(_scene);
            // renders.Add(drawline);
         }
@@ -120,7 +120,7 @@ namespace PongGlobe.Windows
         {
             {
                 //显示帧率
-                ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));                                                   
+                ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));                
             }
         }
 

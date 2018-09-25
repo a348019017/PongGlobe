@@ -10,7 +10,7 @@ using PongGlobe.Core.Util;
 
 namespace PongGlobe.Scene
 {
-    //写一个在屏幕近裁剪面绘制线的功能
+    //写一个在屏幕近裁剪面绘制线的功能,带UI和相关交互，看如何组织代码
     public class DrawLineTool : IRender
     {
         //当前需要绘制的顶点集合
@@ -164,4 +164,10 @@ namespace PongGlobe.Scene
         }
 
     }
+
+
+
+    
+
+
 }

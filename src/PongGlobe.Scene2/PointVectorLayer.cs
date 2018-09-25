@@ -15,13 +15,15 @@ using System.Collections.ObjectModel;
 using System;
 using ImGuiNET;
 using Veldrid.ImageSharp;
+using PongGlobe.Core.Render;
+using System.Linq;
 
 namespace PongGlobe.Scene
 {
     /// <summary>
-    /// 点矢量图层类
+    /// 点矢量图层渲染类
     /// </summary>
-    public class PointVectorLayer : IRender
+    public class PointVectorLayerRender : IRender
     {       
         private Mesh<Vector3> _meshPoints;
         private Scene _scene;
@@ -36,8 +38,11 @@ namespace PongGlobe.Scene
         private ResourceLayout _pointstyleLayout;
         private TextureView _pointTextureView;
         private Texture _pointTexture;
+        private BasicFeatureRenderStrategy _renderStrategy = new BasicFeatureRenderStrategy();
+        private IEnumerable<FeatureRenderableObject> _allRenderableObjects = null;
+        private IEnumerable<FeatureRenderableObject> _renderStrategyResult = null;
 
-        public PointVectorLayer(string shpPath, Scene scene)
+        public PointVectorLayerRender(string shpPath, Scene scene)
         {
             _scene = scene;
             var shpReader = new NetTopologySuite.IO.ShapeFile.Extended.ShapeDataReader(shpPath);
@@ -55,6 +60,7 @@ namespace PongGlobe.Scene
             _pointTextureView = factory.CreateTextureView(_pointTexture);
 
             var result = _meshPoints.CreateGraphicResource(gd, factory);
+            _allRenderableObjects = MeshToRenderableObject(_meshPoints);
             _VertexBuffer = result.Item1;
             _IndicesBuffer = result.Item2;
             ///Shader布局
@@ -123,20 +129,44 @@ namespace PongGlobe.Scene
             _cl.SetGraphicsResourceSet(1, _pointStyleRSet);
             _cl.SetVertexBuffer(0, _VertexBuffer);
             _cl.SetIndexBuffer(_IndicesBuffer, IndexFormat.UInt16);
-            _cl.DrawIndexed((uint)_meshPoints.Indices.Length, 1, 0, 0, 0);
+            if (_renderStrategyResult != null)
+            {              
+                _cl.DrawIndexed((uint)_renderStrategyResult.Count(), 1, 0, 0, 0);
+            }
+            else
+            {
+                _cl.DrawIndexed((uint)_meshPoints.Indices.Length, 1, 0, 0, 0);
+            }           
+        }
+
+        /// <summary>
+        /// 将Mesh对象转换为可渲染对象
+        /// </summary>
+        private List<FeatureRenderableObject> MeshToRenderableObject(Mesh<Vector3> _mesh)
+        {
+            List<FeatureRenderableObject> renders = new List<FeatureRenderableObject>();
+            for (ushort i = 0; i < _mesh.Positions.Length; i++)
+            {
+                var item = _mesh.Positions[i];
+                var featureRenderableObject = new FeatureRenderableObject();
+                featureRenderableObject.PointVector = item;
+                featureRenderableObject.Indice = i;
+                renders.Add(featureRenderableObject);
+            }
+            return renders;
         }
 
         public void Update()
         {
-            //暂未更新必要
+            //使用渲染策略更新相关数据，这里顶点数据不必更新，仅更新indicesbuffer即可，相当高效，当然在视椎体裁切时可能仍然需要充值顶点数据
+            _renderStrategyResult= _renderStrategy.Apply(_scene, _allRenderableObjects);          
         }
     }
 
    
     [StructLayout(LayoutKind.Sequential)]
     public struct PointStyleUBO
-    {
-       
+    {    
         /// <summary>
         /// 点的颜色
         /// </summary>
