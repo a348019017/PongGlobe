@@ -81,21 +81,7 @@ namespace PongGlobe.Core
 
         public void Intersects(ref Envelope2DZ box, out bool result)
         {
-
-           return   Math.Min(box.Min.X, xb2) >= max(this.Min.X, xb1) && min(ya2, yb2) >= max(ya1, yb1)
-
-            if ((this.Max.X >= box.Min.X) || (this.Min.X <= box.Max.X))
-            {
-                if ((this.Max.Y < box.Min.Y) || (this.Min.Y > box.Max.Y))
-                {
-                    result = false;
-                    return;
-                }
-                result = true;
-                return;
-            }
-
-            result = false;
+            result= Math.Min(box.Max.X, this.Max.X) >= Math.Max(this.Min.X, box.Min.X) && Math.Min(this.Max.Y, box.Max.Y) >= Math.Max(this.Min.Y, box.Min.Y);
             return;
         }
 

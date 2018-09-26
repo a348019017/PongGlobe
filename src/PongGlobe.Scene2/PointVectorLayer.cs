@@ -28,9 +28,11 @@ namespace PongGlobe.Scene
         private Mesh<Vector3> _meshPoints;
         private Scene _scene;
         private PointStyleUBO _pointStyleUBO;
+        private SystemEventUBO _systemEventUbo;
         private DeviceBuffer _VertexBuffer;
         private DeviceBuffer _IndicesBuffer;
         private DeviceBuffer _pointStyle;
+        private DeviceBuffer _eventBuffer;
         //点的渲染管道，默认使用矢量点的渲染模式,非billBoard
         private Pipeline _pointPipeLine;
         ShaderSetDescription shaderSet;
@@ -80,12 +82,15 @@ namespace PongGlobe.Scene
 
             //创建一个pointStyle的UBO,一共32字节，8个浮点值
             _pointStyle = factory.CreateBuffer(new BufferDescription(32, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
+            //传一个系统事件buffer
+            _eventBuffer = factory.CreateBuffer(new BufferDescription(16, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             //创建一个Style的ResourceLayout
              _pointstyleLayout = factory.CreateResourceLayout(
                new ResourceLayoutDescription(
                    new ResourceLayoutElementDescription("Style", ResourceKind.UniformBuffer, ShaderStages.Fragment|ShaderStages.Geometry),
                    new ResourceLayoutElementDescription("SurfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
-                   new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment)
+                   new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment),
+                   new ResourceLayoutElementDescription("SystemEvent", ResourceKind.UniformBuffer, ShaderStages.Geometry)
                    ));
             _pointStyleUBO = new PointStyleUBO(RgbaFloat.Red);
             //更新变量等
@@ -96,7 +101,8 @@ namespace PongGlobe.Scene
                _pointstyleLayout,
                _pointStyle,
                _pointTextureView,
-               gd.Aniso4xSampler
+               gd.Aniso4xSampler,
+               _eventBuffer
                ));
 
             var rasterizer = RasterizerStateDescription.Default;
@@ -129,6 +135,8 @@ namespace PongGlobe.Scene
             _cl.SetGraphicsResourceSet(1, _pointStyleRSet);
             _cl.SetVertexBuffer(0, _VertexBuffer);
             _cl.SetIndexBuffer(_IndicesBuffer, IndexFormat.UInt16);
+            _systemEventUbo.MousePosition = PongGlobe.Scene.InputTracker.MousePosition;
+            _cl.UpdateBuffer(_eventBuffer, 0, _systemEventUbo);
             if (_renderStrategyResult != null)
             {              
                 _cl.DrawIndexed((uint)_renderStrategyResult.Count(), 1, 0, 0, 0);
@@ -159,7 +167,8 @@ namespace PongGlobe.Scene
         public void Update()
         {
             //使用渲染策略更新相关数据，这里顶点数据不必更新，仅更新indicesbuffer即可，相当高效，当然在视椎体裁切时可能仍然需要充值顶点数据
-            _renderStrategyResult= _renderStrategy.Apply(_scene, _allRenderableObjects);          
+            _renderStrategyResult= _renderStrategy.Apply(_scene, _allRenderableObjects);     
+            //更新鼠标事件
         }
     }
 
@@ -187,4 +196,21 @@ namespace PongGlobe.Scene
             split = new Vector3();
         }
     }
+
+    /// <summary>
+    /// 系统事件UBO
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct SystemEventUBO
+    {
+        /// <summary>
+        /// 鼠标所在屏幕坐标
+        /// </summary>
+        public Vector2 MousePosition;
+        /// <summary>
+        /// 
+        /// </summary>
+        public Vector2 spa1;
+    }
+
 }

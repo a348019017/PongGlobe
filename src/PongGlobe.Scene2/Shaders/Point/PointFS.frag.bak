@@ -29,9 +29,9 @@ void main()
    {
       discard;
    } 
-    if(isPicked==1.0f)
+    if(isPicked)
     {
-        fragmentColor=color*vec4(1.0,0.0,0.0,1);
+
     }
     else
     {

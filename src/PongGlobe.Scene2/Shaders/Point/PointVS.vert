@@ -19,6 +19,7 @@ layout(set=0, binding = 0) uniform UniformBufferObject {
 
 
 layout(location = 0) in vec3 position;
+layout(location=0) out vec3 worldposition;
 
 out gl_PerVertex {
     vec4 gl_Position;
@@ -29,6 +30,7 @@ void main()
 {
     gl_Position = ubo.prj * vec4(position,1.0); 
 	gl_Position.y=-gl_Position.y;	
+	worldposition=position;
 	//gl_pointSize渲染的点是方形的点，仍然需要使用GeometryShader渲染成可观的点
 	//gl_PointSize=style.pointSize;
 }

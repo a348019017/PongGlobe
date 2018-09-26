@@ -12,9 +12,10 @@ layout( points ) in;
 //传出Triangle，一个四边形
 layout( triangle_strip, max_vertices = 4 ) out;
 
-//layout(location = 0) in vec3[] worldPosition;
+layout(location = 0) in vec3[] worldPosition;
 //传出顶点的UV坐标
 layout(location = 0) out vec2 fsTextureCoordinates;
+layout(location =1) out float isPicked;
 
 //额外添加传入的viewToViewPort的转换矩阵,这里暂时
 layout(set=0, binding = 0) uniform UniformBufferObject {
@@ -32,11 +33,18 @@ layout(set=0, binding = 0) uniform UniformBufferObject {
 	vec2 spa5;
 } ubo;
 
+
  layout(set=1, binding = 0) uniform LineStyle 
 {
     vec4  LineColor;
     float Thickess;
 } linestyle;
+
+layout(set=1,binding=3) uniform EventUBO
+{
+   vec2 mousePosition;
+   vec2 spa1;
+} event;
 
 //记录每个billborad的envolope
 //处理覆盖的billborad逻辑，按顺序添加每个billboard的屏幕坐标，如有相交比较z值，z值叫小忽略不渲染，z值交大修改其范围，修改范围后又需要重新比较因此是比较低效的
@@ -53,7 +61,7 @@ layout(set=0, binding = 0) uniform UniformBufferObject {
  //屏幕坐标转NDC坐标，这里需要保持深度信息和原始是相同的,这里已经其次话为1
 vec4 ToNDCSpace(vec4 vertex)
 {
-   return vec4(vertex.xy/(ubo.viewport/2.0f)-1.0f,vertex.z,vertex.w);
+   return vec4(vertex.xy/(ubo.viewport/2.0f)-1.0f,0.0f,vertex.w);
 }
 
 
@@ -76,8 +84,14 @@ bool isEyeEarthCull(vec3 pos)
 	vec3 posToEye=ubo.CameraEye-pos;
 	vec3 posNormal=GeodeticSurfaceNormal(pos,ubo.GlobeOneOverRadiiSquared);
 	//如果position在当前的EarthCull内
-	if(dot(posToEye,posNormal)<0) return false;
+	if(dot(posToEye,posNormal)>0) return false;
 	return true;
+}
+
+//矩形是否包含某点，用于billboard对鼠标的判断
+bool isContain(vec2 mousepos,vec4 minpos,vec4 maxpos)
+{
+   return mousepos.x>=minpos.x&&mousepos.x<=maxpos.x&&mousepos.y>=minpos.y&&mousepos.y<=maxpos.y;
 }
 
 //点的深度信息和其它要素，如线要素可能有点冲突可能需要调整
@@ -89,6 +103,11 @@ void main()
      float size=32/2;
     //获取第一个点作为中点
     vec4 center = gl_in[0].gl_Position;
+	//裁剪地球反面的点
+	if(isEyeEarthCull(worldPosition[0]))
+	{
+	    return;
+	}
 	//计算其视口坐标
 	vec4 centerWin=toScreenSpace(center);
 	//计算四个顶点坐标，按顺时针排布此时的UV坐标系和viewport参考系是一致的，均是左上角是0，0，右下角最大
@@ -101,9 +120,14 @@ void main()
 	//右下角顶点
 	vec4 center4=centerWin+vec4(size,size,0,0);
 
-	//cull掉在视图外的点
-	if(center2.x<0||center2.y<0||center4.x>ubo.viewport.x||center4.y>ubo.viewport.y) return;	
+    isPicked=0.0f;
+	if(isContain(event.mousePosition,center2,center4))
+	{
+	   isPicked=1.0f;
+	}
 
+	//cull掉在视图外的点
+	//if(center2.x<0||center2.y<0||center4.x>ubo.viewport.x||center4.y>ubo.viewport.y) return;	
 	gl_Position=ToNDCSpace(center2);
 	fsTextureCoordinates=vec2(0,0);
 	EmitVertex();	

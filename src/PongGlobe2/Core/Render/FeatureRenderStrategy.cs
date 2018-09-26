@@ -35,8 +35,8 @@ namespace PongGlobe.Core.Render
                     //以左上角为原点                   
                  var windCoord = ((MyCameraController2)dc.Camera).Project(pointVector);
                 //这里提前Cull掉场景外的
-                if (windCoord.X > width || windCoord.X < 0) continue;
-                if (windCoord.Y > hight || windCoord.Y < 0) continue;
+                //if (windCoord.X > width || windCoord.X < 0) continue;
+                //if (windCoord.Y > hight || windCoord.Y < 0) continue;
                 var coordExtent = new Envelope2DZ(windCoord - new Vector3(16, 16, 0), windCoord + new Vector3(16, 16, 0));
                 item.WindowsScreenEnvolope = coordExtent;
                 //以其为中心，宽度为32/2计算器像素坐标系
@@ -49,7 +49,7 @@ namespace PongGlobe.Core.Render
                     if (!env.Intersects(coordExtent) && env.Z > coordExtent.Z)
                     {
                         _lstScreenEnv[i] = item;
-                        isIntersect = true;                       
+                        isIntersect = true;
                     }
                 }
                 //如果没有相交则添加
