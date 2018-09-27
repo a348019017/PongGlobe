@@ -19,8 +19,9 @@ layout(set=0, binding = 0) uniform UniformBufferObject {
 
 
 layout(location = 0) in vec3 position;
+layout(location= 1 ) in uint featureId;
 layout(location=0) out vec3 worldposition;
-
+layout(location=1) out uint featureId2;
 out gl_PerVertex {
     vec4 gl_Position;
 	float gl_PointSize;

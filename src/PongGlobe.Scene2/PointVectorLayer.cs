@@ -18,6 +18,7 @@ using Veldrid.ImageSharp;
 using PongGlobe.Core.Render;
 using System.Linq;
 
+
 namespace PongGlobe.Scene
 {
     /// <summary>
@@ -43,6 +44,8 @@ namespace PongGlobe.Scene
         private BasicFeatureRenderStrategy _renderStrategy = new BasicFeatureRenderStrategy();
         private IEnumerable<FeatureRenderableObject> _allRenderableObjects = null;
         private IEnumerable<FeatureRenderableObject> _renderStrategyResult = null;
+        private GraphicsDevice _gd = null;
+
 
         public PointVectorLayerRender(string shpPath, Scene scene)
         {
@@ -56,6 +59,7 @@ namespace PongGlobe.Scene
 
         public void CreateDeviceResources(GraphicsDevice gd, ResourceFactory factory)
         {
+            _gd = gd;
             var inPath = @"E:\swyy\Lib\PongGlobe\PongGlobe\assets\icon\vaves.png";
             ImageSharpTexture inputImage = new ImageSharpTexture(inPath, false);
             _pointTexture= inputImage.CreateDeviceTexture(gd, factory);
@@ -71,7 +75,10 @@ namespace PongGlobe.Scene
                 new[]
                 {
                     new VertexLayoutDescription(
-                        new VertexElementDescription("Position", VertexElementSemantic.Position, VertexElementFormat.Float3))
+                        new VertexElementDescription("Position", VertexElementSemantic.Position, VertexElementFormat.Float3)
+                        ,
+                        //这里在顶点中传入了Id的相关信息
+                        new VertexElementDescription("Id", VertexElementSemantic.Position, VertexElementFormat.UInt1))
                 },
                 new[]
                 {
@@ -164,11 +171,16 @@ namespace PongGlobe.Scene
             return renders;
         }
 
-        public void Update()
+        public  void Update()
         {
             //使用渲染策略更新相关数据，这里顶点数据不必更新，仅更新indicesbuffer即可，相当高效，当然在视椎体裁切时可能仍然需要充值顶点数据
-            _renderStrategyResult= _renderStrategy.Apply(_scene, _allRenderableObjects);     
-            //更新鼠标事件
+            _renderStrategyResult= _renderStrategy.Apply(_scene, _allRenderableObjects);
+            //读取GPU计算的Id信息
+            var result= _gd.Map<SystemEventUBO>(_eventBuffer,MapMode.Read);
+            var ubo = result[0];
+            _gd.Unmap(_eventBuffer);
+            //显示其中的值
+            ImGui.Text(string.Format("Slected PointId:{0}", ubo.FeatureId);
         }
     }
 
@@ -208,9 +220,11 @@ namespace PongGlobe.Scene
         /// </summary>
         public Vector2 MousePosition;
         /// <summary>
-        /// 
+        /// 记录传出的Id
         /// </summary>
-        public Vector2 spa1;
+        public UInt32 FeatureId;
+
+        public float spa1;
     }
 
 }

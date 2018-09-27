@@ -13,6 +13,7 @@ layout( points ) in;
 layout( triangle_strip, max_vertices = 4 ) out;
 
 layout(location = 0) in vec3[] worldPosition;
+layout(location= 1 ) in uint[] featureIds;
 //传出顶点的UV坐标
 layout(location = 0) out vec2 fsTextureCoordinates;
 layout(location =1) out float isPicked;
@@ -43,7 +44,8 @@ layout(set=0, binding = 0) uniform UniformBufferObject {
 layout(set=1,binding=3) uniform EventUBO
 {
    vec2 mousePosition;
-   vec2 spa1;
+   uint featureId;
+   float spa1;
 } event;
 
 //记录每个billborad的envolope
@@ -124,6 +126,7 @@ void main()
 	if(isContain(event.mousePosition,center2,center4))
 	{
 	   isPicked=1.0f;
+	   event.featureId=featureIds[0];
 	}
 
 	//cull掉在视图外的点

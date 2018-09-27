@@ -9,6 +9,7 @@ using PongGlobe.Core.Extension;
 using System.Linq;
 using Veldrid;
 using GeoAPI.Geometries;
+using System.Runtime.InteropServices;
 namespace PongGlobe.Core.Algorithm
 {
     /// <summary>
@@ -143,6 +144,45 @@ namespace PongGlobe.Core.Algorithm
         }
 
 
+        /// <summary>
+        /// 将点要素转换为PointListMesh，同时带有一个Id信息
+        /// </summary>
+        /// <returns></returns>
+        public static Mesh<PositionAndID> PointFeatureToPointsAndId(IEnumerable<IShapefileFeature> _features, Ellipsoid _shape)
+        {
+            var points = new Mesh<PositionAndID>();
+            points.PrimitiveTopology = PrimitiveTopology.PointList;
+            List<PositionAndID> vectors = new List<PositionAndID>();
+            List<ushort> indices = new List<ushort>();
+            ushort start = 0;
+            foreach (var item in _features)
+            {
+                var geo = item.Geometry;
+                ///仅添加点和多点
+                if (geo is IPoint)
+                {
+                    var posAndId = new PositionAndID();
+                    posAndId.Id = Convert.ToInt32(item.FeatureId);
+                    posAndId.Position = _shape.ToVector3(new Geodetic2D(geo.Coordinate.X, geo.Coordinate.Y));
+                    vectors.Add(posAndId);
+                    indices.Add(start++);
+                }
+                else if (geo is IMultiPoint)
+                {
+                    foreach (var coord in geo as IMultiPoint)
+                    {
+                        var posAndId = new PositionAndID();
+                        posAndId.Id = Convert.ToInt32(item.FeatureId);
+                        posAndId.Position = _shape.ToVector3(new Geodetic2D(geo.Coordinate.X, geo.Coordinate.Y))
+                        vectors.Add(posAndId);
+                        indices.Add(start++);
+                    }
+                }
+            }
+            points.Positions = vectors.ToArray();
+            points.Indices = indices.ToArray();
+            return points;
+        }
 
 
         public static Mesh<Vector3> FeatureToLineStripAdjacency(IShapefileFeature _feature, Ellipsoid _shape)
@@ -275,5 +315,18 @@ namespace PongGlobe.Core.Algorithm
             return true;
         }
 
+    }
+
+    /// <summary>
+    /// 结构体记录position和Id信息
+    /// </summary>
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PositionAndID
+    {
+        public Vector3 Position;
+        /// <summary>
+        /// 4个字节的Id
+        /// </summary>
+        public int Id;
     }
 }
