@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Numerics;
-
+using PongGlobe.Core;
 
 
 namespace PongGlobe.Primitive
@@ -49,5 +49,18 @@ namespace PongGlobe.Primitive
         {
             get { return Math.PI * Radius * Radius * Height; }
         }
+
+        /// <summary>
+        /// 将其转换成Mesh对象
+        /// </summary>
+        public Mesh<Vector3> ToMesh()
+        {
+            var mesh = new Mesh<Vector3>();
+            mesh.Positions = new Vector3[] { StartPoint, EndPoint };
+            mesh.Indices = new ushort[] { 0, 1 };
+            //单根线
+            mesh.PrimitiveTopology = Veldrid.PrimitiveTopology.LineList;
+            return mesh;
+        }        
     }
 }

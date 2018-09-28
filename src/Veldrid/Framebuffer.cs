@@ -36,6 +36,11 @@ namespace Veldrid
         /// </summary>
         public virtual uint Height { get; }
 
+        /// <summary>
+        /// 返回当前的ImageView即是，texture对象，然后使用CopyBuffer对象直接拷贝出来
+        /// </summary>
+        //public virtual IReadOnlyList<FramebufferAttachment> ColorTextures { get; }
+
         internal Framebuffer() { }
 
         internal Framebuffer(

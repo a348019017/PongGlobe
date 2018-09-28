@@ -361,6 +361,7 @@ namespace PongGlobe.Renders
             //    _cl.SetIndexBuffer(_indexBuffer[i], IndexFormat.UInt16);
             //    _cl.DrawIndexed((uint)_mesh[i].Indices.Length, 1, 0, 0, 0);                
             //}
+            //_gd.MainSwapchain.Framebuffer.
             _cl.SetPipeline(_boundingBoxPipeLine);
             _cl.SetGraphicsResourceSet(0, ShareResource.ProjectuibResourceSet);
             _cl.SetGraphicsResourceSet(1, _styleResourceSet);

@@ -17,9 +17,9 @@ using ImGuiNET;
 using Veldrid.ImageSharp;
 using PongGlobe.Core.Render;
 using System.Linq;
+using PongGlobe.Scene;
 
-
-namespace PongGlobe.Scene
+namespace PongGlobe.Renders
 {
     /// <summary>
     /// 点矢量图层渲染类
@@ -27,7 +27,7 @@ namespace PongGlobe.Scene
     public class PointVectorLayerRender : IRender
     {       
         private Mesh<Vector3> _meshPoints;
-        private Scene _scene;
+        private Scene.Scene _scene;
         private PointStyleUBO _pointStyleUBO;
         private SystemEventUBO _systemEventUbo;
         private DeviceBuffer _VertexBuffer;
@@ -47,7 +47,7 @@ namespace PongGlobe.Scene
         private GraphicsDevice _gd = null;
 
 
-        public PointVectorLayerRender(string shpPath, Scene scene)
+        public PointVectorLayerRender(string shpPath, Scene.Scene scene)
         {
             _scene = scene;
             var shpReader = new NetTopologySuite.IO.ShapeFile.Extended.ShapeDataReader(shpPath);
@@ -137,6 +137,7 @@ namespace PongGlobe.Scene
 
         public void Draw(CommandList _cl)
         {
+            //_gd.MainSwapchain.Framebuffer.
             _cl.SetPipeline(_pointPipeLine);
             _cl.SetGraphicsResourceSet(0, ShareResource.ProjectuibResourceSet);
             _cl.SetGraphicsResourceSet(1, _pointStyleRSet);
