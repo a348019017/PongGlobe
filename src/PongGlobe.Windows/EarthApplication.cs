@@ -8,6 +8,7 @@ using ImGuiNET;
 using PongGlobe.Core;
 using PongGlobe.Scene;
 using PongGlobe.Renders;
+using System.Text;
 namespace PongGlobe.Windows
 {
     //地球的应用程序对象
@@ -55,7 +56,7 @@ namespace PongGlobe.Windows
             renders.Add(vectorLayerRender);
             var pat2h = @"E:\swyy\Lib\PongGlobe\PongGlobe\assets\Vector\NaturalEarth\110m-populated-places-simple\110m_populated_places_simple.shp";
             var vectorPoint = new PointVectorLayerRender(pat2h, _scene);
-            renders.Add(vectorPoint);
+            //renders.Add(vectorPoint);
             //var drawline = new DrawLineTool(_scene);
            // renders.Add(drawline);
         }
@@ -120,9 +121,19 @@ namespace PongGlobe.Windows
         {
             {
                 //显示帧率
-                ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));                
+                ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));
+                var bytes= "你好";
+                ImGui.Text(bytes);
+                if (ImGui.Button("Export Sc"))
+                {
+                    _controller.SaveFontText();
+                }
             }
         }
+
+      
+
+      
 
 
 
@@ -148,6 +159,9 @@ namespace PongGlobe.Windows
             GraphicsDevice.SubmitCommands(_cl);                                 
             GraphicsDevice.SwapBuffers(GraphicsDevice.MainSwapchain);
             GraphicsDevice.WaitForIdle();
+
+
+
         }
         /// <summary>
         /// 窗口发生变化时停止给场景的Camera对象

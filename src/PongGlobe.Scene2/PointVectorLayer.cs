@@ -176,12 +176,12 @@ namespace PongGlobe.Renders
         {
             //使用渲染策略更新相关数据，这里顶点数据不必更新，仅更新indicesbuffer即可，相当高效，当然在视椎体裁切时可能仍然需要充值顶点数据
             _renderStrategyResult= _renderStrategy.Apply(_scene, _allRenderableObjects);
-            //读取GPU计算的Id信息
-            var result= _gd.Map<SystemEventUBO>(_eventBuffer,MapMode.Read);
-            var ubo = result[0];
-            _gd.Unmap(_eventBuffer);
-            //显示其中的值
-            ImGui.Text(string.Format("Slected PointId:{0}", ubo.FeatureId);
+            ////读取GPU计算的Id信息
+            //var result= _gd.Map<SystemEventUBO>(_eventBuffer,MapMode.Read);
+            //var ubo = result[0];
+            //_gd.Unmap(_eventBuffer);
+            ////显示其中的值
+            //ImGui.Text(string.Format("Slected PointId:{0}", ubo.FeatureId);
         }
     }
 

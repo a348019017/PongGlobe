@@ -4,6 +4,8 @@ using System.Numerics;
 using System.Reflection;
 using System.IO;
 using Veldrid;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace ImGuiNET
 {
@@ -15,6 +17,7 @@ namespace ImGuiNET
     {
         private GraphicsDevice _gd;
         private bool _frameBegun;
+       
 
         // Veldrid objects
         private DeviceBuffer _vertexBuffer;
@@ -78,6 +81,15 @@ namespace ImGuiNET
         {
             Dispose();
         }
+
+        ///// <summary>
+        ///// 获取此Controller中的字体样式
+        ///// </summary>
+        ///// <returns></returns>
+        //public Texture GetTextureOfFont
+        //{
+        //    get { return _fontTexture; }
+        //}
 
         public void CreateDeviceResources(GraphicsDevice gd, OutputDescription outputDescription)
         {
@@ -242,6 +254,10 @@ namespace ImGuiNET
         public unsafe void RecreateFontDeviceTexture(GraphicsDevice gd)
         {
             IO io = ImGui.GetIO();
+            //二维添加中文字体
+           var songti = @"C:\Windows\Fonts\ARIALUNI.TTF";
+            io.FontAtlas.AddFontFromFileTTF(songti,18f);
+            //var font= io.FontAtlas.AddDefaultFont();
             // Build
             FontTextureData textureData = io.FontAtlas.GetTexDataAsRGBA32();
 
@@ -272,6 +288,40 @@ namespace ImGuiNET
 
             io.FontAtlas.ClearTexData();
         }
+
+
+        /// <summary>
+        /// 保存字符集的图片到左面
+        /// </summary>
+        public unsafe void SaveFontText()
+        {
+            IO io = ImGui.GetIO();
+            FontTextureData textureData = io.FontAtlas.GetTexDataAsRGBA32();
+
+            Rgba32[] pixelData = new Rgba32[textureData.Width * textureData.Height];
+            var data = textureData.Pixels;
+            var datalenfth = textureData.BytesPerPixel;
+            int offset = 0;
+            for (int y = 0; y < textureData.Height; y++)
+            {
+                for (int x = 0; x < textureData.Width; x++)
+                {
+                    int index = (int)(y * textureData.Width + x);
+                    //连续读取指定长度的
+                    
+                    pixelData[index] = new Rgba32(data[offset],data[offset++],data[offset++],data[offset++]);
+                                      
+                }
+            }
+            //textureData.
+            var image = SixLabors.ImageSharp.Image.LoadPixelData<Rgba32>(pixelData, textureData.Width, textureData.Height);
+            var path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "123.jpg");
+            image.Save(path);
+            //释放相关变量
+            io.FontAtlas.ClearTexData();
+            image.Dispose();
+        }
+
 
         /// <summary>
         /// Renders the ImGui draw list data.

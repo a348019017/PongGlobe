@@ -173,7 +173,7 @@ namespace PongGlobe.Core.Algorithm
                     {
                         var posAndId = new PositionAndID();
                         posAndId.Id = Convert.ToInt32(item.FeatureId);
-                        posAndId.Position = _shape.ToVector3(new Geodetic2D(geo.Coordinate.X, geo.Coordinate.Y))
+                        posAndId.Position = _shape.ToVector3(new Geodetic2D(geo.Coordinate.X, geo.Coordinate.Y));
                         vectors.Add(posAndId);
                         indices.Add(start++);
                     }
