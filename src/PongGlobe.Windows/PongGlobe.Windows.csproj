@@ -8,7 +8,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <OutputPath>E:\swyy\Lib\PongGlobe\PongGlobe\bin\Debug\PongGlobe.Windows\netcoreapp2.0\win7-x64\netcoreapp2.0\win7-x64\netcoreapp2.0\win7-x64\</OutputPath>
+    <OutputPath>E:\swyy\Lib\PongGlobe\PongGlobe\bin\Debug\PongGlobe.Windows\netcoreapp2.0\win7-x64\netcoreapp2.0\win7-x64\netcoreapp2.0\win7-x64\netcoreapp2.0\win7-x64\netcoreapp2.0\win7-x64\</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

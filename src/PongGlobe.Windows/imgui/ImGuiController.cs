@@ -254,9 +254,10 @@ namespace ImGuiNET
         public unsafe void RecreateFontDeviceTexture(GraphicsDevice gd)
         {
             IO io = ImGui.GetIO();
-            //二维添加中文字体
-           var songti = @"C:\Windows\Fonts\ARIALUNI.TTF";
-            io.FontAtlas.AddFontFromFileTTF(songti,18f);
+            //添加中文字体
+            var songti = @"C:\Windows\Fonts\STSONG.TTF";
+            io.FontAtlas.AddFontFromFileTTF(songti,16f);
+            
             //var font= io.FontAtlas.AddDefaultFont();
             // Build
             FontTextureData textureData = io.FontAtlas.GetTexDataAsRGBA32();

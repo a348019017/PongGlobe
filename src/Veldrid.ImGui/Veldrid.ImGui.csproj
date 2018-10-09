@@ -40,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\ImGui.NET\src\ImGui.NET\ImGui.NET.csproj" />
+    <ProjectReference Include="..\ImGui.NET\ImGui.NET.csproj" />
     <ProjectReference Include="..\Veldrid.SDL2\Veldrid.SDL2.csproj" />
     <ProjectReference Include="..\Veldrid.StartupUtilities\Veldrid.StartupUtilities.csproj" />
     <ProjectReference Include="..\Veldrid\Veldrid.csproj" />
