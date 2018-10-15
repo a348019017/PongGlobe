@@ -60,7 +60,7 @@ namespace ImGuiNET
             _windowWidth = width;
             _windowHeight = height;
 
-            ImGui.GetIO().FontAtlas.AddDefaultFont();
+            ImGui.GetIO().Fonts.AddFontDefault();
 
             CreateDeviceResources(gd, outputDescription);
             SetOpenTKKeyMappings();
@@ -253,17 +253,17 @@ namespace ImGuiNET
         /// </summary>
         public unsafe void RecreateFontDeviceTexture(GraphicsDevice gd)
         {
-            IO io = ImGui.GetIO();
+            ImGuiIOPtr io = ImGui.GetIO();
             //添加中文字体
             var songti = @"C:\Windows\Fonts\STSONG.TTF";
-            io.FontAtlas.AddFontFromFileTTF(songti,16f);
+            io.Fonts.AddFontFromFileTTF(songti,16f);
             
             //var font= io.FontAtlas.AddDefaultFont();
             // Build
-            FontTextureData textureData = io.FontAtlas.GetTexDataAsRGBA32();
+            fonttex textureData = io.Fonts.GetTexDataAsRGBA32()GetTexDataAsRGBA32();
 
             // Store our identifier
-            io.FontAtlas.SetTexID(_fontAtlasID);
+            io.Fonts.SetTexID(_fontAtlasID);
 
             _fontTexture = gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D(
                 (uint)textureData.Width,

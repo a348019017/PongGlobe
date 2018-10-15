@@ -15,6 +15,10 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="imgui\ImGuiController.cs" />
+  </ItemGroup>
+
 
 
   <ItemGroup>

@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="3rd\Text\TextMesh.cs" />
     <Compile Remove="3rd\Text\TextMeshUtil.cs" />
     <Compile Remove="Core\Algorithm\EllipsoidTangentPlane.cs" />
     <Compile Remove="Data\BaseProvider.cs" />
@@ -32,8 +33,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ImGui.NET\ImGui.NET.csproj" />
     <ProjectReference Include="..\Veldrid.ImageSharp\Veldrid.ImageSharp.csproj" />
+    <ProjectReference Include="..\Veldrid.ImGui\Veldrid.ImGui.csproj" />
     <ProjectReference Include="..\Veldrid.StartupUtilities\Veldrid.StartupUtilities.csproj" />
     <ProjectReference Include="..\Veldrid.Utilities\Veldrid.Utilities.csproj" />
     <ProjectReference Include="..\Veldrid\Veldrid.csproj" />

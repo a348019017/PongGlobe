@@ -6,6 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Accord.Video.FFMPEG.x64" Version="3.8.2-alpha" />
+    <PackageReference Include="FFmpeg.Nightly" Version="20181007.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\PongGlobe2\PongGlobe.csproj" />
   </ItemGroup>
 

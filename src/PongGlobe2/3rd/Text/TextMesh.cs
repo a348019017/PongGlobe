@@ -5,7 +5,7 @@ using System.Numerics;
 namespace ImGui
 {
     /// <summary>
-    /// Text mesh
+    /// 定制一个新TextMesh,暂不添加DrawCommand特性
     /// </summary>
     /// <remarks>
     /// A text mesh contains two parts:
@@ -238,4 +238,7 @@ namespace ImGui
             }
         }
     }
+
+
+    
 }

@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="TextRender.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Shaders\CommonLine\LineFS.spv" />
     <None Remove="Shaders\CommonLine\LineGS.spv" />
     <None Remove="Shaders\CommonLine\LineVS.spv" />

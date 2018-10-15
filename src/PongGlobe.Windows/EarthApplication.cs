@@ -33,7 +33,7 @@ namespace PongGlobe.Windows
         public Swapchain MainSwapchain { get; private set; }
 
         private float _ticks;
-        protected ImGuiController _controller = null;
+        protected ImGuiRenderer _controller = null;
         protected static FrameTimeAverager _fta = new FrameTimeAverager(0.666);
         
 
@@ -74,7 +74,7 @@ namespace PongGlobe.Windows
             MainSwapchain = sc;
             CreateResources(factory);
             CreateSwapchainResources(factory);            
-            _controller = new ImGuiController(this.GraphicsDevice, this.GraphicsDevice.MainSwapchain.Framebuffer.OutputDescription, (int)this.Window.Width, (int)this.Window.Height);
+            _controller = new ImGuiRenderer(this.GraphicsDevice, this.GraphicsDevice.MainSwapchain.Framebuffer.OutputDescription, (int)this.Window.Width, (int)this.Window.Height);
         }
 
         protected virtual void OnDeviceDestroyed()
@@ -120,13 +120,13 @@ namespace PongGlobe.Windows
         private  void SubmitUI()
         {
             {
-                //显示帧率
+                //显示帧率              
                 ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));
                 var bytes= "你好";
-                ImGui.Text(bytes);
-                if (ImGui.Button("Export Sc"))
+                ImGuiNET.ImGui.Text(bytes);
+                if (ImGuiNET.ImGui.Button("Export Sc"))
                 {
-                    _controller.SaveFontText();
+                    //_controller.SaveFontText();
                 }
             }
         }

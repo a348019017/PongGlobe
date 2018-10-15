@@ -1,3 +1,6 @@
 [submodule "src/ImGui"]
 	path = src/ImGui
 	url = https://github.com/zwcloud/ImGui.git
+[submodule "src/ImGui.NET"]
+	path = src/ImGui.NET
+	url = https://github.com/mellinoe/ImGui.NET.git

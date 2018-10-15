@@ -48,6 +48,7 @@ namespace PongGlobe.Renders
         {
             //计算Ray于地球的交点
             bool isIntersect =_scene.Ellipsoid.Intersections(ray,out Geodetic2D result);
+            
             ImGui.Text(string.Format("Latitude:{0},logitude:{1}",result.Latitude,result.Longitude));
             SelectedFeatures.Clear();
             var geoFactory = new NetTopologySuite.Geometries.GeometryFactory();

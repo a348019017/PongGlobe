@@ -70,11 +70,8 @@ namespace PongGlobe.Core
         }
     }
 
-    //public class MeshResources
-
-
     /// <summary>
-    /// 定点坐标
+    /// 仅记录顶点坐标
     /// </summary>
     public struct VertexPosition
     {
@@ -105,4 +102,29 @@ namespace PongGlobe.Core
             
         }
     }
+
+    /// <summary>
+    /// 顶点法线贴图
+    /// </summary>
+    public struct VertexPositionUVNormal
+    {
+        public float PosX;
+        public float PosY;
+        public float PosZ;
+
+        //TexU = uv.X;
+        //TexV = uv.Y;
+        //FloatBlue = color.Z;
+        //FloatRed = color.X;
+        //FloatGreen = color.Y;
+
+        public VertexPositionUVNormal(Vector3 pos,Vector3 uv)
+        {
+            PosX = pos.X;
+            PosY = pos.Y;
+            PosZ = pos.Z;
+
+        }
+    }
+
 }
