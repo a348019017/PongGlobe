@@ -81,8 +81,7 @@ namespace PongGlobe.Core
         public float PosY;
         public float PosZ;
 
-       
-
+      
         public VertexPosition(Vector3 pos)
         {
             PosX = pos.X;
@@ -104,26 +103,22 @@ namespace PongGlobe.Core
     }
 
     /// <summary>
-    /// 顶点法线贴图
+    /// 点的像素坐标偏移量+color+点的世界坐标
     /// </summary>
-    public struct VertexPositionUVNormal
+    public struct VertexPosition2UVNormal
     {
-        public float PosX;
-        public float PosY;
-        public float PosZ;
-
-        //TexU = uv.X;
-        //TexV = uv.Y;
-        //FloatBlue = color.Z;
-        //FloatRed = color.X;
-        //FloatGreen = color.Y;
-
-        public VertexPositionUVNormal(Vector3 pos,Vector3 uv)
+        //屏幕坐标
+        public Vector2 ScreenPos;
+        //世界坐标
+        public Vector3 Pos;
+        //颜色
+        public RgbaFloat Color;
+       
+        public VertexPosition2UVNormal( ref Vector2 screenPos,ref Vector3 pos,ref RgbaFloat color)
         {
-            PosX = pos.X;
-            PosY = pos.Y;
-            PosZ = pos.Z;
-
+            ScreenPos = screenPos;
+            Pos = pos;
+            Color = color;
         }
     }
 
