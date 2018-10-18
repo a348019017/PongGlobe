@@ -102,24 +102,6 @@ namespace PongGlobe.Core
         }
     }
 
-    /// <summary>
-    /// 点的像素坐标偏移量+color+点的世界坐标
-    /// </summary>
-    public struct VertexPosition2UVNormal
-    {
-        //屏幕坐标
-        public Vector2 ScreenPos;
-        //世界坐标
-        public Vector3 Pos;
-        //颜色
-        public RgbaFloat Color;
-       
-        public VertexPosition2UVNormal( ref Vector2 screenPos,ref Vector3 pos,ref RgbaFloat color)
-        {
-            ScreenPos = screenPos;
-            Pos = pos;
-            Color = color;
-        }
-    }
+
 
 }
