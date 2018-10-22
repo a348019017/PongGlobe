@@ -121,7 +121,7 @@ namespace PongGlobe.Windows
         {
             {
                 //显示帧率              
-                ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));
+                //ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));
                 var bytes= "你好";
                 ImGuiNET.ImGui.Text(bytes);
                 if (ImGuiNET.ImGui.Button("Export Sc"))

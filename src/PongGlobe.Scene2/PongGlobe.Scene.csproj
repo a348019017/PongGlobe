@@ -45,6 +45,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PongGlobe.CefGlue\PongGlobe.CefGlue.csproj" />
     <ProjectReference Include="..\PongGlobe2\PongGlobe.csproj" />
     <ProjectReference Include="..\Veldrid.ImageSharp\Veldrid.ImageSharp.csproj" />
   </ItemGroup>

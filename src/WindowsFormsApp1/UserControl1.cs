@@ -17,8 +17,8 @@ using PongGlobe;
 using PongGlobe.Scene;
 using PongGlobe.Renders;
 using Veldrid.Sdl2;
-using ImGuiNET;
-using PongGlobe.Windows;
+
+
 
 namespace WindowsFormsApp1
 {
@@ -57,8 +57,8 @@ namespace WindowsFormsApp1
         public Swapchain MainSwapchain { get; private set; }
 
         private float _ticks;
-        protected ImGuiController _controller = null;
-        protected static FrameTimeAverager _fta = new FrameTimeAverager(0.666);
+       
+       
 
         //创建一个计时器和记录之前的时间
         Stopwatch sw;
@@ -221,10 +221,10 @@ namespace WindowsFormsApp1
             {
                 _scene.Camera.WindowResized(this.Width, this.Height);
             }
-            if (_controller != null)
-            {
-                _controller.WindowResized((int)this.Width, (int)this.Height);
-            }       
+            //if (_controller != null)
+            //{
+            //    _controller.WindowResized((int)this.Width, (int)this.Height);
+            //}       
         }
 
         /// <summary>
@@ -261,7 +261,7 @@ namespace WindowsFormsApp1
            //_controller.Update(1f / 60f, InputTracker.FrameSnapshot);
             //更新相机
             _scene.Camera.Update(deltaSeconds);
-            _fta.AddTime(deltaSeconds);
+           
            // SubmitUI();
             _ticks += deltaSeconds * 1000f;
             foreach (var item in renders)
@@ -274,7 +274,7 @@ namespace WindowsFormsApp1
         {
             {
                 //显示帧率
-                ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));
+                //ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));
             }
         }
 
