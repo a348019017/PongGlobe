@@ -58,7 +58,9 @@ namespace PongGlobe.Windows
             var vectorPoint = new PointVectorLayerRender(pat2h, _scene);
             //renders.Add(vectorPoint);
             //var drawline = new DrawLineTool(_scene);
-           // renders.Add(drawline);
+            // renders.Add(drawline);
+            
+
         }
 
         /// <summary>
@@ -69,12 +71,16 @@ namespace PongGlobe.Windows
         /// <param name="sc"></param>
         public void OnGraphicsDeviceCreated(GraphicsDevice gd, ResourceFactory factory, Swapchain sc)
         {
+            //临时创建UI
+            //var mainUi = new MainUIRender(gd, Window.Handle,(int)Window.Width, (int)Window.Height);
+            //renders.Add(mainUi);
             GraphicsDevice = gd;
             ResourceFactory = factory;
             MainSwapchain = sc;
             CreateResources(factory);
             CreateSwapchainResources(factory);            
             _controller = new ImGuiRenderer(this.GraphicsDevice, this.GraphicsDevice.MainSwapchain.Framebuffer.OutputDescription, (int)this.Window.Width, (int)this.Window.Height);
+            
         }
 
         protected virtual void OnDeviceDestroyed()
@@ -120,8 +126,8 @@ namespace PongGlobe.Windows
         private  void SubmitUI()
         {
             {
-                //显示帧率              
-                //ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));
+                //显示帧率     
+                ImGuiNET.ImGui.Text(_fta.CurrentAverageFramesPerSecond.ToString("000.0 fps / ") + _fta.CurrentAverageFrameTimeMilliseconds.ToString("#00.00 ms"));
                 var bytes= "你好";
                 ImGuiNET.ImGui.Text(bytes);
                 if (ImGuiNET.ImGui.Button("Export Sc"))
@@ -147,7 +153,6 @@ namespace PongGlobe.Windows
             _cl.SetFramebuffer(GraphicsDevice.MainSwapchain.Framebuffer);
             _cl.ClearColorTarget(0, RgbaFloat.Black);
             _cl.ClearDepthStencil(1f);
-
             foreach (var item in renders)
             {
                 if (item is RayCastedGlobe) continue;
@@ -160,6 +165,7 @@ namespace PongGlobe.Windows
             GraphicsDevice.SwapBuffers(GraphicsDevice.MainSwapchain);
             GraphicsDevice.WaitForIdle();
 
+            
 
 
         }

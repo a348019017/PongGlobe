@@ -54,7 +54,7 @@ namespace PongGlobe.Scene.cef
             }
         }
 
-        #region Interface
+        
 
         protected override CefRenderHandler GetRenderHandler()
         {

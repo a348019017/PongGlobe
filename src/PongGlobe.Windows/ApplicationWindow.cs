@@ -16,6 +16,8 @@ namespace PongGlobe.Windows
         uint Width { get; }
         uint Height { get; }
 
+        IntPtr Handle { get; }
+
         void Run();
     }
 }

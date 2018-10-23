@@ -10,6 +10,11 @@ namespace GettingStarted2
     {
         public static void Main(string[] args)
         {
+
+
+
+
+
             //string str = "您好";
             //var byte1= Encoding.UTF8.GetBytes(str);
             //Encoding.Default
@@ -17,6 +22,13 @@ namespace GettingStarted2
             VeldridStartupWindow window = new VeldridStartupWindow("Textured Cube");
             EarthApplication texturedCube = new EarthApplication(window);
             //RayCastedGlobe globe = new RayCastedGlobe(window);
+
+
+
+
+
+
+
             window.Run();
         }
     }

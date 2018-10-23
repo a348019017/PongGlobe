@@ -23,6 +23,7 @@ namespace PongGlobe.Windows
 
         public uint Width => (uint)_window.Width;
         public uint Height => (uint)_window.Height;
+        public IntPtr Handle => _window.Handle;
 
         public SamplePlatformType PlatformType => SamplePlatformType.Desktop;
 

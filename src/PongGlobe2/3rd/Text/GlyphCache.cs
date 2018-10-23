@@ -6,7 +6,7 @@ using System.Drawing;
 //using ImGui.Common.Primitive;
 using System.Numerics;
 
-namespace ImGui
+namespace PongGlobe.ImGui
 {
     internal class GlyphData
     {

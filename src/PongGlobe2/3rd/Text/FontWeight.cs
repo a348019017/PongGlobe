@@ -1,4 +1,4 @@
-﻿namespace ImGui
+﻿namespace PongGlobe.ImGui
 {
     /// <summary>
     /// The font weight enumeration describes common values for degree of blackness or thickness of strokes of characters in a font.

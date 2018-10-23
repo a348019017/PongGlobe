@@ -35,7 +35,7 @@ namespace PongGlobe.Scene.cef
             {
                 // factory.CreateTexture(TextureDescription.Texture2D(
                 //Width, Height, MipLevels, 1, PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.Sampled));
-                _cefTexture = _gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D((uint)windowWidth,(uint)windowHeight,0,1,PixelFormat.B8_G8_R8_A8_UNorm,TextureUsage.Sampled));
+                _cefTexture = _gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D((uint)windowWidth,(uint)windowHeight,1,1,PixelFormat.B8_G8_R8_A8_UNorm,TextureUsage.Sampled));
             }
         }
 
