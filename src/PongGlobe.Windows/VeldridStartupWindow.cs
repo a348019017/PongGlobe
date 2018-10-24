@@ -5,6 +5,8 @@ using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
 using Veldrid.Utilities;
 using PongGlobe.Scene;
+using Xilium.CefGlue;
+using PongGlobe.Scene.cef;
 
 namespace PongGlobe.Windows
 {
@@ -33,9 +35,10 @@ namespace PongGlobe.Windows
             {
                 X = 100,
                 Y = 100,
-                WindowWidth = 640,
-                WindowHeight = 360,
+                WindowWidth = 800,
+                WindowHeight = 600,
                 WindowTitle = title,
+                WindowInitialState = WindowState.Normal
             };
             _window = VeldridStartup.CreateWindow(ref wci);
            // _window.Resized
@@ -45,6 +48,14 @@ namespace PongGlobe.Windows
             };
             _window.KeyDown += OnKeyDown;
         }
+
+
+       
+
+
+
+
+
 
         public void Run()
         {

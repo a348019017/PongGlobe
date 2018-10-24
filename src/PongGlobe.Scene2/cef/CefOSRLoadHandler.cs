@@ -5,7 +5,7 @@ using Xilium.CefGlue;
 
 namespace PongGlobe.Scene.cef
 {
-    internal sealed class CefOSRLoadHandler:CefLoadHandler
+    public sealed class CefOSRLoadHandler:CefLoadHandler
     {
         private CefOSRClient client;
         private bool hideScrollbars;

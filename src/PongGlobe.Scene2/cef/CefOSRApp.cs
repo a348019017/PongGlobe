@@ -11,7 +11,7 @@ namespace PongGlobe.Scene.cef
     /// <summary>
     /// 
     /// </summary>
-    internal sealed class CefOSRApp:CefApp
+    public sealed class CefOSRApp:CefApp
     {
         protected override void OnBeforeCommandLineProcessing(string processType, CefCommandLine commandLine)
         {

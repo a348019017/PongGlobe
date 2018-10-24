@@ -8,7 +8,7 @@ namespace PongGlobe.Scene.cef
     /// <summary>
     /// 
     /// </summary>
-    internal class CefOSRRenderHandle : CefRenderHandler
+    public class CefOSRRenderHandle : CefRenderHandler
     {
         private CefOSRClient client;
         private Texture _cefTexture;

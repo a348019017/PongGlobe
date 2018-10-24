@@ -9,6 +9,8 @@ using PongGlobe.Core;
 using PongGlobe.Scene;
 using PongGlobe.Renders;
 using System.Text;
+using Xilium.CefGlue;
+
 namespace PongGlobe.Windows
 {
     //地球的应用程序对象
@@ -31,7 +33,7 @@ namespace PongGlobe.Windows
         public GraphicsDevice GraphicsDevice { get; private set; }
         public ResourceFactory ResourceFactory { get; private set; }
         public Swapchain MainSwapchain { get; private set; }
-
+        private MainUIRender _browHost;
         private float _ticks;
         protected ImGuiRenderer _controller = null;
         protected static FrameTimeAverager _fta = new FrameTimeAverager(0.666);
@@ -72,8 +74,9 @@ namespace PongGlobe.Windows
         public void OnGraphicsDeviceCreated(GraphicsDevice gd, ResourceFactory factory, Swapchain sc)
         {
             //临时创建UI
-            //var mainUi = new MainUIRender(gd, Window.Handle,(int)Window.Width, (int)Window.Height);
-            //renders.Add(mainUi);
+            var mainUi = new MainUIRender(gd, Window.Handle,(int)Window.Width, (int)Window.Height);
+            renders.Add(mainUi);
+            _browHost = mainUi;
             GraphicsDevice = gd;
             ResourceFactory = factory;
             MainSwapchain = sc;
@@ -115,6 +118,7 @@ namespace PongGlobe.Windows
             _scene.Camera.Update(deltaSeconds);
             _fta.AddTime(deltaSeconds);
             SubmitUI();
+            if(_browHost!=null&&_browHost.BrowHost!=null) InputTracker.UpdateCefInput(_browHost.BrowHost, InputTracker.FrameSnapshot);
             _ticks += deltaSeconds * 1000f;
             foreach (var item in renders)
             {

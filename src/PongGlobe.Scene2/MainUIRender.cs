@@ -19,9 +19,10 @@ namespace PongGlobe.Scene
         /// <summary>
         /// 默认显示的网页
         /// </summary>
-        private string url = "file:///E:/chromeDownLoad/cef-mixer-master/cef-mixer-master/resource/hud.html";
+        private string url = "http://www.baidu.com";
+        //private string url = "file:///E:/chromeDownLoad/cef-mixer-master/cef-mixer-master/resource/hud.html";
         //隐藏进度条
-        private bool hideScrollbars = false;
+        private bool hideScrollbars = true;
         private bool shouldQuit = false;
         private CefOSRClient cefClient;
         private Texture _texture;
@@ -30,33 +31,17 @@ namespace PongGlobe.Scene
         private Pipeline _screenPipeline;
         private ResourceSet _screenResourceSet;
         private ResourceLayout _screenResourceLayout;
+
+
+        public CefBrowserHost BrowHost { get { return cefClient.sHost; } }
+
+
         /// <summary>
         /// 加载Cef相关的资源
         /// </summary>
         public MainUIRender(GraphicsDevice gd,IntPtr handle,int windwosWidth,int windowsHeight)
         {
-            //加载runtime
-            CefRuntime.Load();
-            var cefApp = new CefOSRApp();
-            var cefMainArgs = new CefMainArgs(new string[] { });
-
-            if (CefRuntime.ExecuteProcess(cefMainArgs, cefApp, IntPtr.Zero) != -1)
-                Console.WriteLine("Could not start the secondary process.");
-
-            var cefSettings = new CefSettings
-            {
-                //ExternalMessagePump = true,
-                MultiThreadedMessageLoop = true,
-                //SingleProcess = true,
-                LogSeverity = CefLogSeverity.Verbose,
-                LogFile = "cef.log",
-                WindowlessRenderingEnabled = true,
-                NoSandbox = true,
-            };
-
-
-            CefRuntime.Initialize(cefMainArgs, cefSettings, cefApp, IntPtr.Zero);
-
+            
             CefWindowInfo cefWindowInfo = CefWindowInfo.Create();
             cefWindowInfo.SetAsWindowless(handle, true);
 
@@ -72,7 +57,7 @@ namespace PongGlobe.Scene
             };
 
             // Initialize some of the custom interactions with the browser process.
-            this.cefClient = new CefOSRClient(windwosWidth, windowsHeight,gd,this.hideScrollbars);
+            this.cefClient = new CefOSRClient(windwosWidth, windowsHeight, gd, this.hideScrollbars);
 
             this._texture = this.cefClient.MainTexture;
             // Start up the browser instance.
@@ -83,7 +68,7 @@ namespace PongGlobe.Scene
             //CefBrowserHost
 
 
-           // this.cefClient
+            // this.cefClient
             //CefRuntime.do
         }
 

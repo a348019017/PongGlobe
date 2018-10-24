@@ -9,7 +9,7 @@ namespace PongGlobe.Scene.cef
     /// <summary>
     /// 
     /// </summary>
-    internal class CefOSRClient:CefClient
+    public class CefOSRClient:CefClient
     {
         private readonly CefLoadHandler _loadHandler;
         private readonly CefOSRRenderHandle _renderHandler;
