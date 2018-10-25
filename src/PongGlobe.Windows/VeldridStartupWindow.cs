@@ -57,7 +57,7 @@ namespace PongGlobe.Windows
 
 
 
-        public void Run()
+        public unsafe void Run()
         {
             GraphicsDeviceOptions options = new GraphicsDeviceOptions(
                 debug: false,
@@ -78,11 +78,12 @@ namespace PongGlobe.Windows
             {
                 double newElapsed = sw.Elapsed.TotalSeconds;
                 float deltaSeconds = (float)(newElapsed - previousElapsed);
-
-                InputSnapshot inputSnapshot = _window.PumpEvents();
-                InputTracker.UpdateFrameInput(inputSnapshot);
-
-                if (_window.Exists)
+                SDLEventHandler2 cefhandler = CefInputTracker.HandleEvent;
+                InputSnapshot inputSnapshot = _window.PumpEvents(cefhandler);
+                InputTracker.UpdateFrameInput(inputSnapshot);       
+                //在windows处于隐藏转台下时不渲染
+                
+                if (_window.Exists&&_window.WindowState!=WindowState.Minimized)
                 {
                     previousElapsed = newElapsed;
                     if (_windowResized)
@@ -93,9 +94,10 @@ namespace PongGlobe.Windows
                     }
 
                     Rendering?.Invoke(deltaSeconds);
+                    _gd.WaitForIdle();
                 }
             }
-            _gd.WaitForIdle();
+            
             _factory.DisposeCollector.DisposeAll();
             _gd.Dispose();
             GraphicsDeviceDestroyed?.Invoke();

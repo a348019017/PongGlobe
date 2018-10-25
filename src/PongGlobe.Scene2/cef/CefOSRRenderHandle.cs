@@ -10,35 +10,19 @@ namespace PongGlobe.Scene.cef
     /// </summary>
     public class CefOSRRenderHandle : CefRenderHandler
     {
-        private CefOSRClient client;
-        private Texture _cefTexture;
-        private GraphicsDevice _gd;
-        private readonly int _windowWidth;
-        private readonly int _windowHeight;
+        private MainUIRender _renderOwner = null;
 
-        public Texture Texture { get { return _cefTexture; } }
 
         /// <summary>
-        /// 使用GraphicDevice构造
+        /// 
         /// </summary>
         /// <param name="windowWidth"></param>
         /// <param name="windowHeight"></param>
         /// <param name="client"></param>
-        public CefOSRRenderHandle(int windowWidth, int windowHeight, CefOSRClient client,GraphicsDevice gd)
-        {
-            this._windowWidth = windowWidth;
-            this._windowHeight = windowHeight;
-            this.client = client;
-            this._gd = gd;
-            //同时创建一个可更新的Texture
-            if (this._gd != null)
-            {
-                // factory.CreateTexture(TextureDescription.Texture2D(
-                //Width, Height, MipLevels, 1, PixelFormat.R8_G8_B8_A8_UNorm, TextureUsage.Sampled));
-                _cefTexture = _gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D((uint)windowWidth,(uint)windowHeight,1,1,PixelFormat.B8_G8_R8_A8_UNorm,TextureUsage.Sampled));
-            }
+        public CefOSRRenderHandle(MainUIRender client)
+        {           
+            this._renderOwner = client;         
         }
-
 
 
         protected override bool GetRootScreenRect(CefBrowser browser, ref CefRectangle rect)
@@ -55,21 +39,18 @@ namespace PongGlobe.Scene.cef
 
         protected override bool GetViewRect(CefBrowser browser, ref CefRectangle rect)
         {
-            rect.X = 0;
-            rect.Y = 0;
-            rect.Width = this._windowWidth;
-            rect.Height = this._windowHeight;
+            //rect.X = 0;
+            //rect.Y = 0;
+            //rect.Width = client.WindowsWidth;
+            //rect.Height = client.WindowsHeight;
+            this._renderOwner.HandleGetViewRect(browser,ref rect);
             return true;
         }
 
         //[SecurityCritical]
         protected override void OnPaint(CefBrowser browser, CefPaintElementType type, CefRectangle[] dirtyRects, IntPtr buffer, int width, int height)
         {
-            if (browser != null&&_gd!=null)
-            {
-                //直接更新全部纹理               
-                _gd.UpdateTexture(_cefTexture, buffer, (uint)(4 * _windowWidth * _windowHeight), 0, 0, 0, (uint)_windowWidth, (uint)_windowHeight, 1, 0, 0);            
-            }
+            this._renderOwner.HandleOnPaint(browser, type, dirtyRects, buffer, width, height);
         }
 
         protected override bool GetScreenInfo(CefBrowser browser, CefScreenInfo screenInfo)

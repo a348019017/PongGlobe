@@ -74,7 +74,7 @@ namespace PongGlobe.Windows
         public void OnGraphicsDeviceCreated(GraphicsDevice gd, ResourceFactory factory, Swapchain sc)
         {
             //临时创建UI
-            var mainUi = new MainUIRender(gd, Window.Handle,(int)Window.Width, (int)Window.Height);
+            var mainUi = new MainUIRender(gd, Window.Handle,Window.Width, Window.Height);
             renders.Add(mainUi);
             _browHost = mainUi;
             GraphicsDevice = gd;
@@ -118,7 +118,7 @@ namespace PongGlobe.Windows
             _scene.Camera.Update(deltaSeconds);
             _fta.AddTime(deltaSeconds);
             SubmitUI();
-            if(_browHost!=null&&_browHost.BrowHost!=null) InputTracker.UpdateCefInput(_browHost.BrowHost, InputTracker.FrameSnapshot);
+                      
             _ticks += deltaSeconds * 1000f;
             foreach (var item in renders)
             {
@@ -170,8 +170,6 @@ namespace PongGlobe.Windows
             GraphicsDevice.WaitForIdle();
 
             
-
-
         }
         /// <summary>
         /// 窗口发生变化时停止给场景的Camera对象
@@ -180,7 +178,8 @@ namespace PongGlobe.Windows
         {
             _scene.Camera.WindowResized(Window.Width, Window.Height);
             _controller.WindowResized((int)Window.Width, (int)Window.Height);
-        }
-   
+            //调整UI界面的大小
+            _browHost.ResizeWindow(Window.Width, Window.Height);
+        }  
     }
 }

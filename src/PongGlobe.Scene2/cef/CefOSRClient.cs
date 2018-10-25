@@ -13,45 +13,22 @@ namespace PongGlobe.Scene.cef
     {
         private readonly CefLoadHandler _loadHandler;
         private readonly CefOSRRenderHandle _renderHandler;
+        private MainUIRender _renderOwner;
 
-        private static readonly object sPixelLock = new object();
-        
-        public Texture MainTexture { get { return _renderHandler.Texture; } }
+        private static readonly object sPixelLock = new object();     
 
-        public CefBrowserHost sHost;
-
-        public CefOSRClient(int windowWidth,int windowHeight,GraphicsDevice gd, bool hideScrollbars = false)
+        public CefOSRClient(MainUIRender owner)
         {
-            this._loadHandler = new CefOSRLoadHandler (this, hideScrollbars);
-            this._renderHandler = new CefOSRRenderHandle(windowWidth, windowHeight, this,gd);
-            //this.sPixelBuffer = new byte[windowSize.Width * windowSize.Height * 4];
-           // Debug.Log("Constructed Offscreen Client");
+            _renderOwner = owner;
+            this._loadHandler = new CefOSRLoadHandler (this._renderOwner);
+            this._renderHandler = new CefOSRRenderHandle(this._renderOwner);          
         }
 
-        //public void UpdateTexture(Texture2D pTexture)
-        //{
-        //    if (this.sHost != null)
-        //    {
-        //        lock (sPixelLock)
-        //        {
-        //            if (this.sHost != null)
-        //            {
-        //                pTexture.LoadRawTextureData(this.sPixelBuffer);
-        //                pTexture.Apply(false);
-        //            }
-        //        }
-        //    }
-        //}
+       
 
         public void Shutdown()
         {
-            if (this.sHost != null)
-            {
-                //Debug.Log("Host Cleanup");
-                this.sHost.CloseBrowser(true);
-                this.sHost.Dispose();
-                this.sHost = null;
-            }
+             
         }
 
         

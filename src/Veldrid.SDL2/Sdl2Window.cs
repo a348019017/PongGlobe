@@ -420,7 +420,7 @@ namespace Veldrid.Sdl2
             return _publicSnapshot;
         }
 
-        private void ProcessEvents(SDLEventHandler eventHandler)
+        private void ProcessEvents(SDLEventHandler2 eventHandler)
         {
             CheckNewWindowTitle();
 
@@ -430,23 +430,40 @@ namespace Veldrid.Sdl2
                 for (int i = 0; i < _events.Count; i++)
                 {
                     SDL_Event ev = _events[i];
-                    if (eventHandler == null)
+                    HandleEvent(&ev);
+                    if (eventHandler != null)
                     {
-                        HandleEvent(&ev);
-                    }
-                    else
-                    {
-                        eventHandler(ref ev);
-                    }
+                        eventHandler(&ev);
+                    }                   
                 }
                 _events.Clear();
             }
         }
 
-        public void PumpEvents(SDLEventHandler eventHandler)
+
+        public InputSnapshot PumpEvents(SDLEventHandler2 eventHandler)
         {
             ProcessEvents(eventHandler);
+            
+            _currentMouseDelta = new Vector2();
+            if (_threadedProcessing)
+            {
+                SimpleInputSnapshot snapshot = Interlocked.Exchange(ref _privateSnapshot, _privateBackbuffer);
+                snapshot.CopyTo(_publicSnapshot);
+                snapshot.Clear();
+            }
+            else
+            {
+                //ProcessEvents(null);
+                _privateSnapshot.CopyTo(_publicSnapshot);
+                _privateSnapshot.Clear();
+            }
+
+            return _publicSnapshot;
         }
+
+       
+
 
         private unsafe void HandleEvent(SDL_Event* ev)
         {
@@ -1240,5 +1257,6 @@ namespace Veldrid.Sdl2
         }
     }
 
+    public unsafe delegate void SDLEventHandler2(SDL_Event* ev);
     public delegate void SDLEventHandler(ref SDL_Event ev);
 }

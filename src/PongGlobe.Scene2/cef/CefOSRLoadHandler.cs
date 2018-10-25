@@ -7,22 +7,17 @@ namespace PongGlobe.Scene.cef
 {
     public sealed class CefOSRLoadHandler:CefLoadHandler
     {
-        private CefOSRClient client;
+        private MainUIRender _renderOwner;
         private bool hideScrollbars;
 
-        public CefOSRLoadHandler(CefOSRClient client, bool hideScrollbars)
+        public CefOSRLoadHandler(MainUIRender client)
         {
-            this.client = client;
-            this.hideScrollbars = hideScrollbars;
+            this._renderOwner = client;          
         }
 
         protected override void OnLoadStart(CefBrowser browser, CefFrame frame, CefTransitionType transitionType)
         {
-            if (browser != null)
-                this.client.sHost = browser.GetHost();
-
-            //if (frame.IsMain)
-               // Debug.LogFormat("START: {0}", browser.GetMainFrame().Url);
+            this._renderOwner.HandleAfterCreated(browser);
         }
 
         protected override void OnLoadEnd(CefBrowser browser, CefFrame frame, int httpStatusCode)

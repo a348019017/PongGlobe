@@ -25,23 +25,35 @@ namespace PongGlobe.Scene
         private bool hideScrollbars = true;
         private bool shouldQuit = false;
         private CefOSRClient cefClient;
+        private CefBrowserHost _host;
+        private CefBrowser _browser;
         private Texture _texture;
         private TextureView _textureView;
         private ShaderSetDescription _shaderset;
         private Pipeline _screenPipeline;
         private ResourceSet _screenResourceSet;
         private ResourceLayout _screenResourceLayout;
+        private CommandList _cl;
+        private GraphicsDevice _gd;
 
+        //进程锁，在修改texture时使用
+        public readonly object BitmapLock = new object();
 
-        public CefBrowserHost BrowHost { get { return cefClient.sHost; } }
+        /// <summary>
+        /// 子界面的大小
+        /// </summary>
+        private uint _windowsWidth;
+        private uint _windowsHeight;
 
 
         /// <summary>
         /// 加载Cef相关的资源
         /// </summary>
-        public MainUIRender(GraphicsDevice gd,IntPtr handle,int windwosWidth,int windowsHeight)
+        public MainUIRender(GraphicsDevice gd,IntPtr handle,uint windwosWidth,uint windowsHeight)
         {
-            
+            _gd = gd;
+            _windowsHeight = windowsHeight;
+            _windowsWidth = windwosWidth;
             CefWindowInfo cefWindowInfo = CefWindowInfo.Create();
             cefWindowInfo.SetAsWindowless(handle, true);
 
@@ -57,64 +69,72 @@ namespace PongGlobe.Scene
             };
 
             // Initialize some of the custom interactions with the browser process.
-            this.cefClient = new CefOSRClient(windwosWidth, windowsHeight, gd, this.hideScrollbars);
-
-            this._texture = this.cefClient.MainTexture;
+            this.cefClient = new CefOSRClient(this);
+           
             // Start up the browser instance.
             CefBrowserHost.CreateBrowser(cefWindowInfo, this.cefClient, cefBrowserSettings, string.IsNullOrEmpty(this.url) ? "http://www.google.com" : this.url);
-
-            //参照cefwpsosr的例子添加更多消息管理等操作，再测试其实际的帧率。
-
-            //CefBrowserHost
-
-
-            // this.cefClient
-            //CefRuntime.do
-        }
-
-        private void Quit()
-        {
-            this.shouldQuit = true;
-            //this.StopAllCoroutines();
-            this.cefClient.Shutdown();
-            CefRuntime.Shutdown();
-        }
-
-        private static void ResizeWindow(IntPtr handle, int width, int height)
-        {
-            //if (handle != IntPtr.Zero)
-            //{
-            //    NativeMethods.SetWindowPos(handle, IntPtr.Zero,
-            //        0, 0, width, height,
-            //        SetWindowPosFlags.NoMove | SetWindowPosFlags.NoZOrder
-            //        );
-            //}
-        }
-
-        //private IEnumerator MessagePump()
-        //{
-        //    while (!this.shouldQuit)
-        //    {
-        //        CefRuntime.DoMessageLoopWork();
-        //        if (!this.shouldQuit)
-        //            this.cefClient.UpdateTexture(this.BrowserTexture);
-        //        yield return null;
-        //    }
-        //}
-
-
-        /// <summary>
-        /// 调整屏幕分辨率
-        /// </summary>
-        public void Resize()
-        {
             
         }
 
 
+        //调整其子界面的大小
+        public void ResizeWindow(uint width, uint height)
+        {
+            lock (BitmapLock)
+            {
+                //触发host的resize
+                _windowsHeight = height;
+                _windowsWidth = width;
+                if (_host != null)
+                    _host.WasResized();
+                //同时重建渲染管线
+                if (_screenPipeline != null)
+                    _screenPipeline.Dispose();
+                if (_textureView != null)
+                    _textureView.Dispose();
+                if (_texture != null)
+                    _texture.Dispose();
+                if (_screenResourceSet != null)
+                    _screenResourceSet.Dispose();
+
+                
+                _texture = _gd.ResourceFactory.CreateTexture(TextureDescription.Texture2D((uint)_windowsWidth, (uint)_windowsHeight, 1, 1, PixelFormat.B8_G8_R8_A8_UNorm, TextureUsage.Sampled));
+                _textureView = _gd.ResourceFactory.CreateTextureView(_texture);
+
+                //重建resourceSet
+                _screenResourceSet = _gd.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
+           _screenResourceLayout,
+           _textureView,
+           _gd.Aniso4xSampler
+           ));
+
+                var rasterizer = RasterizerStateDescription.Default;
+                rasterizer.FillMode = PolygonFillMode.Solid;
+                rasterizer.FrontFace = FrontFace.CounterClockwise;
+                rasterizer.CullMode = FaceCullMode.Front;
+                _screenPipeline = _gd.ResourceFactory.CreateGraphicsPipeline(new GraphicsPipelineDescription(
+                   BlendStateDescription.SingleOverrideBlend,
+                   DepthStencilStateDescription.DepthOnlyLessEqual,
+                   rasterizer,
+                   PrimitiveTopology.TriangleList,
+                   _shaderset,
+                   //共享View和prj的buffer
+                   new ResourceLayout[] { _screenResourceLayout },
+                   _gd.MainSwapchain.Framebuffer.OutputDescription));
+
+
+            }
+
+           
+        }
+
         public void CreateDeviceResources(GraphicsDevice gd, ResourceFactory factory)
         {
-            if (_texture == null) throw new Exception("Not Initial texture;");
+            ///创建一个默认的commandlist
+            _cl = factory.CreateCommandList();
+
+            //创建一个当前窗体大小的屏幕纹理
+            _texture = factory.CreateTexture(TextureDescription.Texture2D((uint)_windowsWidth, (uint)_windowsHeight, 1, 1, PixelFormat.B8_G8_R8_A8_UNorm, TextureUsage.Sampled));
             //创建textureView
             _textureView = factory.CreateTextureView(_texture);
 
@@ -157,13 +177,23 @@ namespace PongGlobe.Scene
                new ResourceLayout[] { _screenResourceLayout },
                gd.MainSwapchain.Framebuffer.OutputDescription));
 
+
+           
+
         }
 
         public void Dispose()
         {
-            this.shouldQuit = true;
-            //this.StopAllCoroutines();
-            this.cefClient.Shutdown();
+            if (_host != null)
+            {
+                _host.CloseBrowser();
+                _host = null;
+            }
+            if (_browser != null)
+            {
+                _browser.Dispose();
+                _browser = null;
+            }
             CefRuntime.Shutdown();
         }
 
@@ -187,5 +217,76 @@ namespace PongGlobe.Scene
         {
             
         }
+
+        #region all cef handler
+
+
+        /// <summary>
+        /// 创建之后的事件回调
+        /// </summary>
+        /// <param name="browser"></param>
+        public void HandleAfterCreated(CefBrowser browser)
+        {
+            this._host = browser.GetHost();
+            CefInputTracker.Host = _host;
+        }
+
+
+        /// <summary>
+        /// 处理获取当前ViewRect的事件
+        /// </summary>
+        public void HandleGetViewRect(CefBrowser browser, ref CefRectangle rect)
+        {
+            rect.X = 0;
+            rect.Y = 0;
+            rect.Width = (int)_windowsWidth;
+            rect.Height = (int)_windowsHeight;          
+        }
+
+
+        /// <summary>
+        /// 处理重绘操作
+        /// </summary>
+        /// <param name="browser"></param>
+        /// <param name="type"></param>
+        /// <param name="dirtyRects"></param>
+        /// <param name="buffer"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        //此方法是多线程进行的，因此-texture在多线程中被使用
+        public void HandleOnPaint(CefBrowser browser, CefPaintElementType type, CefRectangle[] dirtyRects, IntPtr buffer, int width, int height)
+        {
+            if (_texture != null)
+            {
+                lock (BitmapLock)
+                {
+                    //当前分辨率不一致
+                    if (width != _windowsWidth && height != _windowsHeight)
+                    {
+                        return;
+                    }
+                    else {
+                        _gd.UpdateTexture(_texture, buffer, (uint)(_windowsWidth * _windowsHeight * 4), 0, 0, 0, _windowsWidth, _windowsHeight, 1, 0, 0);
+                        //_gd.WaitForIdle();
+                    }                                            
+                    foreach (var item in dirtyRects)
+                    {
+                        //_gd.UpdateTexture                        
+                    }
+                }                           
+            }
+        }
+        
+
+
+        #endregion
+
+
+
+
+
+
+
+
     }
 }

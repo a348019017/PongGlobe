@@ -4,11 +4,13 @@ using Veldrid;
 using System.Collections;
 using Xilium.CefGlue;
 using System;
+using Veldrid.Sdl2;
+
 
 namespace PongGlobe.Scene
 {
     /// <summary>
-    /// 事件记录类,同步增加CEF的对象
+    /// 事件记录类
     /// </summary>
     public static class InputTracker
     {
@@ -84,32 +86,6 @@ namespace PongGlobe.Scene
         }
 
 
-        /// <summary>
-        /// 更新cefHost中的事件
-        /// </summary>
-        public static void UpdateCefInput(CefBrowserHost host, InputSnapshot snapshot)
-        {
-            //for (int i = 0; i < snapshot.KeyEvents.Count; i++)
-            //{
-            //    KeyEvent ke = snapshot.KeyEvents[i];
-            //    var newKeyEvent = new CefKeyEvent();
-            //    newKeyEvent.Character = ke.Key;
-            //    //newKeyEvent.
-            //}
-            var mousePosition = snapshot.MousePosition;           
-            for (int i = 0; i < snapshot.MouseEvents.Count; i++)
-            {
-                MouseEvent me = snapshot.MouseEvents[i];
-             
-                var cefmouse = new CefMouseEvent();
-                cefmouse.X = Convert.ToInt32(mousePosition.X);
-                cefmouse.Y = Convert.ToInt32(mousePosition.Y);
-                var mouseButton = (int)me.MouseButton;
-                //cefmouse.Modifiers=snapshot.
-                //cefmouse.
-                host.SendMouseClickEvent(cefmouse, (CefMouseButtonType)mouseButton, !me.Down,  1);
-            }
-        }
 
 
         private static void MouseUp(MouseButton mouseButton)
