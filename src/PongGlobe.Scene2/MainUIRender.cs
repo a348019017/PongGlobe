@@ -19,8 +19,9 @@ namespace PongGlobe.Scene
         /// <summary>
         /// 默认显示的网页
         /// </summary>
-        private string url = "http://www.baidu.com";
-        //private string url = "file:///E:/chromeDownLoad/cef-mixer-master/cef-mixer-master/resource/hud.html";
+        //private string url = "http://www.baidu.com";
+       // private string url = "file:///E:/chromeDownLoad/cef-mixer-master/cef-mixer-master/resource/hud.html";
+        private string url = "http://192.168.0.133:6767/index.html";
         //隐藏进度条
         private bool hideScrollbars = true;
         private bool shouldQuit = false;

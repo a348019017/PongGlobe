@@ -48,7 +48,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinformCEF3", "WinformCEF3\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PongGlobe.CefGlue", "PongGlobe.CefGlue\PongGlobe.CefGlue.csproj", "{C43CD6E0-602A-42D7-93B8-0E363F37BB30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PongGlobe.CefExtension", "PongGlobe.CefExtension\PongGlobe.CefExtension.csproj", "{FD17FAA9-A846-416B-9FAE-7B8A963E2D45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PongGlobe.CefExtension", "PongGlobe.CefExtension\PongGlobe.CefExtension.csproj", "{FD17FAA9-A846-416B-9FAE-7B8A963E2D45}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extension", "Extension", "{D30BFDE5-83C0-49A1-A543-A201FE49B383}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
