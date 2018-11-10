@@ -23,8 +23,6 @@ namespace PongGlobe.Core
         public float TexU;
         public float TexV;
 
-
-
         public VertexPositionColorTexture(Vector3 pos, Vector3 color, Vector2 uv)
         {
             PosX = pos.X;
