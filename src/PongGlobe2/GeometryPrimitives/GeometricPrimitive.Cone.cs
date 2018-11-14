@@ -2,8 +2,10 @@
 // Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
 
 using System;
-
-using Xenko.Core.Mathematics;
+using Veldrid;
+//using Xenko.Core.Mathematics;
+using PongGlobe.Graphics;
+using PongGlobe.Core;
 
 namespace Xenko.Graphics.GeometricPrimitives
 {

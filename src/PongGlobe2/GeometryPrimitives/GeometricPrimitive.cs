@@ -23,30 +23,34 @@
 
 using System;
 
-using Xenko.Core;
-using Xenko.Rendering;
+using PongGlobe.Core;
+//using PongGlobe.Rendering;
+using Veldrid;
+using Veldrid.Vk;
+using PongGlobe.Graphics;
 
-namespace Xenko.Graphics.GeometricPrimitives
+
+namespace PongGlobe.Graphics.GeometricPrimitive
 {
     /// <summary>
     /// A geometric primitive used to draw a simple model built from a set of vertices and indices.
     /// </summary>
-    public class GeometricPrimitive<T> : ComponentBase where T : struct, IVertex
+    public class GeometricPrimitive<T> : ComponentBase where T : struct
     {
         /// <summary>
         /// The pipeline state.
         /// </summary>
-        public readonly MutablePipelineState PipelineState;
+        public readonly Pipeline PipelineState;
 
         /// <summary>
         /// The index buffer used by this geometric primitive.
         /// </summary>
-        public readonly Buffer IndexBuffer;
+        public readonly DeviceBuffer IndexBuffer;
 
         /// <summary>
         /// The vertex buffer used by this geometric primitive.
         /// </summary>
-        public readonly Buffer VertexBuffer;
+        public readonly DeviceBuffer VertexBuffer;
 
         /// <summary>
         /// The default graphics device.
@@ -54,9 +58,9 @@ namespace Xenko.Graphics.GeometricPrimitives
         protected readonly GraphicsDevice GraphicsDevice;
 
         /// <summary>
-        /// The input layout used by this geometric primitive (shared for all geometric primitive).
+        /// 顶点资源布局，根据T来进行布局,其它参数相对固定因此不列出
         /// </summary>
-        protected readonly VertexBufferBinding VertexBufferBinding;
+        protected readonly VertexLayoutDescription VertexBufferBinding;
 
         /// <summary>
         /// True if the index buffer is a 32 bit index buffer.
@@ -72,7 +76,7 @@ namespace Xenko.Graphics.GeometricPrimitives
         public GeometricPrimitive(GraphicsDevice graphicsDevice, GeometricMeshData<T> geometryMesh)
         {
             GraphicsDevice = graphicsDevice;
-            PipelineState = new MutablePipelineState(graphicsDevice);
+            PipelineState = graphicsDevice.ResourceFactory.CreateGraphicsPipeline();
 
             var vertices = geometryMesh.Vertices;
             var indices = geometryMesh.Indices;
@@ -87,14 +91,17 @@ namespace Xenko.Graphics.GeometricPrimitives
                 {
                     indicesShort[i] = (ushort)indices[i];
                 }
-                IndexBuffer = Buffer.Index.New(graphicsDevice, indicesShort).RecreateWith(indicesShort).DisposeBy(this);
+                //IndexBuffer = Buffer.Index.New(graphicsDevice, indicesShort).RecreateWith(indicesShort).DisposeBy(this);
+                //创建IndexBuffer
+                IndexBuffer = graphicsDevice.ResourceFactory.CreateBuffer();
             }
             else
             {
-                if (graphicsDevice.Features.CurrentProfile <= GraphicsProfile.Level_9_3)
-                {
-                    throw new InvalidOperationException("Cannot generate more than 65535 indices on feature level HW <= 9.3");
-                }
+                //判断特性是否支持超过65535个Indices，16位表示
+                //if (graphicsDevice.Features.CurrentProfile <= GraphicsProfile.Level_9_3)
+                //{
+                //    throw new InvalidOperationException("Cannot generate more than 65535 indices on feature level HW <= 9.3");
+                //}
 
                 IndexBuffer = Buffer.Index.New(graphicsDevice, indices).RecreateWith(indices).DisposeBy(this);
                 IsIndex32Bits = true;
@@ -105,9 +112,9 @@ namespace Xenko.Graphics.GeometricPrimitives
             VertexBuffer = Buffer.Vertex.New(graphicsDevice, vertices).RecreateWith(vertices).DisposeBy(this);
             VertexBufferBinding = new VertexBufferBinding(VertexBuffer, new T().GetLayout(), vertices.Length);
 
-            PipelineState.State.SetDefaults();
-            PipelineState.State.InputElements = VertexBufferBinding.Declaration.CreateInputElements();
-            PipelineState.State.PrimitiveType = PrimitiveQuad.PrimitiveType;
+            //PipelineState.State.SetDefaults();
+            //PipelineState.State.InputElements = VertexBufferBinding.Declaration.CreateInputElements();
+            //PipelineState.State.PrimitiveType = PrimitiveQuad.PrimitiveType;
         }
 
         /// <summary>
@@ -132,7 +139,7 @@ namespace Xenko.Graphics.GeometricPrimitives
             commandList.SetVertexBuffer(0, VertexBuffer, 0, VertexBufferBinding.Stride);
 
             // Finally Draw this mesh
-            commandList.DrawIndexed(IndexBuffer.ElementCount);
+            commandList.DrawIndexed(IndexBuffer.);
         }
 
         /// <summary>

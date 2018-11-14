@@ -75,9 +75,11 @@
 
 using System;
 using System.Collections.Generic;
-
-using Xenko.Core;
-using Xenko.Core.Mathematics;
+using System.Numerics;
+using PongGlobe.Graphics;
+using PongGlobe.Core;
+//using Xenko.Core;
+//using Xenko.Core.Mathematics;
 
 namespace Xenko.Graphics.GeometricPrimitives
 {

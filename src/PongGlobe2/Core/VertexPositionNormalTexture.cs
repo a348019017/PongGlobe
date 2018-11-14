@@ -1,50 +1,129 @@
-Ôªøusing System;
-using System.Collections.Generic;
-using System.Text;
+// Copyright (c) Xenko contributors (https://xenko.com) and Silicon Studio Corp. (https://www.siliconstudio.co.jp)
+// Distributed under the MIT license. See the LICENSE.md file in the project root for more information.
+//
+// Copyright (c) 2010-2013 SharpDX - Alexandre Mutel
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+using System;
+using System.Runtime.InteropServices;
+//using Xenko.Core.Mathematics;
 using System.Numerics;
 
-namespace PongGlobe.Core
+namespace PongGlobe.Graphics
 {
     /// <summary>
-    /// È°∂ÁÇπÂùêÊ†áÈ¢úËâ≤ÂíåÁ∫πÁêÜ
+    /// Describes a custom vertex format structure that contains position, normal and texture information.
     /// </summary>
-    public struct VertexPositionColorTexture
+    [StructLayout(LayoutKind.Sequential, Pack = 4)]
+    public struct VertexPositionNormalTexture : IEquatable<VertexPositionNormalTexture>
     {
-        public const uint SizeInBytes = 32;
-
-        public float PosX;
-        public float PosY;
-        public float PosZ;
-
-        public float FloatRed;
-        public float FloatGreen;
-        public float FloatBlue;
-
-        public float TexU;
-        public float TexV;
-
-        public VertexPositionColorTexture(Vector3 pos, Vector3 color, Vector2 uv)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="VertexPositionNormalTexture"/> struct.
+        /// </summary>
+        /// <param name="position">The position of this vertex.</param>
+        /// <param name="normal">The vertex normal.</param>
+        /// <param name="textureCoordinate">UV texture coordinates.</param>
+        public VertexPositionNormalTexture(Vector3 position, Vector3 normal, Vector2 textureCoordinate) : this()
         {
-            PosX = pos.X;
-            PosY = pos.Y;
-            PosZ = pos.Z;
-            TexU = uv.X;
-            TexV = uv.Y;
-            FloatBlue = color.Z;
-            FloatRed = color.X;
-            FloatGreen = color.Y;
+            Position = position;
+            Normal = normal;
+            TextureCoordinate = textureCoordinate;
         }
 
-        public VertexPositionColorTexture(Vector3 pos, Vector2 uv)
+        /// <summary>
+        /// XYZ position.
+        /// </summary>
+        public Vector3 Position;
+
+        /// <summary>
+        /// The vertex normal.
+        /// </summary>
+        public Vector3 Normal;
+
+        /// <summary>
+        /// UV texture coordinates.
+        /// </summary>
+        public Vector2 TextureCoordinate;
+        
+        /// <summary>
+        /// Defines structure byte size.
+        /// </summary>
+        public static readonly int Size = 32;
+
+
+
+        //ø…“‘∑µªÿ“ª∏ˆ◊ ‘¥µƒ≤ºæ÷
+
+        /// <summary>
+        /// The vertex layout of this struct.
+        /// </summary>
+        //public static readonly VertexDeclaration Layout = new VertexDeclaration(
+        //    VertexElement.Position<Vector3>(),
+        //    VertexElement.Normal<Vector3>(),
+        //    VertexElement.TextureCoordinate<Vector2>());
+
+        public bool Equals(VertexPositionNormalTexture other)
         {
-            PosX = pos.X;
-            PosY = pos.Y;
-            PosZ = pos.Z;
-            TexU = uv.X;
-            TexV = uv.Y;
-            FloatBlue = 0.5f;
-            FloatRed = 0.5f;
-            FloatGreen = 0.5f;
+            return Position.Equals(other.Position) && Normal.Equals(other.Normal) && TextureCoordinate.Equals(other.TextureCoordinate);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            return obj is VertexPositionNormalTexture && Equals((VertexPositionNormalTexture)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hashCode = Position.GetHashCode();
+                hashCode = (hashCode * 397) ^ Normal.GetHashCode();
+                hashCode = (hashCode * 397) ^ TextureCoordinate.GetHashCode();
+                return hashCode;
+            }
+        }
+
+        //public VertexDeclaration GetLayout()
+        //{
+        //    return Layout;
+        //}
+
+        public void FlipWinding()
+        {
+            TextureCoordinate.X = (1.0f - TextureCoordinate.X);
+        }
+
+        public static bool operator ==(VertexPositionNormalTexture left, VertexPositionNormalTexture right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(VertexPositionNormalTexture left, VertexPositionNormalTexture right)
+        {
+            return !left.Equals(right);
+        }
+
+        public override string ToString()
+        {
+            return string.Format("Position: {0}, Normal: {1}, Texcoord: {2}", Position, Normal, TextureCoordinate);
         }
     }
 }

@@ -83,6 +83,7 @@ namespace PongGlobe.Renders
             //glsl是列主序，C#是行主序，虽然有所差异，但是并不需要装置，glsl中的第一行实际上就是传入矩阵的第一列，此列刚好能参与计算并返回正常值。
             //设置视点位置为2,2,2 ,target 为在0.2,0.2,0
             var eyePosition = _camera.Position;
+            
             _ubo.prj = view * prj;
             _ubo.CameraEye = eyePosition;
             _ubo.CameraEyeSquared = eyePosition * eyePosition;
