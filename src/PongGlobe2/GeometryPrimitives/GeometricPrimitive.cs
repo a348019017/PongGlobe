@@ -35,12 +35,12 @@ namespace PongGlobe.Graphics.GeometricPrimitive
     /// <summary>
     /// A geometric primitive used to draw a simple model built from a set of vertices and indices.
     /// </summary>
-    public class GeometricPrimitive<T> : ComponentBase where T : struct
+    public class GeometricPrimitive<T> : ComponentBase where T : struct ,IVertex
     {
         /// <summary>
         /// The pipeline state.
         /// </summary>
-        public readonly Pipeline PipelineState;
+        public readonly MutablePipeline PipelineState;
 
         /// <summary>
         /// The index buffer used by this geometric primitive.
@@ -76,7 +76,7 @@ namespace PongGlobe.Graphics.GeometricPrimitive
         public GeometricPrimitive(GraphicsDevice graphicsDevice, GeometricMeshData<T> geometryMesh)
         {
             GraphicsDevice = graphicsDevice;
-            PipelineState = graphicsDevice.ResourceFactory.CreateGraphicsPipeline();
+            //PipelineState = graphicsDevice.ResourceFactory.CreateGraphicsPipeline();
 
             var vertices = geometryMesh.Vertices;
             var indices = geometryMesh.Indices;
@@ -90,10 +90,9 @@ namespace PongGlobe.Graphics.GeometricPrimitive
                 for (int i = 0; i < indicesShort.Length; i++)
                 {
                     indicesShort[i] = (ushort)indices[i];
-                }
-                //IndexBuffer = Buffer.Index.New(graphicsDevice, indicesShort).RecreateWith(indicesShort).DisposeBy(this);
+                }            
                 //创建IndexBuffer
-                IndexBuffer = graphicsDevice.ResourceFactory.CreateBuffer();
+                IndexBuffer = graphicsDevice.ResourceFactory.CreateBuffer(new BufferDescription((uint)(sizeof(ushort) * indicesShort.Length), BufferUsage.VertexBuffer));
             }
             else
             {
@@ -102,44 +101,58 @@ namespace PongGlobe.Graphics.GeometricPrimitive
                 //{
                 //    throw new InvalidOperationException("Cannot generate more than 65535 indices on feature level HW <= 9.3");
                 //}
-
-                IndexBuffer = Buffer.Index.New(graphicsDevice, indices).RecreateWith(indices).DisposeBy(this);
+                IndexBuffer = graphicsDevice.ResourceFactory.CreateBuffer(new BufferDescription((uint)(sizeof(int) * indices.Length), BufferUsage.VertexBuffer));
                 IsIndex32Bits = true;
             }
 
-            // For now it will keep buffers for recreation.
-            // TODO: A better alternative would be to store recreation parameters so that we can reuse procedural code.
-            VertexBuffer = Buffer.Vertex.New(graphicsDevice, vertices).RecreateWith(vertices).DisposeBy(this);
-            VertexBufferBinding = new VertexBufferBinding(VertexBuffer, new T().GetLayout(), vertices.Length);
+            // 创建顶点缓存
+            VertexBuffer = graphicsDevice.ResourceFactory.CreateBuffer(new BufferDescription((uint)(32 * vertices.Length), BufferUsage.VertexBuffer));
+            //VertexBufferBinding = new VertexBufferBinding(VertexBuffer, new T().GetLayout(), vertices.Length);
 
+            //创建一个临时的渲染管线，由于渲染管线的状态会发现变化，因此需要一个缓存的CachePipeLine类来处理
             //PipelineState.State.SetDefaults();
             //PipelineState.State.InputElements = VertexBufferBinding.Declaration.CreateInputElements();
             //PipelineState.State.PrimitiveType = PrimitiveQuad.PrimitiveType;
         }
 
+
+        /// <summary>
+        /// 更新相关操作，如更新纹理，可以另建CommandList，更新StaticBuffer的操作,说白了，频次较低的操作在Update，频次较高如Draw操作在Draw中，更新渲染管线的操作
+        /// 当高层次API属性发生变化时,或者是与Draw操作无关的操作。
+        /// </summary>
+        /// <param name="graphicsDevice"></param>
+        public void Update(GraphicsDevice graphicsDevice)
+        {
+            //if (highObject.PropertyIsChange)
+            //    ReConstructGrahphicStatusAndResourceStatus();
+            //PutUpdate()
+
+             
+        }
+
+
         /// <summary>
         /// Draws this <see cref="GeometricPrimitive" />.
+        /// 将EffctInstance替换成活动参数，如TexturePath，ModelViewMatrix,完成一个初步的抽象
         /// </summary>
         /// <param name="commandList">The command list.</param>
         public void Draw(GraphicsContext graphicsContext, EffectInstance effectInstance)
         {
             var commandList = graphicsContext.CommandList;
-
+            //GraphicsDevice.comm
             // Update pipeline state
-            PipelineState.State.RootSignature = effectInstance.RootSignature;
-            PipelineState.State.EffectBytecode = effectInstance.Effect.Bytecode;
-            PipelineState.State.Output.CaptureState(commandList);
-            PipelineState.Update();
-            commandList.SetPipelineState(PipelineState.CurrentState);
-
-            effectInstance.Apply(graphicsContext);
-
+            //PipelineState.State.RootSignature = effectInstance.RootSignature;
+            //PipelineState.State.EffectBytecode = effectInstance.Effect.Bytecode;
+            //PipelineState.State.Output.CaptureState(commandList);
+            //PipelineState.Update();
+            commandList.SetPipeline(PipelineState.CurrentPipeLine);
+            //effectInstance.Apply(graphicsContext);
             // Setup the Vertex Buffer
-            commandList.SetIndexBuffer(IndexBuffer, 0, IsIndex32Bits);
-            commandList.SetVertexBuffer(0, VertexBuffer, 0, VertexBufferBinding.Stride);
-
+            commandList.SetIndexBuffer(IndexBuffer,IsIndex32Bits?IndexFormat.UInt32:IndexFormat.UInt16);
+            commandList.SetVertexBuffer(0,VertexBuffer);
             // Finally Draw this mesh
-            commandList.DrawIndexed(IndexBuffer.);
+            //UpdateDynamicBuffer
+            commandList.DrawIndexed(100);
         }
 
         /// <summary>

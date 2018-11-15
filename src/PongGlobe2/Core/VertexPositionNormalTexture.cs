@@ -25,6 +25,8 @@ using System;
 using System.Runtime.InteropServices;
 //using Xenko.Core.Mathematics;
 using System.Numerics;
+using Veldrid;
+
 
 namespace PongGlobe.Graphics
 {
@@ -32,7 +34,7 @@ namespace PongGlobe.Graphics
     /// Describes a custom vertex format structure that contains position, normal and texture information.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 4)]
-    public struct VertexPositionNormalTexture : IEquatable<VertexPositionNormalTexture>
+    public struct VertexPositionNormalTexture : IEquatable<VertexPositionNormalTexture>,IVertex
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="VertexPositionNormalTexture"/> struct.
@@ -66,18 +68,14 @@ namespace PongGlobe.Graphics
         /// Defines structure byte size.
         /// </summary>
         public static readonly int Size = 32;
-
-
-
-        //可以返回一个资源的布局
-
+       
         /// <summary>
         /// The vertex layout of this struct.
         /// </summary>
-        //public static readonly VertexDeclaration Layout = new VertexDeclaration(
-        //    VertexElement.Position<Vector3>(),
-        //    VertexElement.Normal<Vector3>(),
-        //    VertexElement.TextureCoordinate<Vector2>());
+        public static readonly VertexLayoutDescription Layout = new VertexLayoutDescription(
+           new VertexElementDescription("Position", VertexElementSemantic.Position, VertexElementFormat.Float3),
+           new VertexElementDescription("Normal", VertexElementSemantic.Normal, VertexElementFormat.Float3),
+           new VertexElementDescription("Texture", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2));
 
         public bool Equals(VertexPositionNormalTexture other)
         {
@@ -101,10 +99,10 @@ namespace PongGlobe.Graphics
             }
         }
 
-        //public VertexDeclaration GetLayout()
-        //{
-        //    return Layout;
-        //}
+        public VertexLayoutDescription GetLayout()
+        {
+            return Layout;
+        }
 
         public void FlipWinding()
         {
