@@ -15,4 +15,15 @@ namespace PongGlobe.Core
         void CreateDeviceResources(GraphicsDevice gd,
             ResourceFactory factory);
     }
+
+
+    /// <summary>
+    /// 泛型渲染类
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public interface IRender<T> : IRender
+    {
+
+    }
+
 }

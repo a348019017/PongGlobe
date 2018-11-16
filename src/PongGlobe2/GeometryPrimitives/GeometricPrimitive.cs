@@ -32,11 +32,25 @@ using PongGlobe.Graphics;
 
 namespace PongGlobe.Graphics.GeometricPrimitive
 {
+
+    /// <summary>
+    /// A geometric primitive. Use <see cref="Cube"/>, <see cref="Cylinder"/>, <see cref="GeoSphere"/>, <see cref="Plane"/>, <see cref="Sphere"/>, <see cref="Teapot"/>, <see cref="Torus"/>. See <see cref="Draw+vertices"/> to learn how to use it.
+    /// </summary>
+    public partial class GeometricPrimitive : GeometricPrimitive<VertexPositionNormalTexture>
+    {
+        public GeometricPrimitive(GraphicsDevice graphicsDevice, GeometricMeshData<VertexPositionNormalTexture> geometryMesh) : base(graphicsDevice, geometryMesh)
+        {
+
+        }
+    }
+
+
     /// <summary>
     /// A geometric primitive used to draw a simple model built from a set of vertices and indices.
     /// </summary>
     public class GeometricPrimitive<T> : ComponentBase where T : struct ,IVertex
     {
+        private GeometricMeshData<T> _meshData = null;
         /// <summary>
         /// The pipeline state.
         /// </summary>
@@ -75,9 +89,9 @@ namespace PongGlobe.Graphics.GeometricPrimitive
         /// <exception cref="System.InvalidOperationException">Cannot generate more than 65535 indices on feature level HW <= 9.3</exception>
         public GeometricPrimitive(GraphicsDevice graphicsDevice, GeometricMeshData<T> geometryMesh)
         {
+            _meshData = geometryMesh;
             GraphicsDevice = graphicsDevice;
-            //PipelineState = graphicsDevice.ResourceFactory.CreateGraphicsPipeline();
-
+            
             var vertices = geometryMesh.Vertices;
             var indices = geometryMesh.Indices;
 
@@ -104,18 +118,23 @@ namespace PongGlobe.Graphics.GeometricPrimitive
                 IndexBuffer = graphicsDevice.ResourceFactory.CreateBuffer(new BufferDescription((uint)(sizeof(int) * indices.Length), BufferUsage.VertexBuffer));
                 IsIndex32Bits = true;
             }
-
             // 创建顶点缓存
             VertexBuffer = graphicsDevice.ResourceFactory.CreateBuffer(new BufferDescription((uint)(32 * vertices.Length), BufferUsage.VertexBuffer));
-            //VertexBufferBinding = new VertexBufferBinding(VertexBuffer, new T().GetLayout(), vertices.Length);
-
             //创建一个临时的渲染管线，由于渲染管线的状态会发现变化，因此需要一个缓存的CachePipeLine类来处理
-            //PipelineState.State.SetDefaults();
-            //PipelineState.State.InputElements = VertexBufferBinding.Declaration.CreateInputElements();
-            //PipelineState.State.PrimitiveType = PrimitiveQuad.PrimitiveType;
+            //创建一个ShaderSet,
+            var shaderSet = new ShaderSetDescription(new[] { new T().GetLayout() }, new Shader[] { });
+            //创建渲染管线
+            PipelineState.State.ShaderSet = shaderSet;
+            //创建资源布局
+            PipelineState.State.ResourceLayouts = new ResourceLayout [] { };
+            //管线渲染管线状态
+            PipelineState.Update();
         }
 
-
+        /// <summary>
+        /// get or set Primitive Style
+        /// </summary>
+        public GeometryPrimitiveStyle Style { get; set; } = new GeometryPrimitiveStyle();
         /// <summary>
         /// 更新相关操作，如更新纹理，可以另建CommandList，更新StaticBuffer的操作,说白了，频次较低的操作在Update，频次较高如Draw操作在Draw中，更新渲染管线的操作
         /// 当高层次API属性发生变化时,或者是与Draw操作无关的操作。
@@ -123,36 +142,20 @@ namespace PongGlobe.Graphics.GeometricPrimitive
         /// <param name="graphicsDevice"></param>
         public void Update(GraphicsDevice graphicsDevice)
         {
-            //if (highObject.PropertyIsChange)
-            //    ReConstructGrahphicStatusAndResourceStatus();
-            //PutUpdate()
-
-             
+            //if(Style.)
         }
-
-
         /// <summary>
         /// Draws this <see cref="GeometricPrimitive" />.
         /// 将EffctInstance替换成活动参数，如TexturePath，ModelViewMatrix,完成一个初步的抽象
         /// </summary>
         /// <param name="commandList">The command list.</param>
-        public void Draw(GraphicsContext graphicsContext, EffectInstance effectInstance)
+        public void Draw(GraphicsContext graphicsContext)
         {
             var commandList = graphicsContext.CommandList;
-            //GraphicsDevice.comm
-            // Update pipeline state
-            //PipelineState.State.RootSignature = effectInstance.RootSignature;
-            //PipelineState.State.EffectBytecode = effectInstance.Effect.Bytecode;
-            //PipelineState.State.Output.CaptureState(commandList);
-            //PipelineState.Update();
-            commandList.SetPipeline(PipelineState.CurrentPipeLine);
-            //effectInstance.Apply(graphicsContext);
-            // Setup the Vertex Buffer
+            commandList.SetPipeline(PipelineState.CurrentPipeLine);            
             commandList.SetIndexBuffer(IndexBuffer,IsIndex32Bits?IndexFormat.UInt32:IndexFormat.UInt16);
-            commandList.SetVertexBuffer(0,VertexBuffer);
-            // Finally Draw this mesh
-            //UpdateDynamicBuffer
-            commandList.DrawIndexed(100);
+            commandList.SetVertexBuffer(0, VertexBuffer);           
+            commandList.DrawIndexed((uint)_meshData.Indices.Length);
         }
 
         /// <summary>
@@ -175,13 +178,5 @@ namespace PongGlobe.Graphics.GeometricPrimitive
         }
     }
 
-    /// <summary>
-    /// A geometric primitive. Use <see cref="Cube"/>, <see cref="Cylinder"/>, <see cref="GeoSphere"/>, <see cref="Plane"/>, <see cref="Sphere"/>, <see cref="Teapot"/>, <see cref="Torus"/>. See <see cref="Draw+vertices"/> to learn how to use it.
-    /// </summary>
-    public partial class GeometricPrimitive : GeometricPrimitive<VertexPositionNormalTexture>
-    {
-        public GeometricPrimitive(GraphicsDevice graphicsDevice, GeometricMeshData<VertexPositionNormalTexture> geometryMesh) : base(graphicsDevice, geometryMesh)
-        {
-        }
-    }
+   
 }

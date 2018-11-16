@@ -14,7 +14,7 @@ namespace PongGlobe.Graphics
     {
         private readonly GraphicsDevice graphicsDevice;
         //使用Hash值作缓存
-        private static readonly Dictionary<int, Pipeline> cache=new Dictionary<int, Pipeline>();
+        private static readonly Dictionary<int, Pipeline> cache=new Dictionary<int, Pipeline>(10000);
         public GraphicsPipelineDescription State;
 
         /// <summary>
@@ -49,7 +49,9 @@ namespace PongGlobe.Graphics
 
             // TODO GRAPHICS REFACTOR We could avoid lock by adding them to a ThreadLocal (or RenderContext) and merge at end of frame
             lock (cache)
-            {
+            {   
+                //仅缓存10万个可编程渲染管线
+                if (cache.Count > 100000) throw new Exception("over flow pipeline");
                 if (!cache.TryGetValue(hashedState, out pipelineState))
                 {
                     // Otherwise, instantiate it
@@ -58,7 +60,6 @@ namespace PongGlobe.Graphics
                     cache.Add(hashedState, pipelineState = graphicsDevice.ResourceFactory.CreateGraphicsPipeline(State));
                 }
             }
-
             CurrentPipeLine = pipelineState;
         }
 

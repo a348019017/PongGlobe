@@ -7,7 +7,7 @@ namespace PongGlobe.Graphics
     /// 几何实体的MeshData
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class GeometricMeshData<T> : ComponentBase where T : struct
+    public class GeometricMeshData<T> : ComponentBase where T : struct,IVertex
     {
         public GeometricMeshData(T[] vertices, int[] indices, bool isLeftHanded)
         {

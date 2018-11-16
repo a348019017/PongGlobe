@@ -21,9 +21,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-using Xenko.Core.Mathematics;
+using PongGlobe.Core;
+using System.Numerics;
+using Veldrid;
 
-namespace Xenko.Graphics.GeometricPrimitives
+
+namespace PongGlobe.Graphics.GeometricPrimitive
 {
     /// <summary>
     /// Enumerates the different possible direction of a plane normal.

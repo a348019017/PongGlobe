@@ -14,7 +14,7 @@ namespace PongGlobe.Renders
     /// <summary>
     /// 渲染一个cyliner
     /// </summary>
-    public class CylinderRender : IRender
+    public class CylinderRender: IRender<Cylinder>
     {
         private Scene.Scene _scene;
         private Cylinder _cylinder;

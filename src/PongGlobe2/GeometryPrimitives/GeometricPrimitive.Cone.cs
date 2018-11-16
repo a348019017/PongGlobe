@@ -6,8 +6,9 @@ using Veldrid;
 //using Xenko.Core.Mathematics;
 using PongGlobe.Graphics;
 using PongGlobe.Core;
+using System.Numerics;
 
-namespace Xenko.Graphics.GeometricPrimitives
+namespace PongGlobe.Graphics.GeometricPrimitive
 {
     public partial class GeometricPrimitive
     {
@@ -29,6 +30,7 @@ namespace Xenko.Graphics.GeometricPrimitives
             /// <returns>A cone.</returns>
             public static GeometricPrimitive New(GraphicsDevice device, float radius = 0.5f, float height = 1.0f, int tessellation = 16, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
             {
+                //var cc = new GeometricPrimitive();
                 // Create the primitive object.
                 return new GeometricPrimitive(device, New(radius, height, tessellation, uScale, vScale, toLeftHanded));
             }

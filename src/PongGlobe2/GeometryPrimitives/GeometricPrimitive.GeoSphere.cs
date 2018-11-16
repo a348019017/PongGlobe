@@ -76,10 +76,12 @@
 using System;
 using System.Collections.Generic;
 
-using Xenko.Core;
-using Xenko.Core.Mathematics;
+using PongGlobe.Core;
+using System.Numerics;
+using Veldrid;
 
-namespace Xenko.Graphics.GeometricPrimitives
+
+namespace PongGlobe.Graphics.GeometricPrimitive
 {
     public partial class GeometricPrimitive
     {
@@ -141,6 +143,7 @@ namespace Xenko.Graphics.GeometricPrimitives
             /// <returns>A Geodesic sphere.</returns>
             public static GeometricMeshData<VertexPositionNormalTexture> New(float radius = 0.5f, int tessellation = 3, float uScale = 1.0f, float vScale = 1.0f, bool toLeftHanded = false)
             {
+                
                 var sphere = new GeoSphereData();
                 return sphere.Create(radius, tessellation, uScale, vScale, toLeftHanded);
             }
@@ -259,7 +262,7 @@ namespace Xenko.Graphics.GeometricPrimitives
                         var vertexValue = vertexPositions[i];
 
                         var normal = vertexValue;
-                        normal.Normalize();
+                        normal=Vector3.Normalize(normal);
 
                         var pos = normal * radius;
 

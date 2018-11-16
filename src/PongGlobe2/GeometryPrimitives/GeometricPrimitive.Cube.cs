@@ -74,9 +74,11 @@
 // particular purpose and non-infringement.
 
 using System;
-using Xenko.Core.Mathematics;
+using PongGlobe.Core;
+using Veldrid;
+using System.Numerics;
 
-namespace Xenko.Graphics.GeometricPrimitives
+namespace PongGlobe.Graphics.GeometricPrimitive
 {
     public partial class GeometricPrimitive
     {
@@ -120,6 +122,7 @@ namespace Xenko.Graphics.GeometricPrimitives
             {
                 // Create the primitive object.
                 return new GeometricPrimitive(device, New(size, uScale, vScale, toLeftHanded));
+                
             }
 
             /// <summary>
@@ -135,6 +138,7 @@ namespace Xenko.Graphics.GeometricPrimitives
             {
                 // Create the primitive object.
                 return new GeometricPrimitive(device, New(size, uScale, vScale, toLeftHanded));
+                
             }
 
             /// <summary>
@@ -182,10 +186,10 @@ namespace Xenko.Graphics.GeometricPrimitives
                     Vector3 basis = (i >= 4) ? Vector3.UnitZ : Vector3.UnitY;
 
                     Vector3 side1;
-                    Vector3.Cross(ref normal, ref basis, out side1);
+                    side1= Vector3.Cross( normal,  basis);
 
                     Vector3 side2;
-                    Vector3.Cross(ref normal, ref side1, out side2);
+                    side2= Vector3.Cross( normal,  side1);
 
                     // Six indices (two triangles) per face.
                     int vbase = i * 4;

@@ -74,10 +74,12 @@
 // particular purpose and non-infringement.
 
 using System;
+using Veldrid;
+using PongGlobe.Core;
+using PongGlobe.Graphics;
+using System.Numerics;
 
-using Xenko.Core.Mathematics;
-
-namespace Xenko.Graphics.GeometricPrimitives
+namespace PongGlobe.Graphics.GeometricPrimitive
 {
     public partial class GeometricPrimitive
     {

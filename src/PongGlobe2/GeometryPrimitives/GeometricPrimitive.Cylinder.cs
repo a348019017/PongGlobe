@@ -78,10 +78,12 @@ using System.Collections.Generic;
 using System.Numerics;
 using PongGlobe.Graphics;
 using PongGlobe.Core;
+using Veldrid;
+
 //using Xenko.Core;
 //using Xenko.Core.Mathematics;
 
-namespace Xenko.Graphics.GeometricPrimitives
+namespace PongGlobe.Graphics.GeometricPrimitive
 {
     public partial class GeometricPrimitive
     {

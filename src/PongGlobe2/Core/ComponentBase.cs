@@ -9,7 +9,13 @@ namespace PongGlobe.Core
     /// </summary>
     public class ComponentBase
     {
-
+        /// <summary>
+        /// 
+        /// </summary>
+        public virtual string Name
+        {
+            get;set;
+        }
 
     }
 }
