@@ -1,44 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>PongGlobe</AssemblyName>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>E:\swyy\Lib\PongGlobe\PongGlobe\bin\Debug\PongGlobe\netstandard2.0\</OutputPath>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Remove="3rd\Text\TextMesh.cs" />
-    <Compile Remove="3rd\Text\TextMeshUtil.cs" />
-    <Compile Remove="Core\Algorithm\EllipsoidTangentPlane.cs" />
-    <Compile Remove="Data\BaseProvider.cs" />
-    <Compile Remove="Data\IProvider.cs" />
-    <Compile Remove="Data\IProviderBase.cs" />
-    <Compile Remove="Layers\VectorLayer.cs" />
-    <Compile Remove="Scene\RayCastedGlobe.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="2.2.0-preview2-35157" />
-    <PackageReference Include="NetTopologySuite.IO.ShapeFile" Version="1.15.2" />
-    <PackageReference Include="System.Drawing.Common" Version="4.5.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Data\" />
-    <Folder Include="Layers\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\PongGlobe.CefGlue\PongGlobe.CefGlue.csproj" />
-    <ProjectReference Include="..\Veldrid.ImageSharp\Veldrid.ImageSharp.csproj" />
-    <ProjectReference Include="..\Veldrid.ImGui\Veldrid.ImGui.csproj" />
-    <ProjectReference Include="..\Veldrid.StartupUtilities\Veldrid.StartupUtilities.csproj" />
-    <ProjectReference Include="..\Veldrid.Utilities\Veldrid.Utilities.csproj" />
-    <ProjectReference Include="..\Veldrid\Veldrid.csproj" />
-  </ItemGroup>
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup />
 </Project>

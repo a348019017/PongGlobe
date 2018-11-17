@@ -41,7 +41,6 @@ namespace PongGlobe.Scene
             //gd.UpdateBuffer(_vertexBuffer, 0, this.Positions);
              _lineIndicesBuffer = factory.CreateBuffer(new BufferDescription((uint)(sizeof(ushort) * 102), BufferUsage.IndexBuffer));
             //gd.UpdateBuffer(_indexBuffer, 0, this.Indices);
-
             _polylinetyleBuffer  = factory.CreateBuffer(new BufferDescription(32, BufferUsage.UniformBuffer | BufferUsage.Dynamic));
             gd.UpdateBuffer(_polylinetyleBuffer, 0, new LineVectorStyleUBO(RgbaFloat.Red));
 

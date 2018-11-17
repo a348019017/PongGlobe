@@ -118,9 +118,9 @@
       <Project>{37fbb02a-a223-47e6-8b14-d07880bfd13a}</Project>
       <Name>PongGlobe.Scene</Name>
     </ProjectReference>
-    <ProjectReference Include="..\PongGlobe2\PongGlobe.csproj">
+    <ProjectReference Include="..\PongGlobe2\PongGlobe.Core.csproj">
       <Project>{f6ab7e9b-e58d-4ccb-b0f7-8eea84a71488}</Project>
-      <Name>PongGlobe</Name>
+      <Name>PongGlobe.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\Veldrid.ImageSharp\Veldrid.ImageSharp.csproj">
       <Project>{6a204977-fc5e-48d3-a20c-34a98eb870ef}</Project>

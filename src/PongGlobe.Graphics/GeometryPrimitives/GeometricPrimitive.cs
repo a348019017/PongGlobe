@@ -28,7 +28,8 @@ using PongGlobe.Core;
 using Veldrid;
 using Veldrid.Vk;
 using PongGlobe.Graphics;
-
+using Veldrid.ImageSharp;
+using PongGlobe.Core.Util;
 
 namespace PongGlobe.Graphics.GeometricPrimitive
 {
@@ -51,6 +52,10 @@ namespace PongGlobe.Graphics.GeometricPrimitive
     public class GeometricPrimitive<T> : ComponentBase where T : struct ,IVertex
     {
         private GeometricMeshData<T> _meshData = null;
+        private Texture _texture = null;
+        private TextureView _textureView = null;
+        private DeviceBuffer _styleBuffer = null;
+        private ResourceSet _styleResourceSet = null;
         /// <summary>
         /// The pipeline state.
         /// </summary>
@@ -80,7 +85,10 @@ namespace PongGlobe.Graphics.GeometricPrimitive
         /// True if the index buffer is a 32 bit index buffer.
         /// </summary>
         public readonly bool IsIndex32Bits;
-
+        /// <summary>
+        /// get or set Primitive Style
+        /// </summary>
+        public GeometryPrimitiveStyle Style { get; set; } = new GeometryPrimitiveStyle();
         /// <summary>
         /// Initializes a new instance of the <see cref="GeometricPrimitive{T}"/> class.
         /// </summary>
@@ -122,19 +130,49 @@ namespace PongGlobe.Graphics.GeometricPrimitive
             VertexBuffer = graphicsDevice.ResourceFactory.CreateBuffer(new BufferDescription((uint)(32 * vertices.Length), BufferUsage.VertexBuffer));
             //创建一个临时的渲染管线，由于渲染管线的状态会发现变化，因此需要一个缓存的CachePipeLine类来处理
             //创建一个ShaderSet,
-            var shaderSet = new ShaderSetDescription(new[] { new T().GetLayout() }, new Shader[] { });
+            var shaderSet = new ShaderSetDescription(new[] { new T().GetLayout() }, new Shader[] {
+
+                ResourceHelper.LoadEmbbedShader(ShaderStages.Vertex,"DrawLineVS.spv",gd,curAss),
+                   ResourceHelper.LoadEmbbedShader(ShaderStages.Fragment,"DrawLineFS.spv",gd,curAss),
+                   ResourceHelper.LoadEmbbedShader(ShaderStages.Geometry,"DrawLineGS.spv",gd,curAss)
+            });
             //创建渲染管线
             PipelineState.State.ShaderSet = shaderSet;
+            //创建另一个UniformBuffer,供FrameShader使用
+            _styleBuffer = graphicsDevice.ResourceFactory.CreateBuffer(new BufferDescription(4, BufferUsage.UniformBuffer));
+            //创建Style的ResourceSet布局
+            ResourceLayout styleLayout = graphicsDevice.ResourceFactory.CreateResourceLayout(
+              new ResourceLayoutDescription(
+                  new ResourceLayoutElementDescription("GeometryPrimitiveColor", ResourceKind.UniformBuffer, ShaderStages.Fragment | ShaderStages.Geometry)
+                  ));
+            _styleResourceSet = graphicsDevice.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
+               styleLayout,
+               _styleBuffer
+               ));
             //创建资源布局
-            PipelineState.State.ResourceLayouts = new ResourceLayout [] { };
+            PipelineState.State.ResourceLayouts = new ResourceLayout [] {ShareResource.ProjectionResourceLoyout, styleLayout };
+            //根据Style看是否创建Texture
+            if (Style.Image != null)
+            {
+                var textureImage = new ImageSharpTexture(Style.Image);
+                _texture = textureImage.CreateDeviceTexture(graphicsDevice, graphicsDevice.ResourceFactory);
+                _textureView = graphicsDevice.ResourceFactory.CreateTextureView(_texture);
+
+            } else
+            {
+
+            }
             //管线渲染管线状态
             PipelineState.Update();
         }
 
-        /// <summary>
-        /// get or set Primitive Style
-        /// </summary>
-        public GeometryPrimitiveStyle Style { get; set; } = new GeometryPrimitiveStyle();
+
+        //存储GeometryPrimitive的Color信息，便于动态修改
+        internal struct GeometryPrimitiveStruct
+        {
+            RgbaFloat Color;
+        }
+        
         /// <summary>
         /// 更新相关操作，如更新纹理，可以另建CommandList，更新StaticBuffer的操作,说白了，频次较低的操作在Update，频次较高如Draw操作在Draw中，更新渲染管线的操作
         /// 当高层次API属性发生变化时,或者是与Draw操作无关的操作。
@@ -152,7 +190,9 @@ namespace PongGlobe.Graphics.GeometricPrimitive
         public void Draw(GraphicsContext graphicsContext)
         {
             var commandList = graphicsContext.CommandList;
-            commandList.SetPipeline(PipelineState.CurrentPipeLine);            
+            commandList.SetPipeline(PipelineState.CurrentPipeLine);
+            commandList.SetGraphicsResourceSet(0, ShareResource.ProjectionResourceSet);
+            commandList.SetGraphicsResourceSet(1, _styleResourceSet);
             commandList.SetIndexBuffer(IndexBuffer,IsIndex32Bits?IndexFormat.UInt32:IndexFormat.UInt16);
             commandList.SetVertexBuffer(0, VertexBuffer);           
             commandList.DrawIndexed((uint)_meshData.Indices.Length);

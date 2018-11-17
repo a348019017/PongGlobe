@@ -8,7 +8,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AssetPrimitives", "AssetPri
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Test", "Test\Test.csproj", "{9ABA77D3-E172-42C9-9C86-648728425D2D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PongGlobe", "PongGlobe2\PongGlobe.csproj", "{F6AB7E9B-E58D-4CCB-B0F7-8EEA84A71488}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PongGlobe.Core", "PongGlobe2\PongGlobe.Core.csproj", "{F6AB7E9B-E58D-4CCB-B0F7-8EEA84A71488}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PongGlobe.Scene", "PongGlobe.Scene2\PongGlobe.Scene.csproj", "{37FBB02A-A223-47E6-8B14-D07880BFD13A}"
 EndProject
@@ -52,11 +52,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PongGlobe.CefExtension", "P
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extension", "Extension", "{D30BFDE5-83C0-49A1-A543-A201FE49B383}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PongGlobe.Data", "PongGlobe.Data\PongGlobe.Data.csproj", "{772C40CE-2C29-45FF-93E7-AA85C332E347}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PongGlobe.Data", "PongGlobe.Data\PongGlobe.Data.csproj", "{772C40CE-2C29-45FF-93E7-AA85C332E347}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PongGlobe.Graphics", "PongGlobe.Graphics\PongGlobe.Graphics.csproj", "{A4B44FA7-8A2B-4328-B153-7C2C530FF839}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PongGlobe.Graphics", "PongGlobe.Graphics\PongGlobe.Graphics.csproj", "{A4B44FA7-8A2B-4328-B153-7C2C530FF839}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PongGlobe.UI", "PongGlobe.UI\PongGlobe.UI.csproj", "{42BC4C6B-6EF0-472D-95D6-FAF663F60285}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PongGlobe.UI", "PongGlobe.UI\PongGlobe.UI.csproj", "{42BC4C6B-6EF0-472D-95D6-FAF663F60285}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

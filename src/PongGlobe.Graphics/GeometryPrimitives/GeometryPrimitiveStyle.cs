@@ -4,6 +4,7 @@ using System.Text;
 using Veldrid;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
+using System.IO;
 
 namespace PongGlobe.Graphics.GeometricPrimitive
 {
@@ -20,6 +21,7 @@ namespace PongGlobe.Graphics.GeometricPrimitive
         {
             //默认有颜色无纹理
             Color = RgbaFloat.Red;
+            Image = null;
         }
     }
 }

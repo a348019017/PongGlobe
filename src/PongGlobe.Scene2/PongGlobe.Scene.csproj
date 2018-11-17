@@ -34,7 +34,7 @@
     <EmbeddedResource Include="Shaders\DrawLine\LineGS.spv" LogicalName="DrawLineGS.spv" />
     <EmbeddedResource Include="Shaders\DrawLine\LineVS.spv" LogicalName="DrawLineVS.spv" />
     <EmbeddedResource Include="Shaders\FullScreen\FullScreenFS.spv" LogicalName="FullScreenFS.spv" />
-    <EmbeddedResource Include="Shaders\FullScreen\FullScreenVS.spv" LogicalName="FullScreenVS.spv"/>
+    <EmbeddedResource Include="Shaders\FullScreen\FullScreenVS.spv" LogicalName="FullScreenVS.spv" />
     <EmbeddedResource Include="Shaders\GlobeFS.spv" LogicalName="GlobeFS.spv" />
     <EmbeddedResource Include="Shaders\GlobeVS.spv" LogicalName="GlobeVS.spv" />
     <EmbeddedResource Include="Shaders\Point\PointFS.spv" LogicalName="PointFS.spv" />
@@ -50,7 +50,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PongGlobe.CefGlue\PongGlobe.CefGlue.csproj" />
-    <ProjectReference Include="..\PongGlobe2\PongGlobe.csproj" />
+    <ProjectReference Include="..\PongGlobe2\PongGlobe.Core.csproj" />
     <ProjectReference Include="..\Veldrid.ImageSharp\Veldrid.ImageSharp.csproj" />
   </ItemGroup>
 

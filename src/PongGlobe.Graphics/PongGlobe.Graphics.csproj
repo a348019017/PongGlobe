@@ -4,8 +4,21 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\PongGlobe2\PongGlobe.csproj" />
+    <Compile Remove="BatchBase.cs" />
+    <Compile Remove="Class1.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PongGlobe2\PongGlobe.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Shader\GLSL\" />
   </ItemGroup>
 
 </Project>

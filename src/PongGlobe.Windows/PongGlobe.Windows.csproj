@@ -38,7 +38,7 @@
     <ProjectReference Include="..\AssetPrimitives\AssetPrimitives.csproj" />
     <ProjectReference Include="..\PongGlobe.CefGlue\PongGlobe.CefGlue.csproj" />
     <ProjectReference Include="..\PongGlobe.Scene2\PongGlobe.Scene.csproj" />
-    <ProjectReference Include="..\PongGlobe2\PongGlobe.csproj" />
+    <ProjectReference Include="..\PongGlobe2\PongGlobe.Core.csproj" />
   </ItemGroup>
 
 </Project>

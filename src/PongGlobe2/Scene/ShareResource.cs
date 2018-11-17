@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Veldrid;
 
-namespace PongGlobe.Scene
+namespace PongGlobe.Core
 {
 
     /// <summary>
@@ -19,8 +19,10 @@ namespace PongGlobe.Scene
         /// 投影矩阵的布局信息
         /// </summary>
         public static ResourceLayout ProjectionResourceLoyout { get; set; }
-
-        public static ResourceSet ProjectuibResourceSet { get; set; }
+        /// <summary>
+        /// 共享资源集
+        /// </summary>
+        public static ResourceSet ProjectionResourceSet { get; set; }
     }
 
 
