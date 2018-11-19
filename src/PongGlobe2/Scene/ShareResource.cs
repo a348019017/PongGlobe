@@ -18,7 +18,7 @@ namespace PongGlobe.Core
         /// <summary>
         /// 投影矩阵的布局信息
         /// </summary>
-        public static ResourceLayout ProjectionResourceLoyout { get; set; }
+        public static ResourceLayout ProjectionResourceLayout { get; set; }
         /// <summary>
         /// 共享资源集
         /// </summary>

@@ -47,6 +47,8 @@ namespace PongGlobe.Graphics
             Position = position;
             Normal = normal;
             TextureCoordinate = textureCoordinate;
+            //Ä¬ÈÏÎªÈý½ÇÍø
+            PrimitiveTopology=PrimitiveTopology.TriangleList;
         }
 
         /// <summary>
@@ -76,6 +78,8 @@ namespace PongGlobe.Graphics
            new VertexElementDescription("Position", VertexElementSemantic.Position, VertexElementFormat.Float3),
            new VertexElementDescription("Normal", VertexElementSemantic.Normal, VertexElementFormat.Float3),
            new VertexElementDescription("Texture", VertexElementSemantic.TextureCoordinate, VertexElementFormat.Float2));
+
+        public PrimitiveTopology PrimitiveTopology { get; set; } 
 
         public bool Equals(VertexPositionNormalTexture other)
         {

@@ -53,10 +53,7 @@ namespace PongGlobe.Graphics
                 //仅缓存10万个可编程渲染管线
                 if (cache.Count > 100000) throw new Exception("over flow pipeline");
                 if (!cache.TryGetValue(hashedState, out pipelineState))
-                {
-                    // Otherwise, instantiate it
-                    // First, make an copy
-                    //hashedState = new PipelineStateDescriptionWithHash(State.Clone());
+                {              
                     cache.Add(hashedState, pipelineState = graphicsDevice.ResourceFactory.CreateGraphicsPipeline(State));
                 }
             }

@@ -97,12 +97,12 @@ namespace PongGlobe.Graphics.GeometricPrimitive
         /// <exception cref="System.InvalidOperationException">Cannot generate more than 65535 indices on feature level HW <= 9.3</exception>
         public GeometricPrimitive(GraphicsDevice graphicsDevice, GeometricMeshData<T> geometryMesh)
         {
+            //创建一个MutePipeLine对象
+            PipelineState = new MutablePipeline(graphicsDevice);
             _meshData = geometryMesh;
-            GraphicsDevice = graphicsDevice;
-            
+            GraphicsDevice = graphicsDevice;           
             var vertices = geometryMesh.Vertices;
-            var indices = geometryMesh.Indices;
-
+            var indices = geometryMesh.Indices;          
             if (geometryMesh.IsLeftHanded)
                 ReverseWinding(vertices, indices);
 
@@ -115,6 +115,8 @@ namespace PongGlobe.Graphics.GeometricPrimitive
                 }            
                 //创建IndexBuffer
                 IndexBuffer = graphicsDevice.ResourceFactory.CreateBuffer(new BufferDescription((uint)(sizeof(ushort) * indicesShort.Length), BufferUsage.VertexBuffer));
+                //提前更新Buffer
+                graphicsDevice.UpdateBuffer(IndexBuffer, 0,  indicesShort);
             }
             else
             {
@@ -123,55 +125,62 @@ namespace PongGlobe.Graphics.GeometricPrimitive
                 //{
                 //    throw new InvalidOperationException("Cannot generate more than 65535 indices on feature level HW <= 9.3");
                 //}
-                IndexBuffer = graphicsDevice.ResourceFactory.CreateBuffer(new BufferDescription((uint)(sizeof(int) * indices.Length), BufferUsage.VertexBuffer));
+                IndexBuffer = graphicsDevice.ResourceFactory.CreateBuffer(new BufferDescription((uint)(sizeof(uint) * indices.Length), BufferUsage.VertexBuffer));
                 IsIndex32Bits = true;
+                graphicsDevice.UpdateBuffer(IndexBuffer, 0, indices);
             }
             // 创建顶点缓存
             VertexBuffer = graphicsDevice.ResourceFactory.CreateBuffer(new BufferDescription((uint)(32 * vertices.Length), BufferUsage.VertexBuffer));
+            //提前更新顶点
+            graphicsDevice.UpdateBuffer(VertexBuffer, 0, vertices);
             //创建一个临时的渲染管线，由于渲染管线的状态会发现变化，因此需要一个缓存的CachePipeLine类来处理
             //创建一个ShaderSet,
             var shaderSet = new ShaderSetDescription(new[] { new T().GetLayout() }, new Shader[] {
-
-                ResourceHelper.LoadEmbbedShader(ShaderStages.Vertex,"DrawLineVS.spv",gd,curAss),
-                   ResourceHelper.LoadEmbbedShader(ShaderStages.Fragment,"DrawLineFS.spv",gd,curAss),
-                   ResourceHelper.LoadEmbbedShader(ShaderStages.Geometry,"DrawLineGS.spv",gd,curAss)
+                   ResourceHelper.LoadEmbbedShader(ShaderStages.Fragment,"GeoPrimFrag.spv",GraphicsDevice,this.GetType().Assembly),
+                   ResourceHelper.LoadEmbbedShader(ShaderStages.Vertex,"GeoPrimVet.spv",GraphicsDevice,this.GetType().Assembly)
             });
             //创建渲染管线
             PipelineState.State.ShaderSet = shaderSet;
             //创建另一个UniformBuffer,供FrameShader使用
-            _styleBuffer = graphicsDevice.ResourceFactory.CreateBuffer(new BufferDescription(4, BufferUsage.UniformBuffer));
+            _styleBuffer = graphicsDevice.ResourceFactory.CreateBuffer(new BufferDescription(8, BufferUsage.UniformBuffer));
             //创建Style的ResourceSet布局
             ResourceLayout styleLayout = graphicsDevice.ResourceFactory.CreateResourceLayout(
               new ResourceLayoutDescription(
-                  new ResourceLayoutElementDescription("GeometryPrimitiveColor", ResourceKind.UniformBuffer, ShaderStages.Fragment | ShaderStages.Geometry)
-                  ));
-            _styleResourceSet = graphicsDevice.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
-               styleLayout,
-               _styleBuffer
-               ));
-            //创建资源布局
-            PipelineState.State.ResourceLayouts = new ResourceLayout [] {ShareResource.ProjectionResourceLoyout, styleLayout };
+                  new ResourceLayoutElementDescription("GeometryPrimitiveStyle", ResourceKind.UniformBuffer, ShaderStages.Fragment ),               
+                  new ResourceLayoutElementDescription("SurfaceTexture", ResourceKind.TextureReadOnly, ShaderStages.Fragment),
+                  new ResourceLayoutElementDescription("SurfaceSampler", ResourceKind.Sampler, ShaderStages.Fragment)
+                  ));                    
             //根据Style看是否创建Texture
             if (Style.Image != null)
             {
                 var textureImage = new ImageSharpTexture(Style.Image);
                 _texture = textureImage.CreateDeviceTexture(graphicsDevice, graphicsDevice.ResourceFactory);
                 _textureView = graphicsDevice.ResourceFactory.CreateTextureView(_texture);
-
-            } else
-            {
-
+                _styleResourceSet = graphicsDevice.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
+              styleLayout,
+              _styleBuffer, _textureView, graphicsDevice.Aniso4xSampler
+              ));
             }
-            //管线渲染管线状态
+            else
+            {
+                //创建的Resourceset
+                _styleResourceSet = graphicsDevice.ResourceFactory.CreateResourceSet(new ResourceSetDescription(
+              styleLayout,
+              _styleBuffer, null, null));               
+            }
+            //设置resourceSetLayout给Pipeline
+            PipelineState.State.ResourceLayouts = new[] {ShareResource.ProjectionResourceLayout, styleLayout };
+            //设置其PrimitiveTopoType
+            PipelineState.State.PrimitiveTopology = new T().PrimitiveTopology;           
+            //更新管线渲染管线状态
             PipelineState.Update();
+            //提前更新一次StyleBuffer的参数,在需要的时候再更新,不必在Draw循环中频繁更新，手动控制Buffer的更新
+            var style = Style.ToStyleStruct();
+            graphicsDevice.UpdateBuffer(_styleBuffer,0, ref style);
         }
 
 
-        //存储GeometryPrimitive的Color信息，便于动态修改
-        internal struct GeometryPrimitiveStruct
-        {
-            RgbaFloat Color;
-        }
+       
         
         /// <summary>
         /// 更新相关操作，如更新纹理，可以另建CommandList，更新StaticBuffer的操作,说白了，频次较低的操作在Update，频次较高如Draw操作在Draw中，更新渲染管线的操作

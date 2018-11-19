@@ -96,7 +96,7 @@ namespace PongGlobe.Renders
                 rd,
                 PrimitiveTopology.TriangleList,
                 shaderSet,
-                new[] { ShareResource.ProjectionResourceLoyout, worldTextureLayout },
+                new[] { ShareResource.ProjectionResourceLayout, worldTextureLayout },
                 gd.MainSwapchain.Framebuffer.OutputDescription));
 
             
@@ -119,7 +119,7 @@ namespace PongGlobe.Renders
             _cl.SetPipeline(_pipeline);
             _cl.SetVertexBuffer(0, _vertexBuffer);
             _cl.SetIndexBuffer(_indexBuffer, IndexFormat.UInt16);
-            _cl.SetGraphicsResourceSet(0, ShareResource.ProjectuibResourceSet);
+            _cl.SetGraphicsResourceSet(0, ShareResource.ProjectionResourceSet);
             _cl.SetGraphicsResourceSet(1, _worldTextureSet);
             _cl.DrawIndexed((uint)_indices.Length, 1, 0, 0, 0);                      
         }

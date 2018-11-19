@@ -21,5 +21,6 @@ namespace PongGlobe.Graphics
         void FlipWinding();
 
         //int Size { get; set; }
+        PrimitiveTopology PrimitiveTopology { get; set; }
     }
 }
