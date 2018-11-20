@@ -123,7 +123,7 @@ namespace PongGlobe.Renders
                _meshPoints.PrimitiveTopology,
                shaderSet,
                //共享View和prj的buffer
-               new ResourceLayout[] { ShareResource.ProjectionResourceLoyout, _pointstyleLayout },
+               new ResourceLayout[] { ShareResource.ProjectionResourceLayout, _pointstyleLayout },
                gd.MainSwapchain.Framebuffer.OutputDescription));
         }
 
@@ -138,7 +138,7 @@ namespace PongGlobe.Renders
         {
             //_gd.MainSwapchain.Framebuffer.
             _cl.SetPipeline(_pointPipeLine);
-            _cl.SetGraphicsResourceSet(0, ShareResource.ProjectuibResourceSet);
+            _cl.SetGraphicsResourceSet(0, ShareResource.ProjectionResourceSet);
             _cl.SetGraphicsResourceSet(1, _pointStyleRSet);
             _cl.SetVertexBuffer(0, _VertexBuffer);
             _cl.SetIndexBuffer(_IndicesBuffer, IndexFormat.UInt16);
@@ -171,7 +171,7 @@ namespace PongGlobe.Renders
             return renders;
         }
 
-        public  void Update()
+        public void Update()
         {
             //使用渲染策略更新相关数据，这里顶点数据不必更新，仅更新indicesbuffer即可，相当高效，当然在视椎体裁切时可能仍然需要充值顶点数据
             _renderStrategyResult= _renderStrategy.Apply(_scene, _allRenderableObjects);
@@ -288,7 +288,7 @@ namespace PongGlobe.Renders
                _meshPoints.PrimitiveTopology,
                shaderSet,
                //共享View和prj的buffer
-               new ResourceLayout[] { ShareResource.ProjectionResourceLoyout, _pointstyleLayout },
+               new ResourceLayout[] { ShareResource.ProjectionResourceLayout, _pointstyleLayout },
                gd.MainSwapchain.Framebuffer.OutputDescription));
         }
 
@@ -303,7 +303,7 @@ namespace PongGlobe.Renders
         {
             //_gd.MainSwapchain.Framebuffer.
             _cl.SetPipeline(_pointPipeLine);
-            _cl.SetGraphicsResourceSet(0, ShareResource.ProjectuibResourceSet);
+            _cl.SetGraphicsResourceSet(0, ShareResource.ProjectionResourceSet);
             _cl.SetGraphicsResourceSet(1, _pointStyleRSet);
             _cl.SetVertexBuffer(0, _VertexBuffer);
             _cl.SetIndexBuffer(_IndicesBuffer, IndexFormat.UInt16);

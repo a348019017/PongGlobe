@@ -81,8 +81,7 @@ namespace PongGlobe.Windows
                 SDLEventHandler2 cefhandler = CefInputTracker.HandleEvent;
                 InputSnapshot inputSnapshot = _window.PumpEvents(cefhandler);
                 InputTracker.UpdateFrameInput(inputSnapshot);       
-                //在windows处于隐藏转台下时不渲染
-                
+                //在windows处于隐藏转台下时不渲染              
                 if (_window.Exists&&_window.WindowState!=WindowState.Minimized)
                 {
                     previousElapsed = newElapsed;

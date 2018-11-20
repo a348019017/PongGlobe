@@ -81,7 +81,7 @@ namespace PongGlobe.Scene
                 PrimitiveTopology.LinesAdjacency,
                 shaderSetBoundingBox,
                 //共享View和prj的buffer
-                new ResourceLayout[] { ShareResource.ProjectionResourceLoyout, styleLayout },
+                new ResourceLayout[] { ShareResource.ProjectionResourceLayout, styleLayout },
                 gd.MainSwapchain.Framebuffer.OutputDescription));
 
 
@@ -103,7 +103,7 @@ namespace PongGlobe.Scene
             if (points.Count >= 2)
             {
                 _cl.SetPipeline(_pipeline);
-                _cl.SetGraphicsResourceSet(0, ShareResource.ProjectuibResourceSet);
+                _cl.SetGraphicsResourceSet(0, ShareResource.ProjectionResourceSet);
                 _cl.SetGraphicsResourceSet(1, _styleResourceSet);
                 _cl.SetVertexBuffer(0, _lineVertexBuffer);
                 _cl.SetIndexBuffer(_lineIndicesBuffer, IndexFormat.UInt16);

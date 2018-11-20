@@ -5,13 +5,16 @@ using Veldrid;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System.IO;
+using System.ComponentModel;
+using PropertyChanged;
 
 namespace PongGlobe.Graphics.GeometricPrimitive
 {
     /// <summary>
     /// 几何图元的可变参数，样式，使用StyleClass是为了灵活性和节省空间
     /// </summary>
-    public class GeometryPrimitiveStyle
+    //[AddINotifyPropertyChangedInterface]
+    public class GeometryPrimitiveStyle:INotifyPropertyChanged
     {
         public RgbaFloat Color { get; set; }
         //优先使用Image作为纹理
@@ -23,6 +26,8 @@ namespace PongGlobe.Graphics.GeometricPrimitive
             Color = RgbaFloat.Red;
             Image = null;
         }
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
         /// 转换成结构体参数，以供Shader使用。

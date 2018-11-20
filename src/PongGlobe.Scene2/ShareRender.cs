@@ -59,8 +59,8 @@ namespace PongGlobe.Renders
 
             //保存一些公共资源
             ShareResource.ProjectionBuffer = _projectionBuffer;
-            ShareResource.ProjectionResourceLoyout = projViewLayout;
-            ShareResource.ProjectuibResourceSet = _projViewSet;
+            ShareResource.ProjectionResourceLayout = projViewLayout;
+            ShareResource.ProjectionResourceSet = _projViewSet;
         }
 
         public void Dispose()

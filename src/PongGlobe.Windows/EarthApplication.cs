@@ -10,6 +10,7 @@ using PongGlobe.Scene;
 using PongGlobe.Renders;
 using System.Text;
 using Xilium.CefGlue;
+using System.Collections.Concurrent;
 
 namespace PongGlobe.Windows
 {
@@ -37,7 +38,8 @@ namespace PongGlobe.Windows
         private float _ticks;
         protected ImGuiRenderer _controller = null;
         protected static FrameTimeAverager _fta = new FrameTimeAverager(0.666);
-        
+        //主程序中的更新队列
+        public readonly  ConcurrentQueue<IRender> _updateQuere = new ConcurrentQueue<IRender>();
 
         public EarthApplication(ApplicationWindow window)
         {
@@ -121,6 +123,11 @@ namespace PongGlobe.Windows
                       
             _ticks += deltaSeconds * 1000f;
             foreach (var item in renders)
+            {
+                item.Update();
+            }
+            //更新队列中的操作
+            foreach (var item in _updateQuere)
             {
                 item.Update();
             }

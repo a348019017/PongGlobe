@@ -21,4 +21,8 @@
     <Folder Include="Shader\GLSL\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="PropertyChanged.Fody" Version="2.5.14" />
+  </ItemGroup>
+
 </Project>

@@ -315,7 +315,7 @@ namespace PongGlobe.Renders
                 PrimitiveTopology.TriangleList,
                 shaderSet,
                 //共享View和prj的buffer
-                new ResourceLayout[] { ShareResource.ProjectionResourceLoyout, styleLayout },
+                new ResourceLayout[] { ShareResource.ProjectionResourceLayout, styleLayout },
                 gd.MainSwapchain.Framebuffer.OutputDescription));
 
             //创建一个渲染boundingBox的渲染管线
@@ -331,7 +331,7 @@ namespace PongGlobe.Renders
                 _meshLine.PrimitiveTopology,
                 shaderSetBoundingBox,
                 //共享View和prj的buffer
-                new ResourceLayout[] { ShareResource.ProjectionResourceLoyout, styleLayout },
+                new ResourceLayout[] { ShareResource.ProjectionResourceLayout, styleLayout },
                 gd.MainSwapchain.Framebuffer.OutputDescription));
           
 
@@ -364,7 +364,7 @@ namespace PongGlobe.Renders
             //}
             //_gd.MainSwapchain.Framebuffer.
             _cl.SetPipeline(_boundingBoxPipeLine);
-            _cl.SetGraphicsResourceSet(0, ShareResource.ProjectuibResourceSet);
+            _cl.SetGraphicsResourceSet(0, ShareResource.ProjectionResourceSet);
             _cl.SetGraphicsResourceSet(1, _styleResourceSet);
             _cl.SetVertexBuffer(0, _lineVertexBuffer);
             _cl.SetIndexBuffer( _lineIndicesBuffer, IndexFormat.UInt16);

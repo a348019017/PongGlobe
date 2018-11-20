@@ -177,11 +177,21 @@ namespace PongGlobe.Graphics.GeometricPrimitive
             //提前更新一次StyleBuffer的参数,在需要的时候再更新,不必在Draw循环中频繁更新，手动控制Buffer的更新
             var style = Style.ToStyleStruct();
             graphicsDevice.UpdateBuffer(_styleBuffer,0, ref style);
+            Style.PropertyChanged -= Style_PropertyChanged;
+            Style.PropertyChanged += Style_PropertyChanged;
+        }
+        //使用更新队列的形式解决更新的问题最佳，将所有修改的操作（也即是函数）提交给渲染进程中的Update中完成，不直接使用主进程使用的对象
+
+
+        //添加样式变动的更新代码
+        private void Style_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            //锁住渲染进程,这里务必加锁因为涉及到修改渲染管线及相关资源，显然不合理，还是需要在不干扰现在渲染的情况下，主线程处理好状态变更后
+            //切换Draw即可
+            
+            //更新pipeLine状态
         }
 
-
-       
-        
         /// <summary>
         /// 更新相关操作，如更新纹理，可以另建CommandList，更新StaticBuffer的操作,说白了，频次较低的操作在Update，频次较高如Draw操作在Draw中，更新渲染管线的操作
         /// 当高层次API属性发生变化时,或者是与Draw操作无关的操作。
@@ -190,15 +200,34 @@ namespace PongGlobe.Graphics.GeometricPrimitive
         public void Update(GraphicsDevice graphicsDevice)
         {
             //if(Style.)
+            if (Style.Image != null)
+            {
+                if (_texture != null && _textureView != null)
+                {
+                    _texture.Dispose();
+                    _texture = null;
+                    _textureView.Dispose();
+                    _textureView = null;
+                }
+                //重建TextureView并且更新Texture
+                var textureImage = new ImageSharpTexture(Style.Image);
+                _texture = textureImage.CreateDeviceTexture(graphicsDevice, graphicsDevice.ResourceFactory);
+                _textureView = graphicsDevice.ResourceFactory.CreateTextureView(_texture);
+               
+              ));
+            }
+            //更新Buffer，这里管线状态仍然可能变化
+
+            
         }
         /// <summary>
         /// Draws this <see cref="GeometricPrimitive" />.
         /// 将EffctInstance替换成活动参数，如TexturePath，ModelViewMatrix,完成一个初步的抽象
         /// </summary>
         /// <param name="commandList">The command list.</param>
-        public void Draw(GraphicsContext graphicsContext)
+        public void Draw(CommandList commandList)
         {
-            var commandList = graphicsContext.CommandList;
+            //var commandList = CommandList;
             commandList.SetPipeline(PipelineState.CurrentPipeLine);
             commandList.SetGraphicsResourceSet(0, ShareResource.ProjectionResourceSet);
             commandList.SetGraphicsResourceSet(1, _styleResourceSet);
