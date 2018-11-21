@@ -12,7 +12,7 @@ using Veldrid.Utilities;
 using Veldrid.StartupUtilities;
 using System.Diagnostics;
 using PongGlobe.Core;
-
+using System.Collections.Concurrent;
 using PongGlobe;
 using PongGlobe.Scene;
 using PongGlobe.Renders;
@@ -39,6 +39,8 @@ namespace WindowsFormsApp1
         public event Action GraphicsDeviceDestroyed;
         // public event Action Resized;
         private Sdl2Window _window;
+        //更新操作队列
+        public readonly ConcurrentQueue<IRender> _updateQuere = new ConcurrentQueue<IRender>();
 
         private CommandList _cl;
         //是否正在进行渲染，如缩小界面的时候都可以停止渲染。
@@ -46,7 +48,12 @@ namespace WindowsFormsApp1
         /// <summary>
         /// 当前地球的场景对象
         /// </summary>
-        protected PongGlobe.Scene.Scene _scene;
+        public PongGlobe.Scene.Scene _scene;
+        /// <summary>
+        /// 场景上下文对象
+        /// </summary>
+        protected PongGlobe.Scene.SceneContext _sceneConext;
+
         /// <summary>
         /// 当前的各个子渲染对象
         /// </summary>
@@ -237,7 +244,6 @@ namespace WindowsFormsApp1
             _cl.SetFramebuffer(GraphicsDevice.MainSwapchain.Framebuffer);
             _cl.ClearColorTarget(0, RgbaFloat.Black);
             _cl.ClearDepthStencil(1f);
-
             foreach (var item in renders)
             {
                 //if (item is RayCastedGlobe) continue;

@@ -13,8 +13,6 @@ namespace PongGlobe.Scene
     /// </summary>
     public class GeometryPrimitivesRenderer : IRender<GeometricPrimitive>
     {
-
-
         private GraphicsDevice GraphicsDevice = null;
         /// <summary>
         /// 构造函数
@@ -32,19 +30,15 @@ namespace PongGlobe.Scene
                 _geo = new ConcurrentBag<GeometricPrimitive>(primitives);
             //对Style添加INotify接口及时捕获参数的变化
             //Style.PropertyChanged += Style_PropertyChanged;
-            
-           
+                     
         }
-
         private void Style_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             
         }
-
         public GeometryPrimitiveStyle Style { get; set; } = new GeometryPrimitiveStyle();
         //线程安全的集合，可能阻塞渲染进程
         private ConcurrentBag<GeometricPrimitive> _geo=new ConcurrentBag<GeometricPrimitive>();
-
         //返回集合对象，方便添加数据
         public ConcurrentBag<GeometricPrimitive> GeometricPrimitives { get { return _geo; } }
 

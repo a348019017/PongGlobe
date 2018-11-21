@@ -45,7 +45,6 @@ namespace PongGlobe.Styles
         /// Gets or Sets what level-reference the Min/Max values are defined in
         /// </summary>
         //VisibilityUnits VisibilityUnits { get; set; }
-
         /// <summary>
         /// Gets or sets whether objects in this style is rendered or not
         /// </summary>

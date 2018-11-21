@@ -7,6 +7,7 @@ using SixLabors.ImageSharp.PixelFormats;
 using System.IO;
 using System.ComponentModel;
 using PropertyChanged;
+using PongGlobe.Styles;
 
 namespace PongGlobe.Graphics.GeometricPrimitive
 {
@@ -14,7 +15,7 @@ namespace PongGlobe.Graphics.GeometricPrimitive
     /// 几何图元的可变参数，样式，使用StyleClass是为了灵活性和节省空间
     /// </summary>
     //[AddINotifyPropertyChangedInterface]
-    public class GeometryPrimitiveStyle:INotifyPropertyChanged
+    public class GeometryPrimitiveStyle: Style,INotifyPropertyChanged
     {
         public RgbaFloat Color { get; set; }
         //优先使用Image作为纹理
@@ -26,7 +27,6 @@ namespace PongGlobe.Graphics.GeometricPrimitive
             Color = RgbaFloat.Red;
             Image = null;
         }
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
